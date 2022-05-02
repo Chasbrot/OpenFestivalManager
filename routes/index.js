@@ -12,10 +12,6 @@ router.get('/kellner.js', function (req, res) {
   res.render('kellner');
 });
 
-router.get('/admin.js', function (req, res) {
-  res.sendFile(__dirname + "/admin.html");
-});
-
 
 router.get('/registrierung_personal.html', function (req, res) {
   res.sendFile(__dirname + "/registrierung_personal.html");
@@ -28,6 +24,24 @@ router.get('/station_overview.html', function (req, res) {
   res.sendFile(__dirname + "/station_overview.html");
 });
 
+router.get('/login_station.html', function (req, res) {
+  res.sendFile(__dirname + "/login_station.html");
+});
+
+
+router.get('/login_admin.html', function (req, res) {
+  res.sendFile(__dirname + "/login_admin.html");
+});
+router.get('/admin.html', function (req, res) {
+  res.sendFile(__dirname + "/admin.html");
+});
+router.get('/admin_configuration.html', function (req, res) {
+  res.sendFile(__dirname + "/admin_configuration.html");
+});
+
+router.get('/admin_orderdata.html', function (req, res) {
+  res.sendFile(__dirname + "/admin_orderdata.html");
+});
 router.get('/personal_overview.html', function (req, res) {
   res.sendFile(__dirname + "/personal_overview.html");
 });
@@ -42,7 +56,7 @@ router.get('/tisch_overview.html', function (req, res) {
 });
 
 
-router.get('/personal.html', function (req, res) {
+router.get('/registrierung_personal.html', function (req, res) {
   res.sendFile(__dirname + "/registrierung_personal.html");
 });
 

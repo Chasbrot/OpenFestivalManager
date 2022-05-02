@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Konsole</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <!-- Brand/logo -->
+        <a class="navbar-brand" href="/">Home</a>
+
+        <!-- Links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="admin.html">System</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_orderdata.html">Bestelldaten</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_configuration.html">Konfiguration</a>
+            </li>
+        </ul>
+    </nav>
+    <br>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                Auslastung
+            </div>
+            <div class="card-body">
+                Anzahl Kellner: 5
+                <br>
+                Aktive Sitzungen: 10
+                <br>
+                Belegung: 10/50
+                <br>
+                Aktive Bestellungen: 4
+            </div>
+        </div>
+        <br>
+        <div class="card">
+            <div class="card-header">
+                Sitzung suchen
+            </div>
+            <div class="card-body">
+                <h4>Tisch</h4>
+                <div class="card-body">
+
+                    <select class="custom-select" id="inputGroupSelect01">
+                        <option selected>Choose...</option>
+                        <option value="1">A1</option>
+                        <option value="2">A2</option>
+                        <option value="2">A2</option>
+                    </select>
+                </div>
+                <h4>Sitzungen</h4>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm">
+                                Sitzungs ID
+                            </div>
+                            <div class="col-sm">
+                                Start
+                            </div>
+                            <div class="col-sm">
+                                Ende
+                            </div>
+                            <div class="col-sm">
+                                Kellner
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <div class="card">
+            <div class="card-header">
+                Bestellung suchen
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="sessionid">Sitzungs ID:</label>
+                    <input type="number" class="form-control" id="sessionid">
+                  </div>
+                <button class="btn btn-primary" >Suche</button>
+            </div>
+            
+            <div class="card-body">
+                <h4>Bestellungen der Sitzung:</h4>
+                <div class="card" style="height: 200px">
+                    <div class="card-body overflow-auto pt-0 px-1">
+            
+                        <div class="list-group pt-0">
+                            <div class="list-group-item py-0">
+                                <img src="images/order.png" style="width:15px">
+                                1x Feuerfleck
+                            </div>
+                            <div class="list-group-item py-0">
+                                <img src="images/loading.gif" style="width:15px">
+                                1x Kotlettsemmel
+                            </div>
+                            <div class="list-group-item py-0">
+                                <img src="images/check.png" style="width: 15px">
+                                1x Kotlett
+                            </div>
+                            <div class="list-group-item py-0">
+                                <img src="images/check.png" style="width:15px">
+                                1x Bratwurst
+                            </div>
+                            <div class="list-group-item py-0">
+                                <img src="images/check.png" style="width:15px">
+                                1x Kotlett
+                            </div>
+                            <div class="list-group-item py-0">
+                                <img src="images/check.png" style="width:15px">
+                                1x Bratwurst
+                            </div>
+                            <div class="list-group-item py-0">
+                                <img src="images/check.png" style="width:15px">
+                                1x Kotlett
+                            </div>
+                            <div class="list-group-item py-0">
+                                <img src="images/check.png" style="width:15px">
+                                1x Bratwurst
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</body>
+
+</html>

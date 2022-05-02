@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Konsole</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <!-- Brand/logo -->
+        <a class="navbar-brand" href="/">Home</a>
+
+        <!-- Links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="admin.html">System</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_orderdata.html">Bestelldaten</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_configuration.html">Konfiguration</a>
+            </li>
+        </ul>
+    </nav>
+    <br>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                Organisation
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <label for="usr">Neue Station:</label>
+                    <input type="text" class="form-control" id="neue_station">
+                    <button class="btn btn-primary"> Neue Station anlegen</button>
+                </div>
+            </div>
+            <div class="card-body">
+                Stationen:
+                <div class="list-group overflow-auto" style="max-height: 150px">
+                    <div class="list-group-item">
+                        Grill
+                    </div>
+                    <div class="list-group-item">
+                        Pizza
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <div class="card">
+            <div class="card-header">
+                Optionen
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <label for="usr">Neue Option:</label>
+                    <input type="text" class="form-control" id="neue_station">
+                    <button class="btn btn-primary"> Neue Option anlegen</button>
+                </div>
+            </div>
+            <div class="card-body">
+                Optionen:
+                <div class="list-group overflow-auto" style="max-height: 150px">
+                    <div class="list-group-item">
+                        Senf
+                    </div>
+                    <div class="list-group-item">
+                        Katup
+                    </div>
+                    <div class="list-group-item">
+                        semml
+                    </div>
+                    <div class="list-group-item">
+                        brot
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <div class="card-header">
+                Produkte
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <label class="form-check-label" for="inputGroupSelect01">Station</label>
+                      <select class="custom-select" id="inputGroupSelect01">
+                        <option selected>Choose...</option>
+                        <option value="1">Grill</option>
+                        <option value="2">Pizza</option>
+                      </select>
+                      <label for="defaultCheck1">
+                        Produktname
+                    </label>
+                    <select class="custom-select" id="inputGroupSelect01">
+                        <option selected>Choose...</option>
+                        <option value="1">Grill</option>
+                        <option value="2">Pizza</option>
+                      </select>
+                    <br>
+                    
+                    Optionen
+                        <div class="list-group">
+                            <div class="list-group-item">
+                                <input  type="checkbox" value="" checked="true"
+                                    id="item1_option1" >
+                                Kraut
+                                <input  type="checkbox" value="" checked="true"
+                                    id="item1_option1" >
+                                Standard?
+                            </div>
+                            <div class="list-group-item">
+                                <input  type="checkbox" value="" checked="true"
+                                    id="item1_option1" >
+                                Senf
+                                <input  type="checkbox" value="" checked="true"
+                                    id="item1_option1">
+                                Standard?
+                            </div>
+                            <div class="list-group-item">
+                                <input  type="checkbox" value="" checked="true"
+                                    id="item1_option1" >
+                                Katup
+                                <input  type="checkbox" value="" checked="true"
+                                    id="item1_option1" >
+                                Standard?
+                            </div>
+
+                        </div>
+                        <br>
+                        <button class="btn btn-primary"> Speichern</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

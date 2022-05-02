@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Übersicht</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="stylesheets/css/bootstrap.min.css">
+  <script src="javascripts/jquery-3.5.1.slim.min.js"></script>
+  <script src="javascripts/bootstrap/bootstrap.bundle.min.js"></script>
+
+</head>
+<body>
+  
+  <!-- Nav bar -->
+  <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Übersicht</a>
+      <ul class="navbar-nav mr-auto">
+      </ul>
+      <a class="navbar-brand " href="">Kellnername</a>
+      <a class="btn btn-outline-danger" href="/">Logout</a>
+      <!--<button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Logout</button>-->
+  </nav>
+
+  <div id="accordion">
+    <div class="card">
+        <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne">
+          Abgeschlossene Tische
+        </a>
+      <div id="collapseOne" class="collapse" data-parent="#accordion">
+        <div class="card-body">
+          <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action">Zelt Z2</a>
+            <a href="#" class="list-group-item list-group-item-action">Wiese W7</a>
+            <a href="#" class="list-group-item list-group-item-action">Heim A12</a>
+            <a href="#" class="list-group-item list-group-item-action disabled">Gustav G9</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+        <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo">
+        Aktive Tische
+      </a>
+      <div id="collapseTwo" class="collapse show" data-parent="#accordion">
+        <div class="card-body">
+          <div class="list-group">
+            <a href="/tisch_overview.html" class="list-group-item list-group-item-action">Zelt Z2</a>
+            <a href="#" class="list-group-item list-group-item-action">Wiese W7</a>
+            <a href="#" class="list-group-item list-group-item-action">Heim A12</a>
+            <a href="#" class="list-group-item list-group-item-action disabled">Gustav G9</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Abgeschlossene Tische -->
+
+
+<!-- Aktive Tische -->
+
+<!-- Neuer Tisch -->
+<div class="fixed-bottom text-center">
+  <a class="btn btn-primary btn-lg btn-block" href="tisch_neu.html" role="button">Neuer Tisch</a>
+</div>
+
+
+</body>
+</html>

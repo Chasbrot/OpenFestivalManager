@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Übersicht</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/css/bootstrap.min.css">
+    <script src="javascripts/jquery-3.5.1.slim.min.js"></script>
+    <script src="javascripts/bootstrap/bootstrap.bundle.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- Nav bar -->
+    <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">Übersicht</a>
+        <div class="navbar-brand flex-right">Grill</div>
+    </nav>
+
+    <div id="accordion">
+        <div class="card">
+            <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne">
+                Abgeschlossene Bestellungen
+                <div class="float-right">
+                    2
+                </div>
+            </a>
+            <div id="collapseOne" class="collapse" data-parent="#accordion">
+                <div class="card-body px-1">
+                    <div class="list-group pt-0" id="orders">
+
+                        <!-- Bestellung -->
+                        <div class="list-group-item px-1">
+
+                            <!-- Optionen -->
+                            <a class="card-header btn-light align-middle" data-toggle="collapse" href="#options_order1">
+                                <!-- Wartezeit -->
+                                12m
+                                <!-- Status -->
+                                <img src="images/check.png" style="width:20px">
+                                <!-- Gericht -->
+                                1x Feuerfleck
+
+                            </a>
+                            <!-- Tisch Nummer -->
+                            <div class="float-right pr-3">
+                                A3
+                            </div>
+
+                            <div class="float-right pr-3">
+                                19:45
+                            </div>
+                            <div id="options_order1" class="collapse" data-parent="#orders">
+                                <div class="list-group pt-3">
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1" disabled="true">
+                                        Knoblauch
+                                    </div>
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="false"
+                                            id="item1_option1" disabled="true">
+                                        Soße extra
+                                    </div>
+
+                                </div>
+                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
+                                    disabled="true">
+                            </div>
+
+
+                        </div>
+
+                        <!-- Bestellung -->
+                        <div class="list-group-item px-1">
+
+                            <!-- Optionen -->
+                            <a class="card-header btn-light align-middle" data-toggle="collapse" href="#options_order2">
+                                <!-- Wartezeit -->
+                                12m
+                                <!-- Status -->
+                                <img src="images/canceled.png" style="width:20px">
+                                <!-- Gericht -->
+                                1x Feuerfleck
+
+                            </a>
+                            <!-- Tisch Nummer -->
+                            <div class="float-right pr-3">
+                                A3
+                            </div>
+
+                            <div class="float-right pr-3">
+                                19:45
+                            </div>
+                            <div id="options_order2" class="collapse" data-parent="#orders">
+                                <div class="list-group pt-3">
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1" disabled="true">
+                                        Knoblauch
+                                    </div>
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="false"
+                                            id="item1_option1" disabled="true">
+                                        Soße extra
+                                    </div>
+
+                                </div>
+                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
+                                    disabled="true">
+                            </div>
+
+
+                        </div>
+
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo">
+                Aktive Bestellungen
+                <div class="float-right">
+                    6
+                </div>
+            </a>
+            <div id="collapseTwo" class="collapse show" data-parent="#accordion">
+                <div class="card-body px-1">
+                    <div class="list-group pt-0" id="orders">
+                        <!-- Bestellung -->
+                        <div class="list-group-item px-1">
+
+                            <!-- Optionen -->
+                            <a class="card-header btn-light align-middle" data-toggle="collapse" href="#options_order1">
+                                <!-- Wartezeit -->
+                                12m
+                                <!-- Status -->
+                                <img src="images/loading.gif" style="width:15px">
+                                <!-- Gericht -->
+                                1x Feuerfleck
+
+                            </a>
+                            <!-- Gericht ausgeschickt -->
+                            <button class="btn btn-success btn-sm float-right py-1 px-5"><img src="images/sent.png"
+                                    style="width: 20px"></button>
+                            <!-- Tisch Nummer -->
+                            <div class="float-right pr-3">
+                                A3
+                            </div>
+                            <div id="options_order1" class="collapse" data-parent="#orders">
+                                <div class="list-group pt-3">
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1" disabled="true">
+                                        Knoblauch
+                                    </div>
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="false"
+                                            id="item1_option1" disabled="true">
+                                        Soße extra
+                                    </div>
+
+                                </div>
+                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
+                                    disabled="true">
+                            </div>
+
+
+                        </div>
+                        <!-- Bestellung -->
+                        <div class="list-group-item px-1">
+
+                            <!-- Optionen -->
+                            <a class="card-header btn-light align-middle" data-toggle="collapse" href="#options_order2">
+                                <!-- Wartezeit -->
+                                6m
+                                <!-- Status -->
+                                <img src="images/order.png" style="width:15px">
+                                <!-- Gericht -->
+                                1x Kotlett
+
+                            </a>
+                            <!-- Gericht ausgeschickt -->
+                            <button class="btn btn-info btn-md float-right py-1 px-5"><img src="images/chef.png"
+                                    style="width: 20px"></button>
+                            <!-- Tisch Nummer -->
+                            <div class="float-right pr-3 align-middle">
+                                W10
+                            </div>
+                            <div id="options_order2" class="collapse" data-parent="#orders">
+                                <div class="list-group pt-3">
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1" disabled="true">
+                                        Kraut
+                                    </div>
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="false"
+                                            id="item1_option1" disabled="true">
+                                        Senf
+                                    </div>
+                                    <div class="list-group-item py-0">
+                                        <input class="form-check-input" type="checkbox" value="" checked="false"
+                                            id="item1_option1" disabled="true">
+                                        Katchup
+                                    </div>
+
+                                </div>
+                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
+                                    disabled="true">
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

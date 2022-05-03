@@ -55,6 +55,10 @@ router.get('/tisch_overview.html', function (req, res) {
   res.sendFile(__dirname + "/tisch_overview.html");
 });
 
+router.get('/tisch_kassieren.html', function (req, res) {
+  res.sendFile(__dirname + "/tisch_kassieren.html");
+});
+
 
 router.get('/registrierung_personal.html', function (req, res) {
   res.sendFile(__dirname + "/registrierung_personal.html");

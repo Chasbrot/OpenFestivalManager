@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Error</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <h1>
+        <%= error %>
+    </h1>
+    <h2>
+        <%= error.status %>
+    </h2>
+    <pre><%= error.stack %></pre>
+    <div>
+        <img src="images/error.gif" style="margin-left: 25%; width: 50%">
+    </div>
+
+</body>
+
+</html>

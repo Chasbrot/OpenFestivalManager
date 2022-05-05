@@ -6,6 +6,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+
+    <script>
+        function setCheckbox(id, state) {
+            document.getElementById(id).disabled = state;
+            if (state) {
+                document.getElementById(id).checked = false;
+            }
+        }
+    </script>
+
 </head>
 
 <body>
@@ -39,7 +49,7 @@
                     <form action="configuration" method="POST">
                         <div class="form-check">
                             <label for="new_station">Neue Station:</label>
-                            <input type="input" id="new_station" name="new_station" required>
+                            <input type="text" class="form-control" id="new_station" name="new_station" required>
                             <br>
                             <button class="btn btn-primary" onclick="this.form.submit()"> Neue Station anlegen</button>
                         </div>
@@ -74,7 +84,7 @@
                     <form action="configuration" method="POST">
                         <div class="form-check">
                             <label for="new_option">Neue Zutat:</label>
-                            <input type="input" id="new_option" name="new_option" required>
+                            <input type="text" class="form-control" id="new_option" name="new_option" required>
                             <br>
                             <button class="btn btn-primary" onclick="this.form.submit()"> Neue Zutat anlegen</button>
                         </div>
@@ -109,7 +119,7 @@
                 <div class="form-check">
                     <form action="configuration" method="POST">
                         <label class="form-check-label" for="product_station">Station</label>
-                        <select class="custom-select" id="product_station">
+                        <select class="custom-select" id="product_station" name="product_station" required>
                             <% if(stations.length){ for(var i=0; i< stations.length; i++) {%>
                                 <option value="<%= stations[i].id%>">
                                     <%= stations[i].name%>
@@ -117,25 +127,29 @@
                                 <% } }else{ %>
                                     <option value="-1" selected>Leer</option>
                                     <% } %>
-
                         </select>
-                        <label for="defaultCheck1">
+                        <label for="product_name">
                             Produktname
                         </label>
-                        <select class="custom-select" id="inputGroupSelect01">
-                            <option selected>Choose...</option>
-                            <option value="1">Grill</option>
-                            <option value="2">Pizza</option>
-                        </select>
+                        <input type="text" class="form-control" id="product_name" name="product_name" required>
+                        <label for="product_cost">
+                            Preis
+                        </label>
+                        <input type="number" class="form-control" id="product_cost" name="product_cost" required>
+                        <input type="checkbox" id="product_deliverable" name="product_deliverable" required>
+                        Lieferbar? oder Selbstabholung
                         <br>
-
                         Optionen
                         <div class="list-group">
                             <% if(options.length){ for(var i=0; i< options.length; i++) {%>
                                 <div class="list-group-item">
-                                    <input type="checkbox" value="<%= options[i].id%>" id="product_option_id">
+                                    <input type="checkbox" value="<%= options[i].id%>"
+                                        id="product_option_<%= options[i].id%>" name="product_option"
+                                        onclick="setCheckbox('product_option_standard_<%= options[i].id%>', !this.checked)">
                                     <%= options[i].name%>
-                                        <input type="checkbox" value="" checked="true" id="item1_option1">
+                                        <input type="checkbox" value="<%= options[i].id%>"
+                                            id="product_option_standard_<%= options[i].id%>"
+                                            name="product_option_standard" disabled>
                                         Standard?
                                 </div>
                                 <% } }else{ %>
@@ -148,6 +162,62 @@
                         <button class="btn btn-primary" onclick="this.form.submit()"> Speichern</button>
                     </form>
                 </div>
+            </div>
+            <div class="card-body">
+                Produkte:
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Stand</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Preis</th>
+                            <th scope="col">Lieferbar?</th>
+                            <th scope="col">Entfernen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(products.length){ for(var i=0; i< products.length; i++) {%>
+                            <tr>
+                                <th scope="row">
+                                    <%= products[i].id%>
+                                </th>
+                                <td>
+                                    <%= products[i].id_stand%>
+                                </td>
+                                <td>
+                                    <%= products[i].name%>
+                                </td>
+                                <td>
+                                    <%= products[i].preis%>
+                                </td>
+                                <td>
+                                        <% if(products[i].lieferbar==1){ %>
+                                            <img src="/images/check.png" style="width:20px">
+                                        <% }else{ %>
+                                            <img src="/images/canceled.png" style="width:20px">
+                                        <% } %>
+                                </td>
+                                <td>
+                                    <form action="configuration" method="POST">
+                                        <button class="btn btn-danger" id="remove_product" name="remove_product" value="<%= products[i].id%>" onclick="this.form.submit()">
+                                            X
+                                        </button>
+                                    </form>
+                                    
+                                </td>
+                            </tr>
+
+                            <% } }else{ %>
+
+                                Keine Produkte definiert
+
+                                <% } %>
+                    </tbody>
+                </table>
+
+                <br>
             </div>
         </div>
     </div>

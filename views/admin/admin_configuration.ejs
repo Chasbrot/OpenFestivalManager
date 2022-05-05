@@ -36,20 +36,30 @@
             </div>
             <div class="card-body">
                 <div class="form-check">
-                    <label for="usr">Neue Station:</label>
-                    <input type="text" class="form-control" id="neue_station">
-                    <button class="btn btn-primary"> Neue Station anlegen</button>
+                    <form action="configuration" method="POST">
+                        <div class="form-check">
+                            <label for="new_station">Neue Station:</label>
+                            <input type="input" id="new_station" name="new_station" required>
+                            <br>
+                            <button class="btn btn-primary" onclick="this.form.submit()"> Neue Station anlegen</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="card-body">
                 Stationen:
                 <div class="list-group overflow-auto" style="max-height: 150px">
-                    <div class="list-group-item">
-                        Grill
-                    </div>
-                    <div class="list-group-item">
-                        Pizza
-                    </div>
+                    <% if(stations.length){ for(var i=0; i< stations.length; i++) {%>
+                        <div class="list-group-item">
+                            <td>
+                                <%= stations[i].name%>
+                            </td>
+                        </div>
+                        <% } }else{ %>
+                            <div class="list-group-item">
+                                Keine Stationen definiert
+                            </div>
+                            <% } %>
                 </div>
             </div>
         </div>
@@ -61,26 +71,30 @@
             </div>
             <div class="card-body">
                 <div class="form-check">
-                    <label for="usr">Neue Option:</label>
-                    <input type="text" class="form-control" id="neue_station">
-                    <button class="btn btn-primary"> Neue Option anlegen</button>
+                    <form action="configuration" method="POST">
+                        <div class="form-check">
+                            <label for="new_option">Neue Zutat:</label>
+                            <input type="input" id="new_option" name="new_option" required>
+                            <br>
+                            <button class="btn btn-primary" onclick="this.form.submit()"> Neue Zutat anlegen</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="card-body">
                 Optionen:
                 <div class="list-group overflow-auto" style="max-height: 150px">
-                    <div class="list-group-item">
-                        Senf
-                    </div>
-                    <div class="list-group-item">
-                        Katup
-                    </div>
-                    <div class="list-group-item">
-                        semml
-                    </div>
-                    <div class="list-group-item">
-                        brot
-                    </div>
+                    <% if(options.length){ for(var i=0; i< options.length; i++) {%>
+                        <div class="list-group-item">
+                            <td>
+                                <%= options[i].name%>
+                            </td>
+                        </div>
+                        <% } }else{ %>
+                            <div class="list-group-item">
+                                Keine Zutaten definiert
+                            </div>
+                            <% } %>
                 </div>
             </div>
         </div>
@@ -93,56 +107,50 @@
             </div>
             <div class="card-body">
                 <div class="form-check">
-                    <label class="form-check-label" for="inputGroupSelect01">Station</label>
-                      <select class="custom-select" id="inputGroupSelect01">
-                        <option selected>Choose...</option>
-                        <option value="1">Grill</option>
-                        <option value="2">Pizza</option>
-                      </select>
-                      <label for="defaultCheck1">
-                        Produktname
-                    </label>
-                    <select class="custom-select" id="inputGroupSelect01">
-                        <option selected>Choose...</option>
-                        <option value="1">Grill</option>
-                        <option value="2">Pizza</option>
-                      </select>
-                    <br>
-                    
-                    Optionen
-                        <div class="list-group">
-                            <div class="list-group-item">
-                                <input  type="checkbox" value="" checked="true"
-                                    id="item1_option1" >
-                                Kraut
-                                <input  type="checkbox" value="" checked="true"
-                                    id="item1_option1" >
-                                Standard?
-                            </div>
-                            <div class="list-group-item">
-                                <input  type="checkbox" value="" checked="true"
-                                    id="item1_option1" >
-                                Senf
-                                <input  type="checkbox" value="" checked="true"
-                                    id="item1_option1">
-                                Standard?
-                            </div>
-                            <div class="list-group-item">
-                                <input  type="checkbox" value="" checked="true"
-                                    id="item1_option1" >
-                                Katup
-                                <input  type="checkbox" value="" checked="true"
-                                    id="item1_option1" >
-                                Standard?
-                            </div>
+                    <form action="configuration" method="POST">
+                        <label class="form-check-label" for="product_station">Station</label>
+                        <select class="custom-select" id="product_station">
+                            <% if(stations.length){ for(var i=0; i< stations.length; i++) {%>
+                                <option value="<%= stations[i].id%>">
+                                    <%= stations[i].name%>
+                                </option>
+                                <% } }else{ %>
+                                    <option value="-1" selected>Leer</option>
+                                    <% } %>
 
+                        </select>
+                        <label for="defaultCheck1">
+                            Produktname
+                        </label>
+                        <select class="custom-select" id="inputGroupSelect01">
+                            <option selected>Choose...</option>
+                            <option value="1">Grill</option>
+                            <option value="2">Pizza</option>
+                        </select>
+                        <br>
+
+                        Optionen
+                        <div class="list-group">
+                            <% if(options.length){ for(var i=0; i< options.length; i++) {%>
+                                <div class="list-group-item">
+                                    <input type="checkbox" value="<%= options[i].id%>" id="product_option_id">
+                                    <%= options[i].name%>
+                                        <input type="checkbox" value="" checked="true" id="item1_option1">
+                                        Standard?
+                                </div>
+                                <% } }else{ %>
+                                    <div class="list-group-item">
+                                        Keine Zutaten vorhanden
+                                    </div>
+                                    <% } %>
                         </div>
                         <br>
-                        <button class="btn btn-primary"> Speichern</button>
-                    </div>
+                        <button class="btn btn-primary" onclick="this.form.submit()"> Speichern</button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
 </body>

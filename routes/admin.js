@@ -24,13 +24,54 @@ router.post('/', function (req, res, next) {
     global.registrationActive = false;
   }
 
-  res.redirect("admin/admin");  // redirect to user form page after inserting the data
+  res.redirect("/admin");  // redirect to user form page after inserting the data
 });
 
 
 router.get('/configuration', function (req, res) {
-  res.render("admin/admin_configuration");
+
+  db.query('SELECT * FROM stand', function (err, rows) {
+    if (err) {
+      console.log("error");
+    }
+
+    db.query('SELECT * FROM Zutat', function (err, opts) {
+      if (err) {
+        console.log("error");
+      }
+
+      res.render("admin/admin_configuration", { stations: rows, options: opts });
+    });
+
+  });
+
 });
+
+router.post('/configuration', function (req, res) {
+
+  const body = req.body;
+  console.log(body);
+
+  if (body.new_station) {
+    var sql = `INSERT INTO stand VALUES (0,"${body.new_station}",NULL)`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log('record inserted');
+    });
+  }
+
+  if (body.new_option) {
+    var sql = `INSERT INTO Zutat VALUES (0,"${body.new_option}")`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log('record inserted');
+    });
+  }
+
+  res.redirect("/admin/configuration");
+
+});
+
 
 router.get('/orderdata', function (req, res) {
   res.render("admin/admin_orderdata");

@@ -18,7 +18,8 @@
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
     "mysql2": "^2.3.3",
-    "pug": "^2.0.0-beta11"
+    "pug": "^2.0.0-beta11",
+    "random-token": "^0.0.8"
   },
   "devDependencies": {
     "nodemon": "^2.0.16"

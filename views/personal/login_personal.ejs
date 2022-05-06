@@ -16,14 +16,13 @@
 <div class="container">
   <h2>Login Personal</h2>
   <h3>Hier startest du die Anwendung. Gib deinen Namen ein log dich ein.</h3>
-  <form action="/action_page.php">
+  <form action="login_personal" method="POST">
     <div class="form-group">
       <label for="name">Name:</label>
-      <input type="text" class="form-control" id="name" placeholder="Name eingeben" name="name">
+      <input type="text" class="form-control" id="username" placeholder="Name eingeben" name="username">
     </div>
     <div class="text-center">
-        <a class="btn btn-primary" href="personal_overview">Login</a>
-        <!--<button type="submit" class="btn btn-primary">Login</button>-->
+        <button type="submit" class="btn btn-primary">Login</button>
     </div>
   </form>
 </div>

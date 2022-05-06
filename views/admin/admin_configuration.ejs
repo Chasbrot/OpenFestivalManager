@@ -240,7 +240,7 @@
                         Lieferbar? oder Selbstabholung
                         <br>
                         Optionen
-                        <div class="list-group">
+                        <div class="list-group overflow-auto" style="max-height: 150px">
                             <% if(options.length){ for(var i=0; i< options.length; i++) {%>
                                 <div class="list-group-item">
                                     <input type="checkbox" value="<%= options[i].id%>"
@@ -301,7 +301,7 @@
                                 </td>
                                 <td>
                                     <form action="configuration" method="POST">
-                                        <button class="btn btn-danger" id="remove_product" name="remove_product"
+                                        <button class="btn btn-danger btn-sm" id="remove_product" name="remove_product"
                                             value="<%= products[i].id%>" onclick="this.form.submit()">
                                             X
                                         </button>

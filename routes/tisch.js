@@ -3,7 +3,14 @@ var router = express.Router();
 var db = require("../database");
 
 router.get('/tisch_neu', function (req, res) {
-    res.render("tisch/tisch_neu");
+    db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
+        if (err) {
+          console.log(err);
+        }
+
+        res.render("tisch/tisch_neu", {table_groups: groups});
+      });
+    
 });
 
 

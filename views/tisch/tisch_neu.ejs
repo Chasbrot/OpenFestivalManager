@@ -17,7 +17,7 @@
 
     <!-- Nav bar -->
     <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
-        <a class="navbar-brand" href="/personal/personal_overview.html">Übersicht</a>
+        <a class="navbar-brand" href="/personal/personal_overview">Übersicht</a>
         <ul class="navbar-nav mr-auto">
         </ul>
         <a class="navbar-brand " href="">Neuer Tisch</a>
@@ -26,20 +26,22 @@
     <div class="card">
         <div class="card-body">
             <h3>Kategorie</h3>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-primary btn-lg">
-                    <input type="radio" name="options" id="option1" autocomplete="off" checked> Heim
-                </label>
-                <label class="btn btn-primary btn-lg">
-                    <input type="radio" name="options" id="option2" autocomplete="off"> Wiese
-                </label>
-                <label class="btn btn-primary btn-lg">
-                    <input type="radio" name="options" id="option3" autocomplete="off"> Gustav
-                </label>
-                <label class="btn btn-primary btn-lg">
-                    <input type="radio" name="options" id="option3" autocomplete="off"> Zelt
-                </label>
-            </div>
+            <% if(table_groups.length){%>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <% for(var i=0; i< table_groups.length; i++) {%>
+                    <label class="btn btn-primary btn-lg">
+                        <input type="radio" name="table_group" id="option<%= table_groups[i].id%>" value="<%= table_groups[i].id%>"
+                            autocomplete="off">
+                        <%= table_groups[i].groupname%>
+                    </label>
+                <% } %>
+                </div>
+            <% }else{ %>
+                <div class="list-group-item">
+                    Keine Tisch Gruppen definiert
+                </div>
+            <% } %>
+                
         </div>
         <div class="card-body">
             <h3>Tisch</h3>
@@ -55,7 +57,7 @@
                 <option value="2">A2</option>
                 <option value="1">A1</option>
                 <option value="2">A2</option>
-              </select>
+            </select>
         </div>
     </div>
 

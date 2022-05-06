@@ -16,7 +16,7 @@ router.get('/registrierung_personal', function (req, res) {
     if (global.registrationActive) {
         res.render("personal/registrierung_personal");
     } else {
-        res.redirect("login_personal");
+        res.redirect("/personal/login_personal");
     }
 
 });
@@ -33,7 +33,7 @@ router.post('/registrierung_personal', function (req, res, next) {
         console.log('record inserted');
     });
 
-    res.redirect("personal/login_personal");  // redirect to user form page after inserting the data
+    res.redirect("/personal/login_personal");  // redirect to user form page after inserting the data
 });
 
 

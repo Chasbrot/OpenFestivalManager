@@ -40,6 +40,106 @@
     <br>
 
     <div class="container">
+
+        <div class="card">
+            <div class="card-header">
+                TIsch Gruppen
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <form action="configuration" method="POST">
+                        <div class="form-check">
+                            <label for="new_table_group">Neue Tisch Gruppe:</label>
+                            <input type="text" class="form-control" id="new_table_group" name="new_table_group"
+                                required>
+                            <br>
+                            <button class="btn btn-primary" onclick="this.form.submit()"> Neue Tisch Gruppe
+                                anlegen</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body">
+                Tisch Gruppen:
+                <div class="list-group overflow-auto" style="max-height: 150px">
+                    <% if(table_groups.length){ for(var i=0; i< table_groups.length; i++) {%>
+                        <div class="list-group-item">
+                            <td>
+                                <%= table_groups[i].groupname%>
+                                <div class="float-right">
+                                    <form action="configuration" method="POST">
+                                        <button class="btn btn-danger btn-sm" id="remove_table_group" name="remove_table_group"
+                                            value="<%= table_groups[i].id%>" onclick="this.form.submit()">
+                                            X
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </div>
+                        <% } }else{ %>
+                            <div class="list-group-item">
+                                Keine Tisch Gruppen definiert
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="card">
+            <div class="card-header">
+                Tische
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <form action="configuration" method="POST">
+                        <div class="form-check">
+                            <label for="new_table">Neuer Tisch:</label>
+                            <input type="text" class="form-control" id="new_table" name="new_table" required>
+                            <label class="form-check-label" for="table_group_id">Gruppe:</label>
+                            <select class="custom-select" id="table_group_id" name="table_group_id" required>
+                                <% if(table_groups.length){ for(var i=0; i< table_groups.length; i++) {%>
+                                    <option value="<%= table_groups[i].id%>">
+                                        <%= table_groups[i].groupname%>
+                                    </option>
+                                    <% } }else{ %>
+                                        <option value="-1" selected>Leer</option>
+                                        <% } %>
+                            </select>
+                            <br>
+                            <button class="btn btn-primary" onclick="this.form.submit()"> Neuen Tisch anlegen</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body">
+                Tische:
+                <div class="list-group overflow-auto" style="max-height: 150px">
+                    <% if(tables.length){ for(var i=0; i< tables.length; i++) {%>
+                        <div class="list-group-item">
+                            <td>
+                                <%= tables[i].nummer%>
+                                <div class="float-right">
+                                    <form action="configuration" method="POST">
+                                        <button class="btn btn-danger btn-sm" id="remove_table" name="remove_table"
+                                            value="<%= tables[i].id%>" onclick="this.form.submit()">
+                                            X
+                                        </button>
+                                    </form>
+                                </div>
+                                
+                            </td>
+                        </div>
+                        <% } }else{ %>
+                            <div class="list-group-item">
+                                Keine Tische definiert
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
         <div class="card">
             <div class="card-header">
                 Organisation
@@ -193,19 +293,20 @@
                                     <%= products[i].preis%>
                                 </td>
                                 <td>
-                                        <% if(products[i].lieferbar==1){ %>
-                                            <img src="/images/check.png" style="width:20px">
+                                    <% if(products[i].lieferbar==1){ %>
+                                        <img src="/images/check.png" style="width:20px">
                                         <% }else{ %>
                                             <img src="/images/canceled.png" style="width:20px">
-                                        <% } %>
+                                            <% } %>
                                 </td>
                                 <td>
                                     <form action="configuration" method="POST">
-                                        <button class="btn btn-danger" id="remove_product" name="remove_product" value="<%= products[i].id%>" onclick="this.form.submit()">
+                                        <button class="btn btn-danger" id="remove_product" name="remove_product"
+                                            value="<%= products[i].id%>" onclick="this.form.submit()">
                                             X
                                         </button>
                                     </form>
-                                    
+
                                 </td>
                             </tr>
 

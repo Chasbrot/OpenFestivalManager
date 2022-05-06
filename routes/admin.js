@@ -1,14 +1,23 @@
 var express = require('express');
 var router = express.Router();
 var db = require("../database");
+const fs = require('fs');
+const { groupCollapsed } = require('console');
 
 router.get('/', function (req, res) {
 
   db.query('SELECT * FROM account', function (err, rows) {
+    var db_access = true, db_table = true;
     if (err) {
-      console.log("error");
+      console.log(err);
+      if (err.code != "ER_NO_SUCH_TABLE") {
+        db_access = false;
+      }
+      db_table = false;
+      rows = {};
     }
-    res.render("admin/admin", { regActive: global.registrationActive, uptime: parseInt(process.uptime()), personal: rows });
+    res.render("admin/admin", { regActive: global.registrationActive, uptime: parseInt(process.uptime()), personal: rows, db_a: db_access, db_t: db_table });
+
   });
 
 });
@@ -22,6 +31,24 @@ router.post('/', function (req, res, next) {
     global.registrationActive = true;
   } else {
     global.registrationActive = false;
+  }
+
+  if (body.createTables) {
+    console.log("create Tables WIP");
+    /*    fs.readFile('fm_db.sql', 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      var sql = data.replaceAll("\n","");
+      console.log(sql);
+      
+      db.query(sql, function (err, rows) {
+        if (err) {
+          console.log(err);
+        }
+      });
+    });*/
   }
 
   res.redirect("/admin");  // redirect to user form page after inserting the data
@@ -44,8 +71,20 @@ router.get('/configuration', function (req, res) {
         if (err) {
           console.log(err);
         }
+        db.query('SELECT * FROM Tisch', function (err, table) {
+          if (err) {
+            console.log(err);
+          }
 
-        res.render("admin/admin_configuration", { stations: rows, options: opts, products: prod });
+          db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
+            if (err) {
+              console.log(err);
+            }
+
+            res.render("admin/admin_configuration", { stations: rows, options: opts, products: prod, table_groups: groups, tables: table });
+          });
+        });
+
       });
 
     });
@@ -58,6 +97,24 @@ router.post('/configuration', function (req, res) {
 
   const body = req.body;
   console.log(body)
+
+  // Neue Tisch Gruppe anlegen
+  if (body.new_table_group) {
+    var sql = `INSERT INTO Tisch_Gruppe VALUES (0,"${body.new_table_group}")`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log('record inserted');
+    });
+  }
+
+  // Neuen Tisch anlegen
+  if (body.new_table) {
+    var sql = `INSERT INTO Tisch VALUES (0,"${body.new_table}",${body.table_group_id})`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log('record inserted');
+    });
+  }
 
 
   // Neue Station anlegen
@@ -124,6 +181,31 @@ router.post('/configuration', function (req, res) {
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record  deleted');
+    });
+  }
+
+  // Remove Tisch
+  if (body.remove_table) {
+    // Gericht_Zutaten entfernen
+    var sql = `DELETE FROM Tisch WHERE id = ${body.remove_table}`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log('record  deleted');
+    });
+  }
+
+  // Remove Tisch Gruppe
+  if (body.remove_table_group) {
+    // Tische entfernen
+    var sql = `DELETE FROM Tisch WHERE id_tischgruppe = ${body.remove_table_group}`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log('record  deleted');
+      var sql = `DELETE FROM Tisch_Gruppe WHERE id = ${body.remove_table_group}`;
+      db.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log('record  deleted');
+      });
     });
   }
 

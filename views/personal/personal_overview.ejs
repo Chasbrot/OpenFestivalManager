@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Übersicht</title>
   <meta charset="utf-8">
@@ -9,56 +10,74 @@
   <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
 
 </head>
+
 <body>
-  
+
   <!-- Nav bar -->
   <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
     <a class="navbar-brand" href="#">Übersicht</a>
-      <ul class="navbar-nav mr-auto">
-      </ul>
-      <a class="navbar-brand " href="">Kellnername</a>
-      <form action="personal_overview" method="POST">
-        <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout" value="true">Logout</button>
-      </form>
-      
+    <ul class="navbar-nav mr-auto">
+    </ul>
+    <div class="navbar-brand ">
+      <%= personal_name%>
+    </div>
+    <form action="personal_overview" method="POST">
+      <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout" value="true">Logout</button>
+    </form>
+
   </nav>
 
   <div id="accordion">
     <div class="card">
-        <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne">
-          <img src="/images/caret-down-fill.svg">
-          Abgeschlossene Tische
-          <div class="float-right">
-            4
-          </div>
-        </a>
-        
+      <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne">
+        <img src="/images/caret-down-fill.svg">
+        Abgeschlossene Tische
+        <div class="float-right">
+          <%= past_sessions.length%>
+        </div>
+      </a>
+
       <div id="collapseOne" class="collapse" data-parent="#accordion">
         <div class="card-body">
           <div class="list-group">
-            <a href="#" class="list-group-item list-group-item-action">Zelt Z2</a>
-            <a href="#" class="list-group-item list-group-item-action">Wiese W7</a>
-            <a href="#" class="list-group-item list-group-item-action">Heim A12</a>
-            <a href="#" class="list-group-item list-group-item-action disabled">Gustav G9</a>
+            <!--act_sessions: past_sessions:  { s_id: 7, t_id: 1, t_nr: 'A1', t_name: 'Wiese' },-->
+            <% if(past_sessions.length){%>
+              <% for(var i=0; i< past_sessions.length; i++) {%>
+                <button href="#" class="list-group-item list-group-item-action" name="tisch_id"
+                  value="<%= past_sessions[i].s_id%>">
+                  <%= past_sessions[i].t_name%>
+                    <%= past_sessions[i].t_nr%>
+                </button>
+                <% } %>
+                  <% }else{ %>
+                    Keine vergangenen Sitzungen
+                    <% } %>
           </div>
         </div>
       </div>
     </div>
     <div class="card">
-        <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo">
-          <img src="/images/caret-down-fill.svg">
+      <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo">
+        <img src="/images/caret-down-fill.svg">
         Aktive Tische
         <div class="float-right">
-          4
+          <%= act_sessions.length%>
         </div>
       </a>
       <div id="collapseTwo" class="collapse show" data-parent="#accordion">
         <div class="card-body">
           <div class="list-group">
-            <a href="/tisch_overview.html" class="list-group-item list-group-item-action">Zelt Z2</a>
-            <a href="#" class="list-group-item list-group-item-action">Wiese W7</a>
-            <a href="#" class="list-group-item list-group-item-action">Heim A12</a>
-            <a href="#" class="list-group-item list-group-item-action disabled">Gustav G9</a>
+            <!--act_sessions: past_sessions:  { s_id: 7, t_id: 1, t_nr: 'A1', t_name: 'Wiese' },-->
+            <% if(act_sessions.length){%>
+              <% for(var i=0; i< act_sessions.length; i++) {%>
+                <a href="/tisch/tisch_overview/<%= act_sessions[i].s_id%>" class="list-group-item list-group-item-action">
+                  <%= act_sessions[i].t_name%>
+                    <%= act_sessions[i].t_nr%>
+                </a>
+                <% } %>
+                  <% }else{ %>
+                    Keine aktiven Sitzungen
+                    <% } %>
           </div>
         </div>
       </div>
@@ -67,13 +86,14 @@
   <!-- Abgeschlossene Tische -->
 
 
-<!-- Aktive Tische -->
+  <!-- Aktive Tische -->
 
-<!-- Neuer Tisch -->
-<div class="fixed-bottom text-center">
-  <a class="btn btn-primary btn-lg btn-block" href="/tisch/tisch_neu" role="button">Neuer Tisch</a>
-</div>
+  <!-- Neuer Tisch -->
+  <div class="fixed-bottom text-center">
+    <a class="btn btn-primary btn-lg btn-block" href="/tisch/tisch_neu" role="button">Neuer Tisch</a>
+  </div>
 
 
 </body>
+
 </html>

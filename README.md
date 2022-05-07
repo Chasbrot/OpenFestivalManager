@@ -15,6 +15,8 @@ npm install mysql2 --save<br>
 npm install cookie-parser --save<br>
 npm install random-token --save <br>
 
+npm run devstart
+
 ## Description
 A webbased organisation tool for small festivals ("festl" in austrian). It manages food and drink orders for service personal. Automatically send food orders to assigned stations and tracks the order.
 

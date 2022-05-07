@@ -15,50 +15,49 @@
     <!-- Nav bar -->
     <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
         <a class="navbar-brand" href="/personal/personal_overview">Übersicht</a>
-        <div class="navbar-brand float-right">A12</div>
+        <div class="navbar-brand float-right">
+            <%= t_name%>
+        </div>
         <a class="btn btn-danger float-right btn-md py-0" href="tisch_kassieren">Kassieren</a>
     </nav>
 
     <!-- Bestellungen -->
     <div class="card" style="height: 170px">
         <div class="card-header py-0">Bestellungen</div>
-        <div class="card-body overflow-auto pt-0 px-1">
 
+        <div class="card-body overflow-auto pt-0 px-1">
             <div class="list-group pt-0">
-                <div class="list-group-item py-0">
-                    <img src="images/order.png" style="width:15px">
-                    1x Feuerfleck
-                    <button class="btn btn-danger btn-sm float-right py-0 px-4">x</button>
-                </div>
-                <div class="list-group-item py-0">
-                    <img src="images/loading.gif" style="width:15px">
-                    1x Kotlettsemmel
-                    <button class="btn btn-danger btn-sm float-right py-0 px-4">x</button>
-                </div>
-                <div class="list-group-item py-0">
-                    <img src="images/check.png" style="width: 15px">
-                    1x Kotlett
-                </div>
-                <div class="list-group-item py-0">
-                    <img src="images/check.png" style="width:15px">
-                    1x Bratwurst
-                </div>
-                <div class="list-group-item py-0">
-                    <img src="images/check.png" style="width:15px">
-                    1x Kotlett
-                </div>
-                <div class="list-group-item py-0">
-                    <img src="images/check.png" style="width:15px">
-                    1x Bratwurst
-                </div>
-                <div class="list-group-item py-0">
-                    <img src="images/check.png" style="width:15px">
-                    1x Kotlett
-                </div>
-                <div class="list-group-item py-0">
-                    <img src="images/check.png" style="width:15px">
-                    1x Bratwurst
-                </div>
+
+                <% if(orders.length){%>
+                    <% for(var i=0; i< orders.length; i++) {%>
+                        <div class="list-group-item py-0">
+                            <!-- Status icons -->
+                            <% if(orders[i].stoniert){%>
+                                <img src="/images/canceled.png" style="width:15px">
+                                <% } else if(orders[i].erledigt){%>
+                                    <img src="/images/check.png" style="width:15px">
+                                    <% } else if(orders[i].in_zubereitung){ %>
+                                        <img src="/images/loading.gif" style="width:15px">
+                                        <% } else { %>
+                                            <img src="/images/order.png" style="width:15px">
+                                            <% } %>
+                                                <%= orders[i].anzahl%> x
+                                                    <%= orders[i].name%>
+                                                        <% if(!orders[i].erledigt && !orders[i].in_zubereitung && !orders[i].stoniert){%>
+                                                            <form action="#" method="POST" style="display:inline;">
+                                                                <button
+                                                                    class="btn btn-danger btn-sm float-right py-0 px-4"
+                                                                    type="submit" name="cancelOrder"
+                                                                    value="<%= orders[i].id%>">x</button>
+                                                            </form>
+                                                            <% } %>
+                        </div>
+                        <% } %>
+                            <% }else{ %>
+                                <div class="list-group-item py-0">
+                                    Keine Bestellungen
+                                </div>
+                                <% } %>
             </div>
         </div>
     </div>
@@ -70,12 +69,12 @@
         </div>
         <div class="card-body px-0 pt-0">
             <div class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link active px-2" id="nav-home-tab" data-toggle="tab" href="#nav-pizza" role="tab"
-                    aria-controls="nav-home" aria-selected="true">Pizza</a>
+                <a class="nav-item nav-link active px-2" id="nav-home-tab" data-toggle="tab" href="#nav-pizza"
+                    role="tab" aria-controls="nav-home" aria-selected="true">Pizza</a>
                 <a class="nav-item nav-link px-2" id="nav-profile-tab" data-toggle="tab" href="#nav-grill" role="tab"
                     aria-controls="nav-profile" aria-selected="false">Grill</a>
-                <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab" href="#nav-feuerfleck" role="tab"
-                    aria-controls="nav-contact" aria-selected="false">FeuFleck</a>
+                <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab" href="#nav-feuerfleck"
+                    role="tab" aria-controls="nav-contact" aria-selected="false">FeuFleck</a>
                 <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab" href="#nav-kueche" role="tab"
                     aria-controls="nav-contact" aria-selected="false">Kueche</a>
                 <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab" href="#nav-schank" role="tab"
@@ -94,13 +93,15 @@
                             <div class="card-body py-0 px-1">
                                 <div class="list-group">
                                     <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true" id="item1_option1">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1">
                                         <label class="form-check-label" for="item1_option1">
                                             Käse
                                         </label>
                                     </div>
                                     <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true" id="item1_option1">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1">
                                         <label class="form-check-label" for="item1_option1">
                                             Schinken
                                         </label>
@@ -125,7 +126,8 @@
                                     </div>
 
                                 </div>
-                                <input type="text" class="form-control list-group-item" placeholder="Notiz" aria-label="Username" aria-describedby="basic-addon1">
+                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
+                                    aria-label="Username" aria-describedby="basic-addon1">
 
 
                             </div>
@@ -138,7 +140,7 @@
                                     <img src="images/sent.png" style="height: 15px">
 
                                 </div>
-                                
+
                             </div>
 
                         </div>
@@ -152,13 +154,15 @@
                             <div class="card-body py-0 px-1">
                                 <div class="list-group">
                                     <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true" id="item1_option1">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1">
                                         <label class="form-check-label" for="item1_option1">
                                             Käse
                                         </label>
                                     </div>
                                     <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true" id="item1_option1">
+                                        <input class="form-check-input" type="checkbox" value="" checked="true"
+                                            id="item1_option1">
                                         <label class="form-check-label" for="item1_option1">
                                             Schinken
                                         </label>
@@ -183,20 +187,21 @@
                                     </div>
 
                                 </div>
-                                <input type="text" class="form-control list-group-item" placeholder="Notiz" aria-label="Username" aria-describedby="basic-addon1">
+                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
+                                    aria-label="Username" aria-describedby="basic-addon1">
 
 
                             </div>
                             <!-- Bestellsteuerung -->
                             <div class="card-body py-0 px-1 w-25">
                                 <div class="btn btn-secondary btn-block">+</div>
-                                <input type="number" class="form-control text-center"  placeholder="0">
+                                <input type="number" class="form-control text-center" placeholder="0">
                                 <div class="btn btn-secondary btn-block">-</div>
                                 <div class="btn btn-secondary btn-block">
                                     <img src="images/sent.png" style="height: 15px">
 
                                 </div>
-                                
+
                             </div>
 
                         </div>

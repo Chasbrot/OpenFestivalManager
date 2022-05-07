@@ -53,8 +53,8 @@ CREATE TABLE `Sitzung` (
   `start` datetime NOT NULL,
   `end` datetime,
   `id_tisch` int,
-  `id_bestellung` int,
-  `id_abrechner` int
+  `id_abrechner` int,
+  `id_ersteller` int
 );
 
 CREATE TABLE `Bestellung` (
@@ -69,6 +69,15 @@ CREATE TABLE `Bestellung` (
   `bezahlt` int,
   `notiz` varchar(255)
 );
+
+CREATE TABLE `Account_Sitzung` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `id_account` int,
+  `id_sitzung` int
+);
+
+ALTER TABLE `Account_Sitzung` ADD FOREIGN KEY (`id_account`) REFERENCES `Account` (`id`);
+ALTER TABLE `Account_Sitzung` ADD FOREIGN KEY (`id_sitzung`) REFERENCES `Sitzung` (`id`);
 
 ALTER TABLE `Account` ADD FOREIGN KEY (`id_type`) REFERENCES `AccountType` (`id`);
 
@@ -91,3 +100,5 @@ ALTER TABLE `Sitzung` ADD FOREIGN KEY (`id_tisch`) REFERENCES `Tisch` (`id`);
 ALTER TABLE `Bestellung` ADD FOREIGN KEY (`id_sitzung`) REFERENCES `Sitzung` (`id`);
 
 ALTER TABLE `Sitzung` ADD FOREIGN KEY (`id_abrechner`) REFERENCES `Account` (`id`);
+
+ALTER TABLE `Sitzung` ADD FOREIGN KEY (`id_ersteller`) REFERENCES `Account` (`id`);

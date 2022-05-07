@@ -216,8 +216,90 @@ router.post('/configuration', function (req, res) {
 
 
 router.get('/orderdata', function (req, res) {
-  res.render("admin/admin_orderdata");
+
+  // Count all active orders
+  var sql = 'SELECT COUNT(id) AS c FROM bestellung\
+  WHERE bestellung.erledigt IS NULL AND bestellung.stoniert = false';
+  db.query(sql, function (err, activeOrders) {
+    if (err) {
+      console.log(err);
+    }
+    // Count all active sessions
+    db.query("SELECT COUNT(id) AS c FROM sitzung WHERE end IS NULL", function (err, activeSessions) {
+      if (err) {
+        console.log(err);
+      }
+      // Count all tables
+      db.query("SELECT COUNT(id) AS c FROM tisch", function (err, countTables) {
+        if (err) {
+          console.log(err);
+        }
+        // Count all tables
+        db.query("SELECT id, groupname FROM tisch_gruppe", function (err, tables) {
+          if (err) {
+            console.log(err);
+          }
+
+          res.render("admin/admin_orderdata", { activeOrders: activeOrders[0].c, activeSessions: activeSessions[0].c, countTables: countTables[0].c, table_groups: tables });
+        });
+
+      });
+    });
+  });
 });
+
+router.post('/orderdata/getSessionsForTable', function (req, res) {
+  if (!req.body.table_id) {
+    res.json({
+      msg: 'error'
+    });
+    return;
+  }
+  var sql = `SELECT sitzung.id, TIME_FORMAT(sitzung.start,"%H:%i") AS start, TIME_FORMAT(sitzung.end,"%H:%i") AS ende, account.name FROM sitzung\
+  INNER JOIN account_sitzung ON account_sitzung.id_sitzung=sitzung.id\
+  INNER JOIN account ON account_sitzung.id_account=account.id\
+  WHERE id_tisch=${req.body.table_id}\
+  ORDER BY start DESC`;
+  db.query(sql,
+    function (err, rows, fields) {
+      if (err) {
+        console.log(err)
+        res.json({
+          msg: 'error'
+        });
+      } else {
+        res.json({
+          msg: 'success',
+          sessions: rows
+        });
+      }
+    });
+});
+
+router.post('/orderdata/getTablesFromTableGroup', function (req, res) {
+  if (!req.body.group_id) {
+    res.json({
+      msg: 'error'
+    });
+    return;
+  }
+  var sql = `SELECT * FROM Tisch WHERE id_tischgruppe=${req.body.group_id}`;
+  db.query(sql,
+    function (err, rows, fields) {
+      if (err) {
+        console.log(err)
+        res.json({
+          msg: 'error'
+        });
+      } else {
+        res.json({
+          msg: 'success',
+          tables: rows
+        });
+      }
+    });
+});
+
 
 router.get('/login_admin', function (req, res) {
   res.render("admin/login_admin");

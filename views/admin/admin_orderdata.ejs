@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 </head>
 
 <body>
@@ -35,13 +36,11 @@
                 Auslastung
             </div>
             <div class="card-body">
-                Anzahl Kellner: 5
-                <br>
-                Aktive Sitzungen: 10
-                <br>
-                Belegung: 10/50
-                <br>
-                Aktive Bestellungen: 4
+                Aktive Sitzungen: <%= activeSessions%>
+                    <br>
+                    Belegung: <%= activeSessions%>/<%= countTables%>
+                            <br>
+                            Aktive Bestellungen: <%= activeOrders%>
             </div>
         </div>
         <br>
@@ -50,35 +49,36 @@
                 Sitzung suchen
             </div>
             <div class="card-body">
-                <h4>Tisch</h4>
-                <div class="card-body">
 
-                    <select class="custom-select" id="inputGroupSelect01">
-                        <option selected>Choose...</option>
-                        <option value="1">A1</option>
-                        <option value="2">A2</option>
-                        <option value="2">A2</option>
-                    </select>
-                </div>
-                <h4>Sitzungen</h4>
-                <div class="list-group">
-                    <div class="list-group-item">
-                        <div class="row">
-                            <div class="col-sm">
-                                Sitzungs ID
-                            </div>
-                            <div class="col-sm">
-                                Start
-                            </div>
-                            <div class="col-sm">
-                                Ende
-                            </div>
-                            <div class="col-sm">
-                                Kellner
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <h4>Tisch Gruppe</h4>
+                <select class="form-control" id="sessionsTableGroup" onchange="loadTables(this)">
+                    <% if(table_groups.length){%>
+                        <option value="" selected></option>
+                        <% for(var i=0; i< table_groups.length; i++) {%>
+                            <option value="<%= table_groups[i].id%>">
+                                <%= table_groups[i].groupname%>
+                            </option>
+                            <% } }else{ %>
+                                <option value="-1" selected>Leer</option>
+                                <% } %>
+                </select>
+
+                <h4>Tisch</h4>
+                <select class="form-control" id="sessionsTable" onchange="loadSessions(this)">
+                </select>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Sitzungs ID</th>
+                            <th scope="col">Start</th>
+                            <th scope="col">Ende</th>
+                            <th scope="col">Kellner</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessions">
+                    </tbody>
+                </table>
             </div>
         </div>
         <br>
@@ -91,15 +91,15 @@
                 <div class="form-group">
                     <label for="sessionid">Sitzungs ID:</label>
                     <input type="number" class="form-control" id="sessionid">
-                  </div>
-                <button class="btn btn-primary" >Suche</button>
+                </div>
+                <button class="btn btn-primary">Suche</button>
             </div>
-            
+
             <div class="card-body">
                 <h4>Bestellungen der Sitzung:</h4>
                 <div class="card" style="height: 200px">
                     <div class="card-body overflow-auto pt-0 px-1">
-            
+
                         <div class="list-group pt-0">
                             <div class="list-group-item py-0">
                                 <img src="images/order.png" style="width:15px">
@@ -138,7 +138,68 @@
                 </div>
             </div>
         </div>
+        <script>
+            function loadSessions(dropdown) {
+                var table_id = dropdown.value;
+                if (!table_id) {
+                    $("#sessions").html('');
+                    return;
+                }
+                console.log("change " + table_id)
+                $("#sessions").html('');
+                $.ajax({
+                    url: "orderdata/getSessionsForTable",
+                    type: "POST",
+                    data: {
+                        name: 'sessions',
+                        table_id: table_id,
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        console.log(result)
+                        if (result.sessions.length != 0) {
+                            $.each(result.sessions, function (key, value) {
+                                $("#sessions").append('<tr><th scope="row">' + value.id + '</th><td>' + value.start + '</td><td>' + value.ende + '</td><td>' + value.name + '</td></tr>');
+                            });
+                        } else {
+                            $("#sessions").append("Keine Sitzungen gefunden")
+                        }
+                    }
+                });
+            };
 
+            function loadTables(dropdown) {
+                var group_id = dropdown.value;
+                if (!group_id) {
+                    $("#sessionsTable").html('');
+                    $("#sessions").html('');
+                    return;
+                }
+                console.log("change tablegoup " + group_id)
+                $("#sessionsTable").html('');
+                $("#sessions").html('');
+                $.ajax({
+                    url: "orderdata/getTablesFromTableGroup",
+                    type: "POST",
+                    data: {
+                        name: 'tables',
+                        group_id: group_id,
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        console.log(result)
+                        if (result.tables.length != 0) {
+                            $("#sessionsTable").append('<option value="" selected>' + "" + '</option>');
+                            $.each(result.tables, function (key, value) {
+                                $("#sessionsTable").append('<option value="' + value.id + '">' + value.nummer + '</option>');
+                            });
+                        } else {
+                            $("#sessionsTable").append('<option value="-1">' + Leer + '</option>');
+                        }
+                    }
+                });
+            };
+        </script>
 </body>
 
 </html>

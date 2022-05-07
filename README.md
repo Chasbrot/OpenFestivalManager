@@ -18,14 +18,15 @@ npm install random-token --save <br>
 npm run devstart
 
 ## Description
-A webbased organisation tool for small festivals ("festl" in austrian). It manages food and drink orders for service personal. Automatically send food orders to assigned stations and tracks the order.
+A webbased ordering tool for small festivals ("festl" in austrian). It manages food and drink orders for service personal. Automatically send food orders to assigned stations and tracks the order.
 
 ## Requirements
-- MySQL Database
+- MySQL Database, Nodejs
 - Server (Laptop or Desktop PC)
 - Interfaces for the stations (Tablets or Laptop prefered)
 - Smartphones for service personal (min. 6" recommended)
 - Good WiFi coverage (2.4 GHz recommended)
+- Secured and protected Wifi
 
 ## Installation
 Clone Repo to Server and start webservice with: node app.js<br>
@@ -36,7 +37,7 @@ Access WebUI
 
 ## Authors 
 Michael Selinger<br>
-Paul Strondl
+~~Saul Ptrondl~~
 
 ## Project status
 early development

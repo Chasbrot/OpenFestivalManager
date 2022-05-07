@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var personalRouter = require('./routes/personal');
 var tischRouter = require('./routes/tisch');
+var stationRouter = require('./routes/station');
 
 var app = express();
 
@@ -45,7 +46,7 @@ app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/personal', personalRouter);
 app.use('/tisch', tischRouter);
-
+app.use('/station', stationRouter);
 
 
 

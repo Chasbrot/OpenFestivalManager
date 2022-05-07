@@ -4,7 +4,7 @@
   <title>Login Station</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="stylesheets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
 </head>
 <body>
 
@@ -16,14 +16,13 @@
 <div class="container">
   <h2>Login Station</h2>
   <h3>Hier startest du die Anwendung. Gib ein log dich ein.</h3>
-  <form action="/action_page.php">
+  <form action="login_station" method="POST">
     <div class="form-group">
-      <label for="name">Station:</label>
-      <input type="text" class="form-control" id="name" placeholder="Station eingeben" name="name">
+      <label for="username">Station:</label>
+      <input type="text" class="form-control" id="username" placeholder="Station eingeben" name="username">
     </div>
     <div class="text-center">
-        <a class="btn btn-primary" href="station_overview.html">Login</a>
-        <!--<button type="submit" class="btn btn-primary">Login</button>-->
+        <button type="submit" class="btn btn-primary">Login</button>
     </div>
   </form>
 </div>

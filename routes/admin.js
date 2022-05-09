@@ -3,9 +3,13 @@ var router = express.Router();
 var db = require("../database");
 const fs = require('fs');
 const { groupCollapsed } = require('console');
+const { redirect } = require('express/lib/response');
 
 router.get('/', function (req, res) {
-
+  if (!req.session.admin_id) {
+    res.redirect("/admin/login_admin");
+    return;
+  }
   db.query('SELECT * FROM account', function (err, rows) {
     var db_access = true, db_table = true;
     if (err) {
@@ -24,6 +28,10 @@ router.get('/', function (req, res) {
 
 
 router.post('/', function (req, res, next) {
+  if (!req.session.admin_id) {
+    res.redirect("/admin/login_admin");
+    return;
+  }
   // store all the user input data
   const body = req.body;
 
@@ -56,7 +64,10 @@ router.post('/', function (req, res, next) {
 
 
 router.get('/configuration', function (req, res) {
-
+  if (!req.session.admin_id) {
+    res.redirect("/admin/login_admin");
+    return;
+  }
   db.query('SELECT * FROM stand', function (err, rows) {
     if (err) {
       console.log("error");
@@ -94,7 +105,10 @@ router.get('/configuration', function (req, res) {
 });
 
 router.post('/configuration', function (req, res) {
-
+  if (!req.session.admin_id) {
+    res.redirect("/admin/login_admin");
+    return;
+  }
   const body = req.body;
   console.log(body)
 
@@ -216,7 +230,10 @@ router.post('/configuration', function (req, res) {
 
 
 router.get('/orderdata', function (req, res) {
-
+  if (!req.session.admin_id) {
+    res.redirect("/admin/login_admin");
+    return;
+  }
   // Count all active orders
   var sql = 'SELECT COUNT(id) AS c FROM bestellung\
   WHERE bestellung.erledigt IS NULL AND bestellung.stoniert = false';
@@ -301,8 +318,59 @@ router.post('/orderdata/getTablesFromTableGroup', function (req, res) {
 });
 
 
+router.post('/orderdata/getOrdersFromSession', function (req, res) {
+  console.log(req.body)
+  if (!req.body.session_id) {
+    res.json({
+      msg: 'error'
+    });
+    return;
+  }
+  var sql = `SELECT bestellung.id,bestellung.erstellt, bestellung.erledigt,bestellung.in_zubereitung, bestellung.anzahl, bestellung.stoniert, gericht.name  FROM Bestellung\
+  INNER JOIN Gericht ON Gericht.id = bestellung.id_gericht\
+  WHERE id_sitzung=${req.body.session_id}`;
+  db.query(sql,
+    function (err, rows, fields) {
+      if (err) {
+        console.log(err)
+        res.json({
+          msg: 'error'
+        });
+      } else {
+        res.json({
+          msg: 'success',
+          orders: rows
+        });
+      }
+    });
+});
+
+
+
 router.get('/login_admin', function (req, res) {
-  res.render("admin/login_admin");
+  res.render("admin/login_admin", { err: false });
+});
+
+router.post('/login_admin', function (req, res) {
+  // check username
+  console.log(req.body)
+  if (req.body.username && req.body.password) {
+    var sql = `SELECT id,name FROM account WHERE name ="${req.body.username}" AND id_type= 1 AND pw="${req.body.password}"`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+
+      if (result[0]) {
+        req.session.admin_id = result[0].id;
+        req.session.admin_name = result[0].name;
+        res.redirect("/admin");
+      } else {
+        res.render("admin/login_admin", { err: true });
+      }
+    });
+  } else {
+    res.render("admin/login_admin", { err: true });
+  }
+
 });
 
 

@@ -9,14 +9,7 @@ router.get('/tisch_neu', function (req, res) {
       if (err) {
         console.log(err);
       }
-      // Lade Tische der Tischgruppe
-      var sql = `SELECT * FROM Tisch WHERE id_tischgruppe = 1`;
-      db.query(sql, function (err, tabs) {
-        if (err) {
-          console.log(err);
-        }
-        res.render("tisch/tisch_neu", { table_groups: groups, tables: tabs });
-      });
+      res.render("tisch/tisch_neu", { table_groups: groups });
     });
   } else {
     res.redirect("/personal/personal_overview");

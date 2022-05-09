@@ -3,7 +3,7 @@ var router = express.Router();
 var db = require("../database");
 
 router.get('/login_personal', function (req, res) {
-    res.render("personal/login_personal");
+    res.render("personal/login_personal", { err: false });
 });
 
 router.post('/login_personal', function (req, res, next) {
@@ -20,7 +20,7 @@ router.post('/login_personal', function (req, res, next) {
             }
         });
     } else {
-        res.render("personal/login_personal");  // redirect to user form page after inserting the data
+        res.render("personal/login_personal", { err: true });  // redirect to user form page after inserting the data
     }
 
 });
@@ -89,7 +89,7 @@ router.post('/personal_overview', function (req, res) {
 
 router.get('/registrierung_personal', function (req, res) {
     if (global.registrationActive) {
-        res.render("personal/registrierung_personal");
+        res.render("personal/registrierung_personal", {err: false});
     } else {
         res.redirect("/personal/login_personal");
     }
@@ -101,14 +101,26 @@ router.post('/registrierung_personal', function (req, res, next) {
     const userDetails = req.body;
     console.log(userDetails);
 
-    // insert user data into users table
-    var sql = `INSERT INTO account VALUES (0,"${userDetails.name}","",3)`;
+    // Check if username as personal exists
+    var sql = `SELECT * FROM account WHERE name="${userDetails.name}" AND id_type=3`;
     db.query(sql, function (err, result) {
         if (err) throw err;
-        console.log('record inserted');
+        if (result.length == 0) {
+            // insert user data into users table
+            var sql = `INSERT INTO account VALUES (0,"${userDetails.name}","",3)`;
+            db.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log('record inserted');
+            });
+            res.redirect("/personal/login_personal");  // redirect to user form page after inserting the data
+        } else {
+            res.render("personal/registrierung_personal", {err: true});
+        }
     });
 
-    res.redirect("/personal/login_personal");  // redirect to user form page after inserting the data
+
+
+    
 });
 
 

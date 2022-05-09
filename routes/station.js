@@ -94,7 +94,7 @@ router.post('/station_overview', function (req, res) {
 
 
 router.get('/login_station', function (req, res) {
-    res.render("station/login_station");
+    res.render("station/login_station", {err: false});
 });
 
 router.post('/login_station', function (req, res, next) {
@@ -110,11 +110,11 @@ router.post('/login_station', function (req, res, next) {
                 res.redirect("/station/station_overview");
             } else {
                 console.log("station " + req.body.username + " not found")
-                res.redirect("/station/login_station");
+                res.render("station/login_station", {err: true});
             }
         });
     } else {
-        res.render("station/login_station");  // redirect to user form page after inserting the data
+        res.render("station/login_station", {err: true});  // redirect to user form page after inserting the data
     }
 });
 

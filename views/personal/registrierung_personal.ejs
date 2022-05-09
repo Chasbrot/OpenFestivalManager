@@ -21,6 +21,11 @@
       <label>Name:</label>
       <input type="text" class="form-control" placeholder="Name eingeben" name="name" required>
     </div>
+    <% if(err){ %>
+      <div class="alert alert-danger" role="alert">
+        Username already exists!
+      </div>
+    <% } %>
     <div class="text-center">
       <button type="submit" class="btn btn-primary">Registrieren</button>
     </div>

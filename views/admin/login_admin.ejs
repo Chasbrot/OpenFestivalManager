@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Login Admin</title>
+  <title>Login Station</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
@@ -14,16 +14,22 @@
 <br>
 
 <div class="container">
-  <h2>Login Admin</h2>
-  <h3>Festl Manager Admin Konsole</h3>
-  <form action="/action_page.php">
+  <h2>Festl Order Managment Console</h2>
+  <h3>Administrator Login</h3>
+  <form action="login_admin" method="POST">
     <div class="form-group">
+      <label for="username">User:</label>
+      <input type="text" class="form-control" id="username" placeholder="Benutzer eingeben" name="username">
       <label for="password">Password:</label>
-      <input type="text" class="form-control" id="password" placeholder="Password" name="password">
+      <input type="password" class="form-control" id="password" placeholder="Password eingeben" name="password">
     </div>
+    <% if(err){ %>
+      <div class="alert alert-danger" role="alert">
+        Wrong user or password!
+      </div>
+    <% } %>
     <div class="text-center">
-        <a class="btn btn-primary" href="/admin">Login</a>
-        <!--<button type="submit" class="btn btn-primary">Login</button>-->
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
     </div>
   </form>
 </div>

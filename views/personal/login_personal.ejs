@@ -15,14 +15,19 @@
 
 <div class="container">
   <h2>Login Personal</h2>
-  <h3>Hier startest du die Anwendung. Gib deinen Namen ein log dich ein.</h3>
+  <h3>Bitte anmelden.</h3>
   <form action="login_personal" method="POST">
     <div class="form-group">
       <label for="name">Name:</label>
       <input type="text" class="form-control" id="username" placeholder="Name eingeben" name="username">
     </div>
+    <% if(err){ %>
+      <div class="alert alert-danger" role="alert">
+        Wrong username!
+      </div>
+    <% } %>
     <div class="text-center">
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
     </div>
   </form>
 </div>

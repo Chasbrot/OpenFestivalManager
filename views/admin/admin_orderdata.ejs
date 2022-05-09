@@ -92,47 +92,14 @@
                     <label for="sessionid">Sitzungs ID:</label>
                     <input type="number" class="form-control" id="sessionid">
                 </div>
-                <button class="btn btn-primary">Suche</button>
+                <button  class="btn btn-primary form-control" onclick="loadOrders()">Suche</button>
             </div>
 
             <div class="card-body">
                 <h4>Bestellungen der Sitzung:</h4>
-                <div class="card" style="height: 200px">
+                <div class="card" style="max-height: 200px">
                     <div class="card-body overflow-auto pt-0 px-1">
-
-                        <div class="list-group pt-0">
-                            <div class="list-group-item py-0">
-                                <img src="images/order.png" style="width:15px">
-                                1x Feuerfleck
-                            </div>
-                            <div class="list-group-item py-0">
-                                <img src="images/loading.gif" style="width:15px">
-                                1x Kotlettsemmel
-                            </div>
-                            <div class="list-group-item py-0">
-                                <img src="images/check.png" style="width: 15px">
-                                1x Kotlett
-                            </div>
-                            <div class="list-group-item py-0">
-                                <img src="images/check.png" style="width:15px">
-                                1x Bratwurst
-                            </div>
-                            <div class="list-group-item py-0">
-                                <img src="images/check.png" style="width:15px">
-                                1x Kotlett
-                            </div>
-                            <div class="list-group-item py-0">
-                                <img src="images/check.png" style="width:15px">
-                                1x Bratwurst
-                            </div>
-                            <div class="list-group-item py-0">
-                                <img src="images/check.png" style="width:15px">
-                                1x Kotlett
-                            </div>
-                            <div class="list-group-item py-0">
-                                <img src="images/check.png" style="width:15px">
-                                1x Bratwurst
-                            </div>
+                        <div class="list-group pt-0" id="ordersFromSession">
                         </div>
                     </div>
                 </div>
@@ -199,6 +166,52 @@
                     }
                 });
             };
+
+            function loadOrders() {
+                console.log("loadOrders")
+                var session_id = document.getElementById("sessionid").value;
+                console.log(session_id)
+                if (!session_id) {
+                    $("#ordersFromSession").html('');
+                    return;
+                }
+                console.log("load orders from session " + session_id)
+                $("#ordersFromSession").html('');
+                $.ajax({
+                    url: "orderdata/getOrdersFromSession",
+                    type: "POST",
+                    data: {
+                        name: 'orders',
+                        session_id: session_id,
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        console.log(result)
+                        if (result.orders.length != 0) {
+                            $.each(result.orders, function (key, value) {
+                                var s="";
+                                s+='<div class="list-group-item py-0">';
+                                if(value.stoniert){
+                                    s+='<img src="/images/canceled.png" style="width:15px">';
+                                }else if(value.erledigt){
+                                    s+='<img src="/images/check.png" style="width:15px">';
+                                }else if(value.in_zubereitung){
+                                    s+='<img src="/images/loading.gif" style="width:15px">';
+                                }else{
+                                    s+='<img src="/images/order.png" style="width:15px">';
+                                }
+                                s+=(value.anzahl + "x "+ value.name);
+                                s+='</div>';
+                                $("#ordersFromSession").append(s);
+                            });
+                        } else {
+                            $("#ordersFromSession").append('<div class="list-group-item py-0">Leer</div>');
+                        }
+                    }
+                });
+            };
+
+
         </script>
 </body>
 

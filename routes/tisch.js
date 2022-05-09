@@ -19,8 +19,6 @@ router.get('/tisch_neu', function (req, res) {
 
 router.post('/tisch_neu', function (req, res) {
   const body = req.body;
-  console.log(req.body)
-  console.log(req.session.personal_id)
   if (req.session.personal_id) {
 
     // Neue Sitzung erzeugen
@@ -92,17 +90,9 @@ router.post('/tisch_neu', function (req, res) {
   }
 });
 
-
-router.get('/tisch_overview', function (req, res) {
-  if (req.session.personal_id) {
-    res.render("tisch/tisch_overview");
-  } else {
-    res.redirect("/personal/personal_overview");
-  }
-
-});
-
 router.post('/tisch_overview/:sid', function (req, res) {
+  console.log(req.body)
+  const body = req.body;
   if (req.session.personal_id) {
     var sid = req.params.sid;
 
@@ -112,20 +102,22 @@ router.post('/tisch_overview/:sid', function (req, res) {
       db.query(sql, function (err, orders) {
         if (err) throw err;
         console.log("order " + req.body.cancelOrder + " canceled")
-        res.redirect("/tisch/tisch_overview/"+sid);
+        res.redirect("/tisch/tisch_overview/" + sid);
       });
-    } else {
-      res.redirect("/tisch/tisch_overview/"+sid);
+    } else if (body.productid) {
+      console.log("order recieved")
+      //// TODO PARSE ORDER AND SAVE TO DB
+      
+      res.redirect("/tisch/tisch_overview/" + sid);
     }
   } else {
     res.redirect("/personal/personal_overview");
   }
-
 });
 
 router.get('/tisch_overview/:sid', function (req, res) {
-  console.log("requestesd session overview: " + req.params.sid)
   if (req.session.personal_id) {
+    // Check if session exists
     var sql = `SELECT * FROM sitzung\
     INNER JOIN tisch\
     ON sitzung.id_tisch = tisch.id\
@@ -133,6 +125,7 @@ router.get('/tisch_overview/:sid', function (req, res) {
     db.query(sql, function (err, result) {
       if (err) throw err;
       if (result[0]) {
+        // Load all orders from this session with their data
         var sql = `SELECT bestellung.id AS id, bestellung.erstellt, bestellung.erledigt, bestellung.in_zubereitung,  bestellung.anzahl, bestellung.stoniert, gericht.name\
         FROM bestellung\
         INNER JOIN gericht ON bestellung.id_gericht = gericht.id\
@@ -140,11 +133,17 @@ router.get('/tisch_overview/:sid', function (req, res) {
         ORDER BY bestellung.erstellt DESC`;
         db.query(sql, function (err, orders) {
           if (err) throw err;
-          console.log(orders)
           if (orders.length == 0) {
             console.log("session " + req.params.sid + " no orders found")
           }
-          res.render("tisch/tisch_overview", { t_name: result[0].nummer, orders: orders });
+          // Load all stations in 
+          var sql = `SELECT * FROM stand`;
+          db.query(sql, function (err, stations) {
+            if (err) throw err;
+            req.session.session_overview=req.params.sid // save overview id to session
+            res.render("tisch/tisch_overview", { t_name: result[0].nummer, orders: orders, stations: stations });
+          });
+
         });
       } else {
         console.log("session " + req.params.tid + " not found")
@@ -167,6 +166,37 @@ router.get('/tisch_kassieren', function (req, res) {
   } else {
     res.redirect("/personal/personal_overview");
   }
+});
+
+router.get('/productlist/:sid', function (req, res) {
+  console.log(req.params.sid)
+  // Lade Gerichte
+  var sql = `SELECT * FROM Gericht WHERE id_stand=${req.params.sid}`;
+  db.query(sql, function (err, prods) {
+    if (err) {
+      console.log(err);
+    }
+    // Lade Gericht_Zuaten und Zutaten
+    var sql = `SELECT * FROM Gericht_Zutaten INNER JOIN Zutat ON Gericht_Zutaten.id_zutat = Zutat.id`;
+    db.query(sql, function (err, zutaten) {
+      if (err) {
+        console.log(err);
+      }
+      // Allen Produkten ihre Zutaten zuteilen. Keine bessere Idee, aber die listen sind eh ned so groß
+      for (var p = 0; p < prods.length; p++){
+        for (var z = 0; z < zutaten.length; z++){
+          if (zutaten[z].id_gericht == prods[p].id) {
+            if (prods[p].zutaten) {
+              prods[p].zutaten.push(zutaten[z]);
+            } else {
+              prods[p].zutaten = [];
+            }
+          }
+        }
+      }
+      res.render("tisch/productlist", { products: prods });
+    });
+  });
 });
 
 

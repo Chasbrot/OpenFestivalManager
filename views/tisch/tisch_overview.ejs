@@ -6,12 +6,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
-    <script src="/javascripts/jquery-3.5.1.slim.min.js"></script>
+    <script src="/javascripts/jquery-3.1.1.min.js"></script>
     <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
-
     <!-- Nav bar -->
     <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
         <a class="navbar-brand" href="/personal/personal_overview">Übersicht</a>
@@ -43,7 +42,8 @@
                                             <% } %>
                                                 <%= orders[i].anzahl%> x
                                                     <%= orders[i].name%>
-                                                        <% if(!orders[i].erledigt && !orders[i].in_zubereitung && !orders[i].stoniert){%>
+                                                        <% if(!orders[i].erledigt && !orders[i].in_zubereitung &&
+                                                            !orders[i].stoniert){%>
                                                             <form action="#" method="POST" style="display:inline;">
                                                                 <button
                                                                     class="btn btn-danger btn-sm float-right py-0 px-4"
@@ -69,168 +69,74 @@
         </div>
         <div class="card-body px-0 pt-0">
             <div class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link active px-2" id="nav-home-tab" data-toggle="tab" href="#nav-pizza"
-                    role="tab" aria-controls="nav-home" aria-selected="true">Pizza</a>
-                <a class="nav-item nav-link px-2" id="nav-profile-tab" data-toggle="tab" href="#nav-grill" role="tab"
-                    aria-controls="nav-profile" aria-selected="false">Grill</a>
-                <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab" href="#nav-feuerfleck"
-                    role="tab" aria-controls="nav-contact" aria-selected="false">FeuFleck</a>
-                <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab" href="#nav-kueche" role="tab"
-                    aria-controls="nav-contact" aria-selected="false">Kueche</a>
-                <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab" href="#nav-schank" role="tab"
-                    aria-controls="nav-contact" aria-selected="false">Schank</a>
+
+                <% if(stations.length){%>
+                    <% for(var i=0; i< stations.length; i++) {%>
+                        <% if(i==0){ %>
+                            <a class="nav-item nav-link active px-2" id="nav-home-tab" data-toggle="tab"
+                                href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-home"
+                                aria-selected="false" onclick="loadProducts('<%= stations[i].id%>')">
+                                <%= stations[i].name%>
+                            </a>
+                            <% } else {%>
+                                <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab"
+                                    href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-contact"
+                                    aria-selected="false" onclick="loadProducts('<%= stations[i].id%>')">
+                                    <%= stations[i].name%>
+                                </a>
+                                <%}%>
+
+                                    <% } %>
+                                        <% } %>
+
             </div>
-            </nav>
-            <div class="tab-content pb-4" id="nav-tabContent">
-                <div class="tab-pane fade show active" id="nav-pizza" role="tabpanel" aria-labelledby="nav-home-tab">
-                    <div class="list-group">
-                        <div class="list-group-item card px-0 py-1  d-flex flex-row">
-                            <!-- Produkt -->
-                            <div class="card-header py-1 w-25">
-                                Pizza klein
+            <div class="tab-content pb-4" id="station_products">
+                <% if(stations.length){%>
+                    <% for(var i=0; i< stations.length; i++) {%>
+                        <% if(i==0){ %>
+                            <div class="tab-pane fade show active" id="nav-<%= stations[i].id%>" role="tabpanel"
+                                aria-labelledby="nav-home-tab">Test <%= stations[i].id%>
                             </div>
-                            <!-- Optionen -->
-                            <div class="card-body py-0 px-1">
-                                <div class="list-group">
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true"
-                                            id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Käse
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true"
-                                            id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Schinken
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Pfefferoni
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Mais
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Oliven
-                                        </label>
-                                    </div>
-
+                            <% } else {%>
+                                <div class="tab-pane fade" id="nav-<%= stations[i].id%>" role="tabpanel"
+                                    aria-labelledby="nav-contact-tab">Test <%= stations[i].id%>
                                 </div>
-                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
-                                    aria-label="Username" aria-describedby="basic-addon1">
+                                <%}%>
 
+                                    <% } %>
+                                        <% } %>
 
-                            </div>
-                            <!-- Bestellsteuerung -->
-                            <div class="card-body py-0 px-1 w-25">
-                                <div class="btn btn-secondary btn-block">+</div>
-                                <input type="number" class="form-control text-center" disabled="true" placeholder="0">
-                                <div class="btn btn-secondary btn-block">-</div>
-                                <div class="btn btn-secondary btn-block">
-                                    <img src="images/sent.png" style="height: 15px">
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="list-group-item card px-0 py-1  d-flex flex-row">
-                            <!-- Produkt -->
-                            <div class="card-header py-1 w-25">
-                                Pizza
-                            </div>
-                            <!-- Optionen -->
-                            <div class="card-body py-0 px-1">
-                                <div class="list-group">
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true"
-                                            id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Käse
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true"
-                                            id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Schinken
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Pfefferoni
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Mais
-                                        </label>
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="item1_option1">
-                                        <label class="form-check-label" for="item1_option1">
-                                            Oliven
-                                        </label>
-                                    </div>
-
-                                </div>
-                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
-                                    aria-label="Username" aria-describedby="basic-addon1">
-
-
-                            </div>
-                            <!-- Bestellsteuerung -->
-                            <div class="card-body py-0 px-1 w-25">
-                                <div class="btn btn-secondary btn-block">+</div>
-                                <input type="number" class="form-control text-center" placeholder="0">
-                                <div class="btn btn-secondary btn-block">-</div>
-                                <div class="btn btn-secondary btn-block">
-                                    <img src="images/sent.png" style="height: 15px">
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="nav-grill" role="tabpanel" aria-labelledby="nav-profile-tab">
-                    grill
-
-                </div>
-                <div class="tab-pane fade" id="nav-feuerfleck" role="tabpanel" aria-labelledby="nav-contact-tab">
-                    feuerfleck
-
-                </div>
-                <div class="tab-pane fade" id="nav-kueche" role="tabpanel" aria-labelledby="nav-contact-tab">
-                    kueche
-
-                </div>
-                <div class="tab-pane fade" id="nav-schank" role="tabpanel" aria-labelledby="nav-contact-tab">
-                    schank
-
-                </div>
             </div>
         </div>
-
-
     </div>
+
+    <script>
+        // Load first station entries
+        $(document).ready(function () {
+            loadProducts('<%= stations[0].id%>');
+        });
+
+        // Load products for a station
+        function loadProducts(station_id) {
+            if (!station_id) {
+                return;
+            }
+            console.log("loading products for station" + station_id)
+            $("#nav-" + station_id).html('');
+            $("#nav-" + station_id).load("/tisch/productlist/" + station_id);
+        };
+
+        function increment(num) {
+            document.getElementById(num).value = parseInt(document.getElementById(num).value) + 1;
+        };
+        function decrement(num) {
+            if (document.getElementById(num).value > 0) {
+                document.getElementById(num).value = parseInt(document.getElementById(num).value) - 1;
+            }
+        };
+
+
+    </script>
 
 
 </body>

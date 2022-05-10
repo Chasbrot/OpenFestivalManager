@@ -76,6 +76,12 @@ CREATE TABLE `Account_Sitzung` (
   `id_sitzung` int
 );
 
+CREATE TABLE `Zutat_Bestellung` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `id_zutat` int,
+  `id_bestellung` int
+);
+
 ALTER TABLE `Account_Sitzung` ADD FOREIGN KEY (`id_account`) REFERENCES `Account` (`id`);
 ALTER TABLE `Account_Sitzung` ADD FOREIGN KEY (`id_sitzung`) REFERENCES `Sitzung` (`id`);
 
@@ -102,3 +108,7 @@ ALTER TABLE `Bestellung` ADD FOREIGN KEY (`id_sitzung`) REFERENCES `Sitzung` (`i
 ALTER TABLE `Sitzung` ADD FOREIGN KEY (`id_abrechner`) REFERENCES `Account` (`id`);
 
 ALTER TABLE `Sitzung` ADD FOREIGN KEY (`id_ersteller`) REFERENCES `Account` (`id`);
+
+ALTER TABLE `Zutat_Bestellung` ADD FOREIGN KEY (`id_zutat`) REFERENCES `Zutat` (`id`);
+
+ALTER TABLE `Zutat_Bestellung` ADD FOREIGN KEY (`id_bestellung`) REFERENCES `Bestellung` (`id`);

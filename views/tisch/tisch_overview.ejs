@@ -113,7 +113,9 @@
     <script>
         // Load first station entries
         $(document).ready(function () {
-            loadProducts('<%= stations[0].id%>');
+            <% if (stations.length) {%>
+                loadProducts('<%= stations[0].id%>');
+            <%}%>
         });
 
         // Load products for a station

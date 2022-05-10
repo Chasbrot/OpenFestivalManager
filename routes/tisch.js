@@ -42,7 +42,7 @@ router.post('/tisch_neu', function (req, res) {
                 console.log("Session linked to account")
               }
             });
-            res.redirect("/tisch/tisch_overview");
+            res.redirect("/tisch/tisch_overview/" + result[0].id);
 
           } else {
             // Es gibt keine aktive Sitzung -> Neue Erstellen, hinzufügen und öffnen
@@ -72,7 +72,7 @@ router.post('/tisch_neu', function (req, res) {
                     } else {
                       console.log("Session linked to account")
                     }
-                    res.redirect("/tisch/tisch_overview");
+                    res.redirect("/tisch/tisch_overview" + result[0].id);
                   });
                 }
               });
@@ -105,9 +105,40 @@ router.post('/tisch_overview/:sid', function (req, res) {
         res.redirect("/tisch/tisch_overview/" + sid);
       });
     } else if (body.productid) {
-      console.log("order recieved")
-      //// TODO PARSE ORDER AND SAVE TO DB
-      
+      if (body.product_anzahl != 0) {
+        console.log("order recieved")
+        //// TODO PARSE ORDER AND SAVE TO DB
+        // SAVE Order 
+        var sql = `INSERT INTO bestellung VALUES (0, ${body.productid}, ${req.session.personal_id}, ${req.session.session_overview}, NOW(),NULL,false,${body.product_anzahl},0,"${body.notiz}",false)`;
+        db.query(sql, function (err, result) {
+          if (err) throw err;
+          console.log("order created")
+
+          if (body.option.length > 0) {
+            //  Get id of last inserted record
+            var sql = "SELECT LAST_INSERT_ID() AS id";
+            db.query(sql, function (err, result) {
+              if (err) throw err;
+              if (result[0]) {
+                // Create Order - Options Mappings
+                for(var i=0; i<body.option.length; i++){
+                  var sql = `INSERT INTO Zutat_Bestellung VALUES (0,${body.option[i]},${result[0].id})`;
+                  db.query(sql, function (err, result) {
+                    if (err) throw err;
+                  });
+                }
+              }
+            });
+          }
+        });
+
+
+        // Save Food
+
+
+
+
+      }
       res.redirect("/tisch/tisch_overview/" + sid);
     }
   } else {
@@ -140,7 +171,7 @@ router.get('/tisch_overview/:sid', function (req, res) {
           var sql = `SELECT * FROM stand`;
           db.query(sql, function (err, stations) {
             if (err) throw err;
-            req.session.session_overview=req.params.sid // save overview id to session
+            req.session.session_overview = req.params.sid // save overview id to session
             res.render("tisch/tisch_overview", { t_name: result[0].nummer, orders: orders, stations: stations });
           });
 
@@ -183,8 +214,8 @@ router.get('/productlist/:sid', function (req, res) {
         console.log(err);
       }
       // Allen Produkten ihre Zutaten zuteilen. Keine bessere Idee, aber die listen sind eh ned so groß
-      for (var p = 0; p < prods.length; p++){
-        for (var z = 0; z < zutaten.length; z++){
+      for (var p = 0; p < prods.length; p++) {
+        for (var z = 0; z < zutaten.length; z++) {
           if (zutaten[z].id_gericht == prods[p].id) {
             if (prods[p].zutaten) {
               prods[p].zutaten.push(zutaten[z]);

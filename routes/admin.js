@@ -10,7 +10,7 @@ router.get('/', function (req, res) {
     res.redirect("/admin/login_admin");
     return;
   }
-  db.query('SELECT * FROM account', function (err, rows) {
+  db.query('SELECT * FROM account WHERE id_type=3', function (err, rows) {
     var db_access = true, db_table = true;
     if (err) {
       console.log(err);

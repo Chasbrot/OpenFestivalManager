@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
-    <script src="/javascripts/jquery-3.5.1.slim.min.js"></script>
+    <script src="/javascripts/jquery-3.1.1.min.js"></script>
     <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
 
 </head>
@@ -102,7 +102,9 @@
                 <img src="/images/caret-down-fill.svg">
                 Aktive Bestellungen
                 <div class="float-right">
-                    <%= act_orders.length%>
+                    <% if(act_orders.length){%>
+                        <%= act_orders.length%>
+                            <%}%>
                 </div>
             </a>
             <div id="collapseTwo" class="collapse show" data-parent="#accordion">
@@ -116,7 +118,8 @@
 
                                     <!-- Optionen -->
                                     <a class="card-header btn-light align-middle" data-toggle="collapse"
-                                        href="#options_order<%= pre_orders[i].b_id%>">
+                                        href="#options_order<%= act_orders[i].b_id%>"
+                                        onclick="loadOptions('<%= act_orders[i].b_id%>')">
                                         <!-- Wartezeit -->
                                         <%= act_orders[i].wartezeit%> m
                                             <!-- Status -->
@@ -151,23 +154,17 @@
                                                 <div class="float-right pr-3">
                                                     <%= act_orders[i].t_nr%>
                                                 </div>
-                                                <div id="options_order<%= pre_orders[i].b_id%>" class="collapse"
+                                                <!-- Options -->
+                                                <div id="options_order<%= act_orders[i].b_id%>" class="collapse"
                                                     data-parent="#orders">
-                                                    <div class="list-group pt-3">
-                                                        <div class="list-group-item py-0">
-                                                            <input class="form-check-input" type="checkbox" value=""
-                                                                checked="true" id="item1_option1" disabled="true">
-                                                            Knoblauch
-                                                        </div>
-                                                        <div class="list-group-item py-0">
-                                                            <input class="form-check-input" type="checkbox" value=""
-                                                                checked="false" id="item1_option1" disabled="true">
-                                                            Soße extra
-                                                        </div>
-
+                                                    <div class="list-group pt-3"
+                                                        id="options_order<%= act_orders[i].b_id%>_detail">
                                                     </div>
-                                                    <input type="text" class="form-control list-group-item"
-                                                        placeholder="Notiz" disabled="true">
+                                                    <% if(act_orders[i].notiz){%>
+                                                        <div type="text" class="list-group-item"                                                             disabled="true">
+                                                            Notiz: <%= act_orders[i].notiz%>
+                                                        </div>
+                                                        <%}%>
                                                 </div>
 
 
@@ -182,6 +179,39 @@
             </div>
         </div>
     </div>
+    <script>
+        function loadOptions(order_id) {
+            console.log("load options for orders" + order_id)
+            $("#options_order" + order_id + "_detail").html('');
+            if (!order_id) {
+                return;
+            }
+            $.ajax({
+                url: "getOptionsFromOrder",
+                type: "POST",
+                data: {
+                    name: 'options',
+                    order_id: order_id,
+                },
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result)
+                    if (result.options.length != 0) {
+                        $.each(result.options, function (key, value) {
+                            var s = "";
+                            s += '<div class="list-group-item py-0">';
+                            s += '<input class="form-check-input" type="checkbox" checked disabled="true">';
+                            s += value.name;
+                            s += '</div>';
+                            $("#options_order" + order_id + "_detail").append(s);
+                        });
+                    } else {
+                        $("#options_order" + order_id + "_detail").append('<div class="list-group-item py-0">Keine</div>');
+                    }
+                }
+            });
+        };
+    </script>
 
 </body>
 

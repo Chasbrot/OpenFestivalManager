@@ -5,7 +5,7 @@ var db = require("../database");
 
 router.get('/station_overview', function (req, res) {
     if (req.session.station_id) {
-        var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,NOW()) AS wartezeit, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr\
+        var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,NOW()) AS wartezeit, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr, bestellung.notiz\
         FROM bestellung\
         INNER JOIN gericht\
         ON gericht.id = bestellung.id_gericht\
@@ -20,7 +20,7 @@ router.get('/station_overview', function (req, res) {
         db.query(sql, function (err, activeOrders) {
             if (err) throw err;
             console.log(activeOrders)
-            var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, bestellung.stoniert, bestellung.anzahl AS b_anz, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,bestellung.erledigt) AS dauer, TIME_FORMAT(bestellung.erledigt, '%H:%i') as lieferzeit, tisch.nummer AS t_nr\
+            var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, bestellung.stoniert, bestellung.anzahl AS b_anz, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,bestellung.erledigt) AS dauer, TIME_FORMAT(bestellung.erledigt, '%H:%i') as lieferzeit, tisch.nummer AS t_nr, bestellung.notiz\
             FROM bestellung\
             INNER JOIN gericht\
             ON gericht.id = bestellung.id_gericht\
@@ -117,5 +117,33 @@ router.post('/login_station', function (req, res, next) {
         res.render("station/login_station", {err: true});  // redirect to user form page after inserting the data
     }
 });
+
+router.post('/getOptionsFromOrder', function (req, res) {
+    if (!req.body.order_id) {
+      res.json({
+        msg: 'error'
+      });
+      return;
+    }
+    // TODO Only submit differences with standard options
+    var sql = `SELECT Zutat.name FROM Zutat_Bestellung
+    INNER JOIN Zutat ON  Zutat.id = Zutat_Bestellung.id_zutat
+    WHERE Zutat_Bestellung.id_bestellung = ${req.body.order_id}
+    ORDER BY Zutat.name`;
+    db.query(sql,
+      function (err, rows, fields) {
+        if (err) {
+          console.log(err)
+          res.json({
+            msg: 'error'
+          });
+        } else {
+          res.json({
+            msg: 'success',
+            options: rows
+          });
+        }
+      });
+  });
 
 module.exports = router;

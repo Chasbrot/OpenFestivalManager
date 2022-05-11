@@ -47,6 +47,9 @@
                   value="<%= past_sessions[i].s_id%>">
                   <%= past_sessions[i].t_name%>
                     <%= past_sessions[i].t_nr%>
+                    <div class="float-right">
+                      <%= past_sessions[i].end%>
+                    </div>
                 </button>
                 <% } %>
                   <% }else{ %>
@@ -73,6 +76,9 @@
                 <a href="/tisch/tisch_overview/<%= act_sessions[i].s_id%>" class="list-group-item list-group-item-action">
                   <%= act_sessions[i].t_name%>
                     <%= act_sessions[i].t_nr%>
+                    <div class="float-right">
+                      <%= act_sessions[i].start%>
+                    </div>
                 </a>
                 <% } %>
                   <% }else{ %>

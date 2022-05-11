@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
-    <script src="/javascripts/jquery-3.5.1.slim.min.js"></script>
+    <script src="/javascripts/jquery-3.1.1.min.js"></script>
     <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
@@ -19,70 +19,120 @@
 
     <!-- Nav bar -->
     <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
-        <a class="navbar-brand" href="tisch_overview">Zurück</a>
+        <a class="navbar-brand" href="tisch_overview/<%=session_id%>">Zurück</a>
         <div class="navbar-brand float-right">A12</div>
     </nav>
 
     <!-- Bestellungen -->
     <div class="card" style="max-height: 200px;">
-        <div class="card-header py-0">Bestellungen</div>
+        <div class="card-header py-0">Unbezahlte Bestellungen</div>
         <div class="card-body overflow-auto pt-0 px-1">
+            <form action="#" method="POST" style="display:inline;" id="cash">
+                <div class="list-group form-group pt-0" id="orders">
+                    <% if(orders.length){%>
+                        <% for(var i=0; i< orders.length; i++) {%>
+                            <div class="list-group-item py-0 px-1" id="order_<%=orders[i].id%>">
+                                <input type="number" id="preis_<%=orders[i].id%>" style="display: none;"
+                                    value="<%=orders[i].preis%>"></input>
+                                <input type="number" id="uebrig_<%=orders[i].id%>" value="<%=orders[i].uebrig%>"
+                                    style="display: none;"></input>
 
-            <div class="list-group pt-0">
-                <div class="list-group-item py-0 px-1">
-                    0/6 Feuerfleck
-                    <div class="float-right">
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">+</button>
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">-</button>
-                    </div>
+
+                                <input type="number" id="anz_<%=orders[i].id%>" name="<%=orders[i].id%>"
+                                    style="display: inline; width: 40px; border: none" value="0"></input>
+
+                                /
+                                <p style="display: inline;">
+                                    <%=orders[i].uebrig%>
+                                </p>
+                                <%=orders[i].name%>
+                                    <div class="float-right">
+                                        <button type="button" class="btn btn-secondary btn-sm float-right py-0 px-3"
+                                            value="<%=orders[i].id%>"
+                                            onclick="increment('<%=orders[i].id%>')">+</button>
+                                        <button type="button" class="btn btn-secondary btn-sm float-right py-0 px-3"
+                                            value="<%=orders[i].id%>"
+                                            onclick="decrement('<%=orders[i].id%>')">-</button>
+                                    </div>
+                            </div>
+                            <% } %>
+                                <% }else{ %>
+                                    <div class="list-group-item py-0 px-1">
+                                        Alles bezahlt
+                                    </div>
+                                    <% } %>
                 </div>
-                <div class="list-group-item py-0 px-1">
-                    0/2 Gespritzte 1/4
-                    <div class="float-right">
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">+</button>
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">-</button>
-                    </div>
-                </div>
-                <div class="list-group-item py-0 px-1">
-                    0/6 Bier 0.5L
-                    <div class="float-right">
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">+</button>
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">-</button>
-                    </div>
-                </div>
-                <div class="list-group-item py-0 px-1">
-                    0/6 Bratwurst
-                    <div class="float-right">
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">+</button>
-                        <button class="btn btn-secondary btn-sm float-right py-0 px-3">-</button>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <div class="card">
         <div class="card-header">
-                Rechnung
+            Rechnung
             <div class="float-right">
-                <button class="btn btn-warning">
+                <button class="btn btn-warning" type="button" onclick="selectAll()">
                     Alles
                 </button>
             </div>
         </div>
         <div class="card-body text-center">
-            <h3>Geld: 6.90€</h3>
+            <h3 style="display: inline;">Betrag: </h3>
+            <h3 id="orderSum" style="display: inline;">0</h3>
+            <h3 style="display: inline;">€</h3>
+
         </div>
     </div>
-    
+
     <div class="container">
-        <button class="btn btn-info btn-block">
-            Zahlen
-        </button>
-        <a class="btn btn-success btn-block" href="personal_overview.html">
-            Sitzung beenden
-        </a>
+
+        <% if(orders.length==0){%>
+            <form action="#" method="POST" style="display:inline;" id="cash">
+                <button class="btn btn-success btn-block" type="submit" name="closeSession" value="true">
+                    Sitzung beenden
+                </button>
+            </form>
+            <% }else{ %>
+                <button class="btn btn-info btn-block" form="cash" name="payOrder" value="true">
+                    Zahlen
+                </button>
+                <%}%>
     </div>
+
+    <script>
+        function increment(num) {
+            if (parseInt(document.getElementById("anz_" + num).value) < parseInt(document.getElementById("uebrig_" + num).value)) {
+                document.getElementById("anz_" + num).value = parseInt(document.getElementById("anz_" + num).value) + 1;
+                calcCost();
+            }
+        };
+        function decrement(num) {
+            if (parseInt(document.getElementById("anz_" + num).value) > 0) {
+                document.getElementById("anz_" + num).value = parseInt(document.getElementById("anz_" + num).value) - 1;
+                calcCost();
+            }
+        };
+
+        function selectAll() {
+            $("[id^=order_]").each(function (index) {
+                // Get id
+                var i = this.id.split("_")[1];
+                document.getElementById("anz_" + i).value = document.getElementById("uebrig_" + i).value;
+            });
+            calcCost();
+        }
+
+        function calcCost() {
+            var sum = 0;
+            $("[id^=order_]").each(function (index) {
+                // Get id
+                var i = this.id.split("_")[1];
+                var anz = document.getElementById("anz_" + i).value;
+                var preis = document.getElementById("preis_" + i).value;
+                sum += (anz * preis)
+            });
+            $("#orderSum").text(sum.toFixed(2));
+        };
+    </script>
 
 
 </body>

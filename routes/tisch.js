@@ -1,4 +1,5 @@
 var express = require('express');
+const { redirect } = require('express/lib/response');
 var router = express.Router();
 var db = require("../database");
 
@@ -72,7 +73,7 @@ router.post('/tisch_neu', function (req, res) {
                     } else {
                       console.log("Session linked to account")
                     }
-                    res.redirect("/tisch/tisch_overview" + result[0].id);
+                    res.redirect("/tisch/tisch_overview/" + result[0].id);
                   });
                 }
               });
@@ -107,21 +108,19 @@ router.post('/tisch_overview/:sid', function (req, res) {
     } else if (body.productid) {
       if (body.product_anzahl != 0) {
         console.log("order recieved")
-        //// TODO PARSE ORDER AND SAVE TO DB
         // SAVE Order 
         var sql = `INSERT INTO bestellung VALUES (0, ${body.productid}, ${req.session.personal_id}, ${req.session.session_overview}, NOW(),NULL,false,${body.product_anzahl},0,"${body.notiz}",false)`;
         db.query(sql, function (err, result) {
           if (err) throw err;
           console.log("order created")
-
-          if (body.option.length > 0) {
+          if (body.option) {
             //  Get id of last inserted record
             var sql = "SELECT LAST_INSERT_ID() AS id";
             db.query(sql, function (err, result) {
               if (err) throw err;
               if (result[0]) {
                 // Create Order - Options Mappings
-                for(var i=0; i<body.option.length; i++){
+                for (var i = 0; i < body.option.length; i++) {
                   var sql = `INSERT INTO Zutat_Bestellung VALUES (0,${body.option[i]},${result[0].id})`;
                   db.query(sql, function (err, result) {
                     if (err) throw err;
@@ -131,15 +130,15 @@ router.post('/tisch_overview/:sid', function (req, res) {
             });
           }
         });
-
-
-        // Save Food
-
-
-
-
       }
       res.redirect("/tisch/tisch_overview/" + sid);
+    } else if (body.finishOrder) {
+      console.log("finish order" + body.finishOrder)
+      var sql = `UPDATE bestellung SET erledigt = NOW() WHERE id = ${body.finishOrder}`;
+      db.query(sql, function (err, result) {
+        if (err) throw err;
+        res.redirect("/tisch/tisch_overview/" + sid);
+      });
     }
   } else {
     res.redirect("/personal/personal_overview");
@@ -157,7 +156,7 @@ router.get('/tisch_overview/:sid', function (req, res) {
       if (err) throw err;
       if (result[0]) {
         // Load all orders from this session with their data
-        var sql = `SELECT bestellung.id AS id, bestellung.erstellt, bestellung.erledigt, bestellung.in_zubereitung,  bestellung.anzahl, bestellung.stoniert, gericht.name\
+        var sql = `SELECT bestellung.id AS id, bestellung.erstellt, bestellung.erledigt, bestellung.in_zubereitung,  bestellung.anzahl, bestellung.stoniert, gericht.name, gericht.lieferbar\
         FROM bestellung\
         INNER JOIN gericht ON bestellung.id_gericht = gericht.id\
         WHERE bestellung.id_sitzung = ${req.params.sid}\
@@ -193,14 +192,114 @@ router.get('/tisch_overview/:sid', function (req, res) {
 
 router.get('/tisch_kassieren', function (req, res) {
   if (req.session.personal_id) {
-    res.render("tisch/tisch_kassieren");
+    // Check if there are open orders
+    var sql = `SELECT count(*) AS anz FROM bestellung
+    WHERE bestellung.id_sitzung = ${req.session.session_overview} AND (bestellung.erledigt IS NULL AND bestellung.stoniert = FALSE)`;
+    db.query(sql, function (err, result) {
+      if (err) {
+        console.log(err);
+      }
+      if (result[0].anz != 0) {
+        res.redirect("/tisch/tisch_overview/" + req.session.session_overview);
+      } else {
+        // Load orders
+        var sql = `SELECT SUM(bestellung.anzahl- bestellung.bezahlt) AS uebrig, gericht.name, gericht.id, gericht.preis\
+        FROM bestellung\
+        INNER JOIN gericht ON bestellung.id_gericht = gericht.id\
+        WHERE bestellung.id_sitzung = ${req.session.session_overview} AND (bestellung.erledigt IS NOT NULL AND bestellung.stoniert=false)  AND (anzahl-bezahlt)>0\
+        GROUP BY name`;
+        db.query(sql, function (err, orders) {
+          if (err) throw err;
+          if (orders.length == 0) {
+            console.log("session " + req.params.sid + " no orders found")
+          }
+          res.render("tisch/tisch_kassieren", { session_id: req.session.session_overview, orders: orders });
+        });
+
+      }
+    });
   } else {
     res.redirect("/personal/personal_overview");
   }
 });
 
+router.post('/tisch_kassieren', function (req, res) {
+  if (req.session.personal_id) {
+    console.log(req.body)
+    const body = req.body;
+    if (body.payOrder) {
+      // Get all keys from the request
+      var keys = Object.keys(body);
+      keys.forEach(element => {
+        var x = parseInt(element);
+        // Check if it is a product payment request
+        if (!isNaN(x) && body[x] != 0) {
+          var pid = x;
+          var anz = body[x];
+          // Pay orders with requested product amount
+          payOrder(anz, pid, req.session.session_overview)
+        }
+      });
+      res.redirect("/tisch/tisch_kassieren");
+    } else if (body.closeSession) {
+      // Close session
+      console.log("closing session: " + req.session.session_overview)
+      var sql = `UPDATE sitzung SET end=NOW(), id_abrechner=${req.session.personal_id} WHERE id = ${req.session.session_overview}`;
+      db.query(sql, function (err, result) {
+        if (err) throw err;
+        res.redirect("/personal/personal_overview");
+      });
+
+    } else {
+      res.redirect("/tisch/tisch_kassieren");
+    }
+  } else {
+    res.redirect("/personal/personal_overview");
+  }
+});
+
+
+
+
+/*
+* Recursive Payment Function
+* Pay Orders until the requested amount of a product in a session is paid
+*/
+function payOrder(remaining, productid, sessionid) {
+  console.log("payOrder: start " + remaining + " remaining")
+  // Get a possible order from the db
+  var sql = `SELECT bestellung.id, (anzahl - bezahlt) AS rem, anzahl, bezahlt from bestellung WHERE bestellung.id_sitzung =${sessionid} AND bestellung.id_gericht=${productid} AND (anzahl-bezahlt) > 0 AND stoniert=false LIMIT 1;`;
+  db.query(sql, function (err, orders) {
+    if (err) throw err;
+    if (orders.length == 0) {
+      console.log("payment session " + sessionid + " no orders found")
+    } else {
+      console.log("payOrder: possible " + orders[0].rem)
+      // Check proceeding
+      if (remaining - orders[0].rem == 0) {
+        // Pay and return
+        console.log("payOrder: all paid -> returning")
+        var sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
+        db.query(sql, function (err, orders) { if (err) throw err; });
+        return;
+      } else if (remaining - orders[0].rem > 0) {
+        // Pay and recursive
+        console.log("payOrder: paid " + orders[0].rem + " -> continuing")
+        var sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
+        db.query(sql, function (err, orders) { if (err) throw err; });
+        payOrder(remaining - orders[0].rem, productid, sessionid);
+      } else if (remaining - orders[0].rem < 0) {
+        // Pay partial and return
+        console.log("payOrder: paid partial order " + orders[0].rem + " -> returning")
+        var sql = `UPDATE bestellung SET bezahlt=${orders[0].bezahlt + remaining} WHERE id = ${orders[0].id};`;
+        db.query(sql, function (err, orders) { if (err) throw err; });
+      }
+    }
+  });
+}
+
+
 router.get('/productlist/:sid', function (req, res) {
-  console.log(req.params.sid)
   // Lade Gerichte
   var sql = `SELECT * FROM Gericht WHERE id_stand=${req.params.sid}`;
   db.query(sql, function (err, prods) {

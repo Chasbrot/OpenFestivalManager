@@ -32,7 +32,7 @@ router.get('/personal_overview', function (req, res) {
     } else {
 
         // Get Active Sessions
-        var sql = `SELECT sitzung.id AS s_id, tisch.id AS t_id, tisch.nummer AS t_nr,tisch_gruppe.groupname AS t_name\
+        var sql = `SELECT sitzung.id AS s_id, tisch.id AS t_id, tisch.nummer AS t_nr,tisch_gruppe.groupname AS t_name, TIME_FORMAT(sitzung.start, '%H:%i') AS start\
         FROM sitzung \
         INNER JOIN account_sitzung \
         ON account_sitzung.id_sitzung = sitzung.id\
@@ -45,8 +45,8 @@ router.get('/personal_overview', function (req, res) {
             if (err) {
                 console.log(err);
             }
-            // Get Active Sessions
-            var sql = `SELECT sitzung.id AS s_id, tisch.id AS t_id, tisch.nummer AS t_nr,tisch_gruppe.groupname AS t_name\
+            // Get Past Sessions
+            var sql = `SELECT sitzung.id AS s_id, tisch.id AS t_id, tisch.nummer AS t_nr,tisch_gruppe.groupname AS t_name, TIME_FORMAT(sitzung.end, '%H:%i') AS end \
             FROM sitzung \
             INNER JOIN account_sitzung \
             ON account_sitzung.id_sitzung = sitzung.id\

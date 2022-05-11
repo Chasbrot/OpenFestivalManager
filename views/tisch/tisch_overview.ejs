@@ -17,7 +17,7 @@
         <div class="navbar-brand float-right">
             <%= t_name%>
         </div>
-        <a class="btn btn-danger float-right btn-md py-0" href="tisch_kassieren">Kassieren</a>
+        <a class="btn btn-danger float-right btn-md py-0" href="/tisch/tisch_kassieren">Kassieren</a>
     </nav>
 
     <!-- Bestellungen -->
@@ -43,14 +43,32 @@
                                                 <%= orders[i].anzahl%> x
                                                     <%= orders[i].name%>
                                                         <% if(!orders[i].erledigt && !orders[i].in_zubereitung &&
-                                                            !orders[i].stoniert){%>
+                                                            !orders[i].stoniert ){%>
                                                             <form action="#" method="POST" style="display:inline;">
                                                                 <button
                                                                     class="btn btn-danger btn-sm float-right py-0 px-4"
                                                                     type="submit" name="cancelOrder"
-                                                                    value="<%= orders[i].id%>">x</button>
+                                                                    value="<%= orders[i].id%>">X</button>
                                                             </form>
                                                             <% } %>
+                                                                <% if(!orders[i].erledigt && !orders[i].lieferbar &&
+                                                                    !orders[i].stoniert){ %>
+                                                                    <form action="#" method="POST"
+                                                                        style="display:inline;">
+                                                                        <button
+                                                                            class="btn btn-success btn-sm float-right py-0 px-4"
+                                                                            type="submit" name="finishOrder"
+                                                                            value="<%= orders[i].id%>">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                width="15" height="15"
+                                                                                fill="currentColor" class="bi bi-check2"
+                                                                                viewBox="0 0 16 16">
+                                                                                <path
+                                                                                    d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </form>
+                                                                    <%}%>
                         </div>
                         <% } %>
                             <% }else{ %>

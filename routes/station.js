@@ -20,7 +20,7 @@ router.get('/station_overview', function (req, res) {
         db.query(sql, function (err, activeOrders) {
             if (err) throw err;
             console.log(activeOrders)
-            var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, bestellung.stoniert, bestellung.anzahl AS b_anz, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,bestellung.erledigt) AS dauer, TIME_FORMAT(bestellung.erledigt, '%H:%i') as lieferzeit, tisch.nummer AS t_nr, bestellung.notiz\
+            var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, bestellung.stoniert, bestellung.anzahl AS b_anz, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,bestellung.erledigt) AS dauer, TIME_FORMAT(bestellung.erledigt, '%H:%i') as lieferzeit, tisch.nummer AS t_nr, bestellung.notiz, TIME_FORMAT(bestellung.erstellt, '%H:%i') as erstellt\
             FROM bestellung\
             INNER JOIN gericht\
             ON gericht.id = bestellung.id_gericht\
@@ -30,7 +30,7 @@ router.get('/station_overview', function (req, res) {
             ON sitzung.id = bestellung.id_sitzung\
             INNER JOIN tisch\
             ON tisch.id = sitzung.id_tisch\
-            WHERE stand.id = ${req.session.station_id} AND (bestellung.erledigt IS NOT NULL OR bestellung.stoniert = true)
+            WHERE stand.id = ${req.session.station_id} AND (bestellung.erledigt IS NOT NULL OR bestellung.stoniert = true) AND TIMESTAMPDIFF(DAY,bestellung.erstellt, NOW())=0\
             ORDER BY lieferzeit DESC`;
             db.query(sql, function (err, preOrders) {
                 if (err) throw err;

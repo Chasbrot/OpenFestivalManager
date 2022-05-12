@@ -54,36 +54,39 @@ router.post('/tisch_neu', function (req, res) {
                 console.log(err);
               } else {
                 console.log("New session created")
-              }
-              // Get ID from new Session
-              var sql = `SELECT * FROM Sitzung WHERE id_ersteller = ${req.session.personal_id} AND end IS NULL AND id_tisch = ${body.table}`;
-              db.query(sql, function (err, result) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  if (result.length != 1) {
-                    console.log("Error in getting id from new sitzung")
-                    console.log(result)
-                  }
-                  // Link Session to my account
-                  var sql = `INSERT INTO Account_Sitzung VALUES (0,${req.session.personal_id},${result[0].id})`;
-                  db.query(sql, function (err, groups) {
-                    if (err) {
-                      console.log(err);
+                // Get ID from new Session
+                var sql = `SELECT LAST_INSERT_ID() AS id`;
+                db.query(sql, function (err, result) {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    if (result.length != 1) {
+                      console.log("Error in getting id from new sitzung")
+                      console.log(result)
                     } else {
-                      console.log("Session linked to account")
+                      // Link Session to my account
+                      var sql = `INSERT INTO Account_Sitzung VALUES (0,${req.session.personal_id},${result[0].id})`;
+                      db.query(sql, function (err, groups) {
+                        if (err) {
+                          console.log(err);
+                        } else {
+                          console.log("Session linked to account")
+                        }
+                        res.redirect("/tisch/tisch_overview/" + result[0].id);
+                      });
                     }
-                    res.redirect("/tisch/tisch_overview/" + result[0].id);
-                  });
-                }
-              });
+
+                  }
+                });
+              }
+
             });
           }
         }
       });
 
-
-
+    }else{
+      res.redirect("/tisch/tisch_neu");
     }
 
   } else {
@@ -324,7 +327,23 @@ router.get('/productlist/:sid', function (req, res) {
           }
         }
       }
-      res.render("tisch/productlist", { products: prods });
+      // Lade aktuelle Wartezeit
+    var sql = `SELECT AVG(TIMESTAMPDIFF(MINUTE, bestellung.erstellt, bestellung.erledigt)) as dauer\
+    FROM bestellung \
+    INNER JOIN gericht ON gericht.id = bestellung.id_gericht\
+    INNER JOIN stand ON gericht.id_stand = stand.id\
+    WHERE stand.id= ${req.params.sid} AND bestellung.erledigt IS NOT NULL AND TIMESTAMPDIFF(MINUTE, bestellung.erledigt, NOW()) < 60`;
+    db.query(sql, function (err, wartezeit) {
+      if (err) {
+        console.log(err);
+      }
+      var d = parseFloat(wartezeit[0].dauer)
+      if(isNaN(d)){
+        d=0;
+      }
+      
+      res.render("tisch/productlist", { products: prods, currentWaitTime: d.toFixed(0) });
+    });
     });
   });
 });

@@ -332,7 +332,7 @@ router.get('/productlist/:sid', function (req, res) {
     FROM bestellung \
     INNER JOIN gericht ON gericht.id = bestellung.id_gericht\
     INNER JOIN stand ON gericht.id_stand = stand.id\
-    WHERE stand.id= ${req.params.sid} AND bestellung.erledigt IS NOT NULL AND TIMESTAMPDIFF(MINUTE, bestellung.erledigt, NOW()) < 60`;
+    WHERE stand.id= ${req.params.sid} AND bestellung.erledigt IS NOT NULL AND TIMESTAMPDIFF(MINUTE, bestellung.erledigt, NOW()) < 30`;
     db.query(sql, function (err, wartezeit) {
       if (err) {
         console.log(err);

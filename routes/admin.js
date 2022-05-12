@@ -268,7 +268,7 @@ router.get('/statistics', function (req, res) {
           console.log(err);
         }
         // Count all orders today
-        db.query("SELECT COUNT(id) AS c FROM sitzung WHERE end IS NOT NULL AND DATEDIFF(DATE(start),NOW())=0", function (err, todaySessions) {
+        db.query("SELECT COUNT(id) AS c FROM sitzung WHERE end IS NOT NULL AND DATEDIFF(DATE(end),NOW())=0", function (err, todaySessions) {
           if (err) {
             console.log(err);
           }

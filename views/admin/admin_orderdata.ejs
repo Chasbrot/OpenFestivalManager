@@ -19,13 +19,16 @@
         <ul class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link" href="/admin">System</a>
-            </li>
-            <li class="nav-item">
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/admin/statistics">Statistik</a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link" href="/admin/orderdata">Bestelldaten</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/admin/configuration">Konfiguration</a>
-            </li>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/admin/configuration">Stammdaten</a>
+              </li>
         </ul>
     </nav>
     <br>
@@ -33,40 +36,27 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                Auslastung
-            </div>
-            <div class="card-body">
-                Aktive Sitzungen: <%= activeSessions%>
-                    <br>
-                    Belegung: <%= activeSessions%>/<%= countTables%>
-                            <br>
-                            Aktive Bestellungen: <%= activeOrders%>
-            </div>
-        </div>
-        <br>
-        <div class="card">
-            <div class="card-header">
                 Sitzung suchen
             </div>
             <div class="card-body">
 
-                <h4>Tisch Gruppe</h4>
+                Tisch Gruppe
                 <select class="form-control" id="sessionsTableGroup" onchange="loadTables(this)">
                     <% if(table_groups.length){%>
-                        <option value="" selected></option>
-                        <% for(var i=0; i< table_groups.length; i++) {%>
-                            <option value="<%= table_groups[i].id%>">
-                                <%= table_groups[i].groupname%>
-                            </option>
-                            <% } }else{ %>
-                                <option value="-1" selected>Leer</option>
-                                <% } %>
+                    <option value="" selected></option>
+                    <% for(var i=0; i< table_groups.length; i++) {%>
+                    <option value="<%= table_groups[i].id%>">
+                        <%= table_groups[i].groupname%>
+                    </option>
+                    <% } }else{ %>
+                    <option value="-1" selected>Leer</option>
+                    <% } %>
                 </select>
-
-                <h4>Tisch</h4>
+                <br>
+                Tisch
                 <select class="form-control" id="sessionsTable" onchange="loadSessions(this)">
                 </select>
-
+                <br>
                 <table class="table">
                     <thead>
                         <tr>
@@ -92,11 +82,11 @@
                     <label for="sessionid">Sitzungs ID:</label>
                     <input type="number" class="form-control" id="sessionid">
                 </div>
-                <button  class="btn btn-primary form-control" onclick="loadOrders()">Suche</button>
+                <button class="btn btn-primary form-control" onclick="loadOrders()">Suche</button>
             </div>
 
             <div class="card-body">
-                <h4>Bestellungen der Sitzung:</h4>
+                Bestellungen der Sitzung:
                 <div class="card" style="max-height: 200px">
                     <div class="card-body overflow-auto pt-0 px-1">
                         <div class="list-group pt-0" id="ordersFromSession">
@@ -115,7 +105,7 @@
                 console.log("change " + table_id)
                 $("#sessions").html('');
                 $.ajax({
-                    url: "orderdata/getSessionsForTable",
+                    url: "/data/getSessionsForTable",
                     type: "POST",
                     data: {
                         name: 'sessions',
@@ -126,7 +116,9 @@
                         console.log(result)
                         if (result.sessions.length != 0) {
                             $.each(result.sessions, function (key, value) {
-                                $("#sessions").append('<tr><th scope="row">' + value.id + '</th><td>' + value.start + '</td><td>' + value.ende + '</td><td>' + value.name + '</td></tr>');
+                                $("#sessions").append('<tr><th scope="row">' + value.id +
+                                    '</th><td>' + value.start + '</td><td>' + value.ende +
+                                    '</td><td>' + value.name + '</td></tr>');
                             });
                         } else {
                             $("#sessions").append("Keine Sitzungen gefunden")
@@ -146,7 +138,7 @@
                 $("#sessionsTable").html('');
                 $("#sessions").html('');
                 $.ajax({
-                    url: "orderdata/getTablesFromTableGroup",
+                    url: "/data/getTablesFromTableGroup",
                     type: "POST",
                     data: {
                         name: 'tables',
@@ -158,7 +150,8 @@
                         if (result.tables.length != 0) {
                             $("#sessionsTable").append('<option value="" selected>' + "" + '</option>');
                             $.each(result.tables, function (key, value) {
-                                $("#sessionsTable").append('<option value="' + value.id + '">' + value.nummer + '</option>');
+                                $("#sessionsTable").append('<option value="' + value.id + '">' +
+                                    value.nummer + '</option>');
                             });
                         } else {
                             $("#sessionsTable").append('<option value="-1">' + Leer + '</option>');
@@ -178,7 +171,7 @@
                 console.log("load orders from session " + session_id)
                 $("#ordersFromSession").html('');
                 $.ajax({
-                    url: "orderdata/getOrdersFromSession",
+                    url: "/data/getOrdersFromSession",
                     type: "POST",
                     data: {
                         name: 'orders',
@@ -189,19 +182,19 @@
                         console.log(result)
                         if (result.orders.length != 0) {
                             $.each(result.orders, function (key, value) {
-                                var s="";
-                                s+='<div class="list-group-item py-0">';
-                                if(value.stoniert){
-                                    s+='<img src="/images/canceled.png" style="width:15px">';
-                                }else if(value.erledigt){
-                                    s+='<img src="/images/check.png" style="width:15px">';
-                                }else if(value.in_zubereitung){
-                                    s+='<img src="/images/loading.gif" style="width:15px">';
-                                }else{
-                                    s+='<img src="/images/order.png" style="width:15px">';
+                                var s = "";
+                                s += '<div class="list-group-item py-0">';
+                                if (value.stoniert) {
+                                    s += '<img src="/images/canceled.png" style="width:15px">';
+                                } else if (value.erledigt) {
+                                    s += '<img src="/images/check.png" style="width:15px">';
+                                } else if (value.in_zubereitung) {
+                                    s += '<img src="/images/loading.gif" style="width:15px">';
+                                } else {
+                                    s += '<img src="/images/order.png" style="width:15px">';
                                 }
-                                s+=(value.anzahl + "x "+ value.name);
-                                s+='</div>';
+                                s += (value.anzahl + "x " + value.name);
+                                s += '</div>';
                                 $("#ordersFromSession").append(s);
                             });
                         } else {
@@ -210,8 +203,6 @@
                     }
                 });
             };
-
-
         </script>
 </body>
 

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Konsole</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="/javascripts/mdb.js"></script>
+</head>
+
+<body>
+
+
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <!-- Brand/logo -->
+        <a class="navbar-brand" href="/">Home</a>
+
+        <!-- Links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin">System</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/statistics">Statistik</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/orderdata">Bestelldaten</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/configuration">Stammdaten</a>
+            </li>
+        </ul>
+    </nav>
+    <br>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                Aktuelle Auslastung
+            </div>
+            <div class="card-body">
+                Offene Bestellungen: <%= activeOrders%>
+                <br>
+                Belegung: <%= activeSessions%>/<%= countTables%>
+                <br>
+                Abgeschlossene Bestellungen heute: <%= todayOrders%>
+                <br>
+                Abgeschlossene Sitzungen heute: <%= todaySessions%>
+            </div>
+        </div>
+        <br>
+        <div class="card">
+            <div class="card-header">
+                Auslastung Stationen
+            </div>
+            <div class="card-body">
+                Datum:
+                <select class="form-control" id="dates" onchange="loadChart()">
+                    <% if(dates.length){%>
+                    <option value="" selected>Choose ...</option>
+                    <% for(var i=0; i< dates.length; i++) {%>
+                    <option value="<%= dates[i].date_machine%>">
+                        <%= dates[i].date%>
+                    </option>
+                    <% } }else{ %>
+                    <option value="-1" selected>Keine Daten</option>
+                    <% } %>
+                </select>
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+<script>
+    var chart = null;
+
+    function loadChart() {
+        var d = document.getElementById("dates").value;
+        if (d == -1 || d == "") {
+            chart.destroy();
+            return;
+        }
+        // Request all stations
+        $.ajax({
+            url: "/data/getAllStations",
+            type: "GET",
+            dataType: 'json',
+            success: function (result) {
+                var pdatasets = [];
+                for (var i = 0; i < result.stations.length; i++) {
+                    // Load data for station
+                    var station = result.stations[i];
+                    $.ajax({
+                        url: "/data/getDailyLoadForStation",
+                        type: "POST",
+                        async: false,
+                        data: {
+                            date: d,
+                            stationid: station.id
+                        },
+                        dataType: 'json',
+                        success: function (result) {
+                            pdatasets.push({
+                                label: station.name,
+                                data: parseLoad(result.load),
+                                borderColor: [
+                                    getRandColor(),
+                                ],
+                            })
+                        }
+                    });
+                }
+                // Make chart
+                if (chart != null) {
+                    chart.destroy();
+                }
+                var ctxL = document.getElementById("lineChart").getContext('2d');
+                chart = new Chart(ctxL, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({
+                            length: 24
+                        }, (x, i) => i),
+                        datasets: pdatasets
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function parseLoad(load) {
+        var t = [];
+        for (var i = 0; i < 24; i++) {
+            var found = false;
+            load.forEach(element => {
+                if (element.hour == i) {
+                    t.push(element.anzahl)
+                    found = true;
+                }
+            });
+            if (!found) {
+                t.push(0)
+            }
+        }
+        return t;
+    }
+
+    function getRandColor() {
+        return "#" + Math.floor(Math.random() * 16777215).toString(16);
+    }
+</script>
+
+</html>

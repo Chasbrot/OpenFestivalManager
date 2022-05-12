@@ -234,9 +234,25 @@ router.get('/orderdata', function (req, res) {
     res.redirect("/admin/login_admin");
     return;
   }
+  // Count all tables
+  db.query("SELECT id, groupname FROM tisch_gruppe", function (err, tables) {
+    if (err) {
+      console.log(err);
+    }
+    res.render("admin/admin_orderdata", { table_groups: tables });
+
+
+  });
+});
+
+router.get('/statistics', function (req, res) {
+  if (!req.session.admin_id) {
+    res.redirect("/admin/login_admin");
+    return;
+  }
   // Count all active orders
   var sql = 'SELECT COUNT(id) AS c FROM bestellung\
-  WHERE bestellung.erledigt IS NULL AND bestellung.stoniert = false';
+    WHERE bestellung.erledigt IS NULL AND bestellung.stoniert = false';
   db.query(sql, function (err, activeOrders) {
     if (err) {
       console.log(err);
@@ -251,100 +267,35 @@ router.get('/orderdata', function (req, res) {
         if (err) {
           console.log(err);
         }
-        // Count all tables
-        db.query("SELECT id, groupname FROM tisch_gruppe", function (err, tables) {
+        // Count all orders today
+        db.query("SELECT COUNT(id) AS c FROM sitzung WHERE end IS NOT NULL AND DATEDIFF(DATE(start),NOW())=0", function (err, todaySessions) {
           if (err) {
             console.log(err);
           }
+          // Count all sessions today
+          db.query("SELECT COUNT(id) AS c FROM bestellung WHERE erledigt IS NOT NULL AND DATEDIFF(DATE(erledigt),NOW())=0", function (err, todayOrders) {
+            if (err) {
+              console.log(err);
+            }
+            // Count all sessions today
+            db.query('SELECT DISTINCT(DATE_FORMAT(erledigt,"%d.%m.%Y")) AS date, DATE_FORMAT(erledigt,"%Y-%m-%d") AS date_machine FROM bestellung WHERE erledigt IS NOT NULL', function (err, dates) {
+              if (err) {
+                console.log(err);
+              }
+              console.log(dates)
+              res.render("admin/admin_statistics", { activeOrders: activeOrders[0].c, activeSessions: activeSessions[0].c, countTables: countTables[0].c, todayOrders: todayOrders[0].c, todaySessions: todaySessions[0].c, dates: dates });
 
-          res.render("admin/admin_orderdata", { activeOrders: activeOrders[0].c, activeSessions: activeSessions[0].c, countTables: countTables[0].c, table_groups: tables });
+            });
+          });
         });
 
       });
     });
   });
+
+
+
 });
-
-router.post('/orderdata/getSessionsForTable', function (req, res) {
-  if (!req.body.table_id) {
-    res.json({
-      msg: 'error'
-    });
-    return;
-  }
-  var sql = `SELECT sitzung.id, TIME_FORMAT(sitzung.start,"%H:%i") AS start, TIME_FORMAT(sitzung.end,"%H:%i") AS ende, account.name FROM sitzung\
-  INNER JOIN account_sitzung ON account_sitzung.id_sitzung=sitzung.id\
-  INNER JOIN account ON account_sitzung.id_account=account.id\
-  WHERE id_tisch=${req.body.table_id}\
-  ORDER BY start DESC`;
-  db.query(sql,
-    function (err, rows, fields) {
-      if (err) {
-        console.log(err)
-        res.json({
-          msg: 'error'
-        });
-      } else {
-        res.json({
-          msg: 'success',
-          sessions: rows
-        });
-      }
-    });
-});
-
-router.post('/orderdata/getTablesFromTableGroup', function (req, res) {
-  if (!req.body.group_id) {
-    res.json({
-      msg: 'error'
-    });
-    return;
-  }
-  var sql = `SELECT * FROM Tisch WHERE id_tischgruppe=${req.body.group_id}`;
-  db.query(sql,
-    function (err, rows, fields) {
-      if (err) {
-        console.log(err)
-        res.json({
-          msg: 'error'
-        });
-      } else {
-        res.json({
-          msg: 'success',
-          tables: rows
-        });
-      }
-    });
-});
-
-
-router.post('/orderdata/getOrdersFromSession', function (req, res) {
-  console.log(req.body)
-  if (!req.body.session_id) {
-    res.json({
-      msg: 'error'
-    });
-    return;
-  }
-  var sql = `SELECT bestellung.id,bestellung.erstellt, bestellung.erledigt,bestellung.in_zubereitung, bestellung.anzahl, bestellung.stoniert, gericht.name  FROM Bestellung\
-  INNER JOIN Gericht ON Gericht.id = bestellung.id_gericht\
-  WHERE id_sitzung=${req.body.session_id}`;
-  db.query(sql,
-    function (err, rows, fields) {
-      if (err) {
-        console.log(err)
-        res.json({
-          msg: 'error'
-        });
-      } else {
-        res.json({
-          msg: 'success',
-          orders: rows
-        });
-      }
-    });
-});
-
 
 
 router.get('/login_admin', function (req, res) {

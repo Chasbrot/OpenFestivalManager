@@ -28,113 +28,110 @@
             <div class="list-group pt-0">
 
                 <% if(orders.length){%>
-                    <% for(var i=0; i< orders.length; i++) {%>
-                        <div class="list-group-item py-0">
-                            <!-- Status icons -->
-                            <% if(orders[i].stoniert){%>
-                                <img src="/images/canceled.png" style="width:15px">
-                                <% } else if(orders[i].erledigt){%>
-                                    <img src="/images/check.png" style="width:15px">
-                                    <% } else if(orders[i].in_zubereitung){ %>
-                                        <img src="/images/loading.gif" style="width:15px">
-                                        <% } else { %>
-                                            <img src="/images/order.png" style="width:15px">
-                                            <% } %>
-                                                <%= orders[i].anzahl%> x
-                                                    <%= orders[i].name%>
-                                                        <% if(!orders[i].erledigt && !orders[i].in_zubereitung &&
+                <% for(var i=0; i< orders.length; i++) {%>
+                <div class="list-group-item py-0">
+                    <!-- Status icons -->
+                    <% if(orders[i].stoniert){%>
+                    <img src="/images/canceled.png" style="width:15px">
+                    <% } else if(orders[i].erledigt){%>
+                    <img src="/images/check.png" style="width:15px">
+                    <% } else if(orders[i].in_zubereitung){ %>
+                    <img src="/images/loading.gif" style="width:15px">
+                    <% } else { %>
+                    <img src="/images/order.png" style="width:15px">
+                    <% } %>
+                    <%= orders[i].anzahl%> x
+                    <%= orders[i].name%>
+                    <% if(!orders[i].erledigt && !orders[i].in_zubereitung &&
                                                             !orders[i].stoniert ){%>
-                                                            <form action="#" method="POST" style="display:inline;">
-                                                                <button
-                                                                    class="btn btn-danger btn-sm float-right py-0 px-4"
-                                                                    type="submit" name="cancelOrder"
-                                                                    value="<%= orders[i].id%>">X</button>
-                                                            </form>
-                                                            <% } %>
-                                                                <% if(!orders[i].erledigt && !orders[i].lieferbar &&
+                    <form action="#" method="POST" style="display:inline;">
+                        <button class="btn btn-danger btn-sm float-right py-0 px-4" type="submit" name="cancelOrder"
+                            value="<%= orders[i].id%>">X</button>
+                    </form>
+                    <% } %>
+                    <% if(!orders[i].erledigt && !orders[i].lieferbar &&
                                                                     !orders[i].stoniert){ %>
-                                                                    <form action="#" method="POST"
-                                                                        style="display:inline;">
-                                                                        <button
-                                                                            class="btn btn-success btn-sm float-right py-0 px-4"
-                                                                            type="submit" name="finishOrder"
-                                                                            value="<%= orders[i].id%>">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                width="15" height="15"
-                                                                                fill="currentColor" class="bi bi-check2"
-                                                                                viewBox="0 0 16 16">
-                                                                                <path
-                                                                                    d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
-                                                                            </svg>
-                                                                        </button>
-                                                                    </form>
-                                                                    <%}%>
+                    <form action="#" method="POST" style="display:inline;">
+                        <button class="btn btn-success btn-sm float-right py-0 px-4" type="submit" name="finishOrder"
+                            value="<%= orders[i].id%>">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
+                                class="bi bi-check2" viewBox="0 0 16 16">
+                                <path
+                                    d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                            </svg>
+                        </button>
+                    </form>
+                    <%}%>
                         </div>
                         <% } %>
-                            <% }else{ %>
-                                <div class="list-group-item py-0">
-                                    Keine Bestellungen
-                                </div>
-                                <% } %>
+                    <% }else{ %>
+                    <div class="list-group-item py-0">
+                        Keine Bestellungen
+                    </div>
+                    <% } %>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Neu Bestellen -->
-    <div class="card">
-        <div class="card-header py-0">
-            Bestellen
-        </div>
-        <div class="card-body px-0 pt-0">
-            <div class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
+        <!-- Neu Bestellen -->
+        <div class="card">
+            <div class="card-header py-0">
+                Bestellen
+            </div>
+            <div class="card-body px-0 pt-0">
+                <div class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
 
-                <% if(stations.length){%>
+                    <% if(stations.length){%>
                     <% for(var i=0; i< stations.length; i++) {%>
-                        <% if(i==0){ %>
-                            <a class="nav-item nav-link active px-2" id="nav-home-tab" data-toggle="tab"
-                                href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-home"
-                                aria-selected="false" onclick="loadProducts('<%= stations[i].id%>')">
-                                <%= stations[i].name%>
-                            </a>
-                            <% } else {%>
-                                <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab"
-                                    href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-contact"
-                                    aria-selected="false" onclick="loadProducts('<%= stations[i].id%>')">
-                                    <%= stations[i].name%>
-                                </a>
-                                <%}%>
+                    <% if(i==0){ %>
+                    <a class="nav-item nav-link active px-2" id="nav-home-tab" data-toggle="tab"
+                        href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-home" aria-selected="false"
+                        onclick="loadProducts('<%= stations[i].id%>')">
+                        <%= stations[i].name%>
+                    </a>
+                    <% } else {%>
+                    <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab"
+                        href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-contact" aria-selected="false"
+                        onclick="loadProducts('<%= stations[i].id%>')">
+                        <%= stations[i].name%>
+                    </a>
+                    <%}%>
 
                                     <% } %>
-                                        <% } %>
+                    <% } %>
 
-            </div>
-            <div class="tab-content pb-4" id="station_products">
-                <% if(stations.length){%>
+                </div>
+                <div class="tab-content pb-4" id="station_products">
+                    <% if(stations.length){%>
                     <% for(var i=0; i< stations.length; i++) {%>
-                        <% if(i==0){ %>
-                            <div class="tab-pane fade show active" id="nav-<%= stations[i].id%>" role="tabpanel"
-                                aria-labelledby="nav-home-tab">Test <%= stations[i].id%>
-                            </div>
-                            <% } else {%>
-                                <div class="tab-pane fade" id="nav-<%= stations[i].id%>" role="tabpanel"
-                                    aria-labelledby="nav-contact-tab">Test <%= stations[i].id%>
-                                </div>
-                                <%}%>
+                    <% if(i==0){ %>
+                    <div class="tab-pane fade show active" id="nav-<%= stations[i].id%>" role="tabpanel"
+                        aria-labelledby="nav-home-tab">Test <%= stations[i].id%>
+                    </div>
+                    <% } else {%>
+                    <div class="tab-pane fade" id="nav-<%= stations[i].id%>" role="tabpanel"
+                        aria-labelledby="nav-contact-tab">Test <%= stations[i].id%>
+                    </div>
+                    <%}%>
 
                                     <% } %>
-                                        <% } %>
+                    <% } %>
 
+                </div>
             </div>
         </div>
-    </div>
+
+        <% if (stations.length) {%>
+        <script>
+            // Load first station entries
+            $(document).ready(function () {
+                loadProducts('<%= stations[0].id%>');
+            });
+        </script>
+        <%}%>
 
     <script>
-        // Load first station entries
-        $(document).ready(function () {
-            <% if (stations.length) {%>
-                loadProducts('<%= stations[0].id%>');
-            <%}%>
-        });
+        
 
         // Load products for a station
         function loadProducts(station_id) {

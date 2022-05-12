@@ -30,7 +30,7 @@ router.get('/station_overview', function (req, res) {
             ON sitzung.id = bestellung.id_sitzung\
             INNER JOIN tisch\
             ON tisch.id = sitzung.id_tisch\
-            WHERE stand.id = ${req.session.station_id} AND (bestellung.erledigt IS NOT NULL OR bestellung.stoniert = true) AND TIMESTAMPDIFF(DAY,bestellung.erstellt, NOW())=0\
+            WHERE stand.id = ${req.session.station_id} AND (bestellung.erledigt IS NOT NULL OR bestellung.stoniert = true) AND DATEDIFF(DATE(bestellung.erstellt),NOW())=0\
             ORDER BY lieferzeit DESC`;
             db.query(sql, function (err, preOrders) {
                 if (err) throw err;

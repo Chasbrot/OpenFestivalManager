@@ -6,6 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 </head>
 
 <body>
@@ -21,10 +22,13 @@
         <a class="nav-link" href="/admin">System</a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="/admin/statistics">Statistik</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" href="/admin/orderdata">Bestelldaten</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/admin/configuration">Konfiguration</a>
+        <a class="nav-link" href="/admin/configuration">Stammdaten</a>
       </li>
     </ul>
   </nav>
@@ -51,7 +55,8 @@
                     <img src="images/canceled.png" style="width: 15px;">
                     <div>
                       <form action="admin" method="POST">
-                        <button class="btn btn-warning" name="createTables" value="1" onclick="this.form.submit()">Create Tables</button>
+                        <button class="btn btn-warning" name="createTables" value="1"
+                          onclick="this.form.submit()">Create Tables</button>
                       </form>
 
                     </div>

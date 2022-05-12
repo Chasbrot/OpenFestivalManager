@@ -11,6 +11,7 @@ var adminRouter = require('./routes/admin');
 var personalRouter = require('./routes/personal');
 var tischRouter = require('./routes/tisch');
 var stationRouter = require('./routes/station');
+var dataRouter = require('./routes/data');
 
 var app = express();
 
@@ -47,6 +48,7 @@ app.use('/admin', adminRouter);
 app.use('/personal', personalRouter);
 app.use('/tisch', tischRouter);
 app.use('/station', stationRouter);
+app.use('/data', dataRouter);
 
 
 

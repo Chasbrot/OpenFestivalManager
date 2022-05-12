@@ -54,7 +54,7 @@ router.get('/personal_overview', function (req, res) {
             ON tisch.id = sitzung.id_tisch\
             INNER JOIN tisch_gruppe\
             ON tisch.id_tischgruppe = tisch_gruppe.id\
-            WHERE id_account=${req.session.personal_id} AND end IS NOT NULL AND TIMESTAMPDIFF(DAY,sitzung.end, NOW())=0`;
+            WHERE id_account=${req.session.personal_id} AND end IS NOT NULL AND DATEDIFF(DATE(sitzung.end),NOW())=0`;
             db.query(sql, function (err, inactiveSessions) {
                 if (err) {
                     console.log(err);

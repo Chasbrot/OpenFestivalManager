@@ -71,7 +71,7 @@
             console.log("change tablegoup " + group_id)
             $("#table").html('');
             $.ajax({
-                url: "/admin/orderdata/getTablesFromTableGroup",
+                url: "/data/getTablesFromTableGroup",
                 type: "POST",
                 data: {
                     name: 'tables',

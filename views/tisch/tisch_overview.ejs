@@ -5,19 +5,25 @@
     <title>Tisch</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">-->
+    <link href="/javascripts/bootstrap5.0.2.min.css" rel="stylesheet">
     <script src="/javascripts/jquery-3.1.1.min.js"></script>
-    <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
+    <!--<script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>-->
+    <script src="/javascripts/bootstrap5.0.2.bundle.min.js">
+    </script>
+
 </head>
 
 <body>
     <!-- Nav bar -->
     <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
+        <div class="container-fluid">
         <a class="navbar-brand" href="/personal/personal_overview">Übersicht</a>
         <div class="navbar-brand float-right">
             <%= t_name%>
         </div>
         <a class="btn btn-danger float-right btn-md py-0" href="/tisch/tisch_kassieren">Kassieren</a>
+    </div>
     </nav>
 
     <!-- Bestellungen -->
@@ -45,14 +51,14 @@
                     <% if(!orders[i].erledigt && !orders[i].in_zubereitung &&
                                                             !orders[i].stoniert ){%>
                     <form action="#" method="POST" style="display:inline;">
-                        <button class="btn btn-danger btn-sm float-right py-0 px-4" type="submit" name="cancelOrder"
+                        <button class="btn btn-danger btn-sm float-end py-0 px-4" type="submit" name="cancelOrder"
                             value="<%= orders[i].id%>">X</button>
                     </form>
                     <% } %>
                     <% if(!orders[i].erledigt && !orders[i].lieferbar &&
                                                                     !orders[i].stoniert){ %>
                     <form action="#" method="POST" style="display:inline;">
-                        <button class="btn btn-success btn-sm float-right py-0 px-4" type="submit" name="finishOrder"
+                        <button class="btn btn-success btn-sm py-0 px-4 float-end" type="submit" name="finishOrder"
                             value="<%= orders[i].id%>">
                             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
                                 class="bi bi-check2" viewBox="0 0 16 16">
@@ -79,28 +85,28 @@
                 Bestellen
             </div>
             <div class="card-body px-0 pt-0">
-                <div class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
+                <ul class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
 
                     <% if(stations.length){%>
                     <% for(var i=0; i< stations.length; i++) {%>
-                    <% if(i==0){ %>
-                    <a class="nav-item nav-link active px-2" id="nav-home-tab" data-toggle="tab"
-                        href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-home" aria-selected="false"
-                        onclick="loadProducts('<%= stations[i].id%>')">
-                        <%= stations[i].name%>
-                    </a>
-                    <% } else {%>
-                    <a class="nav-item nav-link px-2" id="nav-contact-tab" data-toggle="tab"
-                        href="#nav-<%= stations[i].id%>" role="tab" aria-controls="nav-contact" aria-selected="false"
-                        onclick="loadProducts('<%= stations[i].id%>')">
-                        <%= stations[i].name%>
-                    </a>
-                    <%}%>
+                    <li class="nav-item" role="presentation">
+                        <% if(i==0){ %>
+                        <button class="nav-link active px-2" id="nav-home-tab" type="button" role="tab" aria-controls="home" aria-selected="true"
+                            role="presentation" onclick="loadProducts('<%= stations[i].id%>')" data-bs-toggle="tab" data-bs-target="#nav-<%= stations[i].id%>" >
+                            <%= stations[i].name%>
+                        </button>
+                        <% } else {%>
+                        <button class="nav-link px-2" id="nav-contact-tab"  type="button" role="tab" aria-controls="home" aria-selected="false"
+                            role="presentation" onclick="loadProducts('<%= stations[i].id%>')"  data-bs-toggle="tab" data-bs-target="#nav-<%= stations[i].id%>" >
+                            <%= stations[i].name%>
+                        </button>
+                        <%}%>
+                    </li>
 
-                                    <% } %>
+                    <% } %>
                     <% } %>
 
-                </div>
+                </ul>
                 <div class="tab-content pb-4" id="station_products">
                     <% if(stations.length){%>
                     <% for(var i=0; i< stations.length; i++) {%>

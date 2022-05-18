@@ -13,37 +13,40 @@
                 <%=products[i].name%>
             </div>
             <!-- Optionen -->
-            <div class="card-body py-0 px-1">
-                <div class="list-group">
-                    <% if(products[i].zutaten){%>
-                    <% for(var z=0; z< products[i].zutaten.length; z++) {%>
-                    <div class="list-group-item py-0">
-                        <% if(products[i].zutaten[z].optional){%>
-                        <input class="form-check-input" type="checkbox" value="<%=products[i].zutaten[z].id%>" checked
-                            name="option" id="option<%=products[i].zutaten[z].id%>">
-                        <% } else { %>
-                        <input class="form-check-input" type="checkbox" value="<%=products[i].zutaten[z].id%>"
-                            name="option" id="option<%=products[i].zutaten[z].id%>">
-                        <% } %>
-                        <label class="form-check-label" for="option<%=products[i].zutaten[z].id%>">
-                            <%=products[i].zutaten[z].name%>
-                        </label>
-                    </div>
+            <div class="card-body py-0 px-1 list-group  w-50">
+                <% if(products[i].zutaten){%>
+                <% for(var z=0; z< products[i].zutaten.length; z++) {%>
+                <div class="list-group-item py-0 btn-group px-0">
+                    <% if(products[i].zutaten[z].optional){%>
+                    <input type="checkbox" class="btn-check" value="<%=products[i].zutaten[z].id%>" name="option"
+                        id="<%=products[i].id%>_option<%=products[i].zutaten[z].id%>" checked>
+                    <% } else { %>
+                    <input type="checkbox" class="btn-check" value="<%=products[i].zutaten[z].id%>" name="option"
+                        id="<%=products[i].id%>_option<%=products[i].zutaten[z].id%>">
                     <% } %>
-                    <% } %>
+                    <label class="btn btn-outline-primary py-0" style="width:100%"
+                        for="<%=products[i].id%>_option<%=products[i].zutaten[z].id%>">
+                        <%=products[i].zutaten[z].name%>
+                    </label>
                 </div>
+                <% } %>
+                <% } %>
                 <input type="text" class="form-control list-group-item" placeholder="Notiz" name="notiz">
-
             </div>
             <!-- Bestellsteuerung -->
-            <div class="card-body py-0 px-1 w-25">
-                <div class="btn btn-secondary btn-block" onclick="increment('p_anz<%=products[i].id%>')">+</div>
+            <div class="card-body py-0 px-1 w-25" style="max-width: 100px">
+                <div class="d-grid gap-2">
+                    <div class="btn btn-secondary" onclick="increment('p_anz<%=products[i].id%>')">+</div>
+                </div>
                 <input type="number" name="product_anzahl" id="p_anz<%=products[i].id%>"
                     class="form-control text-center" value=0>
-                <div class="btn btn-secondary btn-block" onclick="decrement('p_anz<%=products[i].id%>')">-</div>
-                <button class="btn btn-secondary btn-block" type="submit" name="productid" value="<%=products[i].id%>">
-                    <img src="/images/sent.png" style="height: 15px">
-                </button>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="decrement('p_anz<%=products[i].id%>')">-</button>
+                    <button class="btn btn-secondary" type="submit" name="productid" value="<%=products[i].id%>">
+                        <img src="/images/sent.png" style="height: 15px">
+                    </button>
+                </div>
             </div>
         </div>
     </form>

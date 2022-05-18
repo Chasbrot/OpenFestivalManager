@@ -109,6 +109,7 @@ router.post('/tisch_overview/:sid', function (req, res) {
         res.redirect("/tisch/tisch_overview/" + sid);
       });
     } else if (body.productid) {
+      console.log(body)
       if (body.product_anzahl != 0) {
         console.log("order recieved")
         // SAVE Order 
@@ -203,6 +204,7 @@ router.get('/tisch_kassieren', function (req, res) {
         console.log(err);
       }
       if (result[0].anz != 0) {
+        console.log("aborting kassieren: "+result[0].anz + " oders are open on session "+ req.session.session_overview)
         res.redirect("/tisch/tisch_overview/" + req.session.session_overview);
       } else {
         // Load orders

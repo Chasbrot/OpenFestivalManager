@@ -24,51 +24,49 @@
     </nav>
 
     <!-- Bestellungen -->
-    <div class="card" style="max-height: 200px;">
+    <div class="card">
         <div class="card-header py-0">Unbezahlte Bestellungen</div>
         <div class="card-body overflow-auto pt-0 px-1">
             <form action="#" method="POST" style="display:inline;" id="cash">
-                <div class="list-group form-group pt-0" id="orders">
+                <div class="list-group form-group pt-1 id="orders">
                     <% if(orders.length){%>
-                        <% for(var i=0; i< orders.length; i++) {%>
-                            <div class="list-group-item py-0 px-1" id="order_<%=orders[i].id%>">
-                                <input type="number" id="preis_<%=orders[i].id%>" style="display: none;"
-                                    value="<%=orders[i].preis%>"></input>
-                                <input type="number" id="uebrig_<%=orders[i].id%>" value="<%=orders[i].uebrig%>"
-                                    style="display: none;"></input>
+                    <% for(var i=0; i< orders.length; i++) {%>
+                    <div class="list-group-item py-0 px-1" id="order_<%=orders[i].id%>">
+                        <input type="number" id="preis_<%=orders[i].id%>" style="display: none;"
+                            value="<%=orders[i].preis%>"></input>
+                        <input type="number" id="uebrig_<%=orders[i].id%>" value="<%=orders[i].uebrig%>"
+                            style="display: none;"></input>
 
 
-                                <input type="number" id="anz_<%=orders[i].id%>" name="<%=orders[i].id%>"
-                                    style="display: inline; width: 40px; border: none" value="0"></input>
+                        <input type="number" id="anz_<%=orders[i].id%>" name="<%=orders[i].id%>"
+                            style="display: inline; width: 40px; border: none" value="0"></input>
 
-                                /
-                                <p style="display: inline;">
-                                    <%=orders[i].uebrig%>
-                                </p>
-                                <%=orders[i].name%>
-                                    <div class="float-right">
-                                        <button type="button" class="btn btn-secondary btn-sm float-right py-0 px-3"
-                                            value="<%=orders[i].id%>"
-                                            onclick="increment('<%=orders[i].id%>')">+</button>
-                                        <button type="button" class="btn btn-secondary btn-sm float-right py-0 px-3"
-                                            value="<%=orders[i].id%>"
-                                            onclick="decrement('<%=orders[i].id%>')">-</button>
-                                    </div>
-                            </div>
-                            <% } %>
-                                <% }else{ %>
-                                    <div class="list-group-item py-0 px-1">
-                                        Alles bezahlt
-                                    </div>
-                                    <% } %>
+                        /
+                        <p style="display: inline;">
+                            <%=orders[i].uebrig%>
+                        </p>
+                        <%=orders[i].name%>
+                        <div class="float-right">
+                            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-3"
+                                value="<%=orders[i].id%>" onclick="increment('<%=orders[i].id%>')">+</button>
+                            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-3"
+                                value="<%=orders[i].id%>" onclick="decrement('<%=orders[i].id%>')">-</button>
+                        </div>
+                    </div>
+                    <% } %>
+                    <% }else{ %>
+                    
+                    <h4 class="text-center">Alles bezahlt</h4>
+                    
+                    <% } %>
                 </div>
             </form>
         </div>
     </div>
-
-    <div class="card">
+    <!-- Rechnung -->
+    <div class="card fixed-bottom">
         <div class="card-header">
-            Rechnung
+            <span class="align-bottom">Rechnung</span>
             <div class="float-right">
                 <button class="btn btn-warning" type="button" onclick="selectAll()">
                     Alles
@@ -81,21 +79,20 @@
             <h3 style="display: inline;">€</h3>
 
         </div>
-    </div>
 
-    <div class="container">
-
-        <% if(orders.length==0){%>
+        <div class="card-body text-center">
+            <% if(orders.length==0){%>
             <form action="#" method="POST" style="display:inline;" id="cash">
                 <button class="btn btn-success btn-block" type="submit" name="closeSession" value="true">
                     Sitzung beenden
                 </button>
             </form>
             <% }else{ %>
-                <button class="btn btn-info btn-block" form="cash" name="payOrder" value="true">
-                    Zahlen
-                </button>
-                <%}%>
+            <button class="btn btn-info btn-block" form="cash" name="payOrder" value="true">
+                Zahlen
+            </button>
+            <%}%>
+        </div>
     </div>
 
     <script>

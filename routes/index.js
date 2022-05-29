@@ -5,8 +5,14 @@ var db = require("../database");
 
 /* GET home page. */
 router.get('/', function (req, res) {
-  res.render('index', { title: 'Hey', message: 'Willkommen zum Bestellsystem!', kellner: "kellner",stand: "stand", admin: "admin"});
+  res.render('index', { registrationActive: global.registrationActive });
 });
+
+/* GET developer page. */
+router.get('/dev', function (req, res) {
+  res.render('dev');
+});
+
 
 /*
 router.get('/error', function (req, res) {

@@ -3,14 +3,14 @@ const { redirect } = require('express/lib/response');
 var router = express.Router();
 var db = require("../database");
 
-router.get('/tisch_neu', function (req, res) {
+router.get('/new', function (req, res) {
   if (req.session.personal_id) {
     // Lade Tischgruppen
     db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
       if (err) {
         console.log(err);
       }
-      res.render("tisch/tisch_neu", { table_groups: groups });
+      res.render("table/table_new", { table_groups: groups });
     });
   } else {
     res.redirect("/personal/personal_overview");
@@ -18,7 +18,7 @@ router.get('/tisch_neu', function (req, res) {
 });
 
 
-router.post('/tisch_neu', function (req, res) {
+router.post('/new', function (req, res) {
   const body = req.body;
   if (req.session.personal_id) {
 
@@ -43,7 +43,7 @@ router.post('/tisch_neu', function (req, res) {
                 console.log("Session linked to account")
               }
             });
-            res.redirect("/tisch/tisch_overview/" + result[0].id);
+            res.redirect("/table/" + result[0].id);
 
           } else {
             // Es gibt keine aktive Sitzung -> Neue Erstellen, hinzufügen und öffnen
@@ -72,7 +72,7 @@ router.post('/tisch_neu', function (req, res) {
                         } else {
                           console.log("Session linked to account")
                         }
-                        res.redirect("/tisch/tisch_overview/" + result[0].id);
+                        res.redirect("/table/" + result[0].id);
                       });
                     }
 
@@ -86,7 +86,7 @@ router.post('/tisch_neu', function (req, res) {
       });
 
     }else{
-      res.redirect("/tisch/tisch_neu");
+      res.redirect("/table/new");
     }
 
   } else {
@@ -94,7 +94,7 @@ router.post('/tisch_neu', function (req, res) {
   }
 });
 
-router.post('/tisch_overview/:sid', function (req, res) {
+router.post('/:sid', function (req, res) {
   console.log(req.body)
   const body = req.body;
   if (req.session.personal_id) {
@@ -106,7 +106,7 @@ router.post('/tisch_overview/:sid', function (req, res) {
       db.query(sql, function (err, orders) {
         if (err) throw err;
         console.log("order " + req.body.cancelOrder + " canceled")
-        res.redirect("/tisch/tisch_overview/" + sid);
+        res.redirect("/table/" + sid);
       });
     } else if (body.productid) {
       console.log(body)
@@ -135,13 +135,13 @@ router.post('/tisch_overview/:sid', function (req, res) {
           }
         });
       }
-      res.redirect("/tisch/tisch_overview/" + sid);
+      res.redirect("/table/" + sid);
     } else if (body.finishOrder) {
       console.log("finish order" + body.finishOrder)
       var sql = `UPDATE bestellung SET erledigt = NOW() WHERE id = ${body.finishOrder}`;
       db.query(sql, function (err, result) {
         if (err) throw err;
-        res.redirect("/tisch/tisch_overview/" + sid);
+        res.redirect("/table/" + sid);
       });
     }
   } else {
@@ -149,7 +149,7 @@ router.post('/tisch_overview/:sid', function (req, res) {
   }
 });
 
-router.get('/tisch_overview/:sid', function (req, res) {
+router.get('/:sid', function (req, res) {
   if (req.session.personal_id) {
     // Check if session exists
     var sql = `SELECT * FROM sitzung\
@@ -175,7 +175,7 @@ router.get('/tisch_overview/:sid', function (req, res) {
           db.query(sql, function (err, stations) {
             if (err) throw err;
             req.session.session_overview = req.params.sid // save overview id to session
-            res.render("tisch/tisch_overview", { t_name: result[0].nummer, orders: orders, stations: stations });
+            res.render("table/table_overview", { t_name: result[0].nummer, orders: orders, stations: stations });
           });
 
         });
@@ -194,7 +194,7 @@ router.get('/tisch_overview/:sid', function (req, res) {
 
 
 
-router.get('/tisch_kassieren', function (req, res) {
+router.get('/bill', function (req, res) {
   if (req.session.personal_id) {
     // Check if there are open orders
     var sql = `SELECT count(*) AS anz FROM bestellung
@@ -205,7 +205,7 @@ router.get('/tisch_kassieren', function (req, res) {
       }
       if (result[0].anz != 0) {
         console.log("aborting kassieren: "+result[0].anz + " oders are open on session "+ req.session.session_overview)
-        res.redirect("/tisch/tisch_overview/" + req.session.session_overview);
+        res.redirect("/table/" + req.session.session_overview);
       } else {
         // Load orders
         var sql = `SELECT SUM(bestellung.anzahl- bestellung.bezahlt) AS uebrig, gericht.name, gericht.id, gericht.preis\
@@ -218,7 +218,7 @@ router.get('/tisch_kassieren', function (req, res) {
           if (orders.length == 0) {
             console.log("session " + req.params.sid + " no orders found")
           }
-          res.render("tisch/tisch_kassieren", { session_id: req.session.session_overview, orders: orders });
+          res.render("table/bill", { session_id: req.session.session_overview, orders: orders });
         });
 
       }
@@ -228,7 +228,7 @@ router.get('/tisch_kassieren', function (req, res) {
   }
 });
 
-router.post('/tisch_kassieren', function (req, res) {
+router.post('/bill', function (req, res) {
   if (req.session.personal_id) {
     console.log(req.body)
     const body = req.body;
@@ -245,7 +245,7 @@ router.post('/tisch_kassieren', function (req, res) {
           payOrder(anz, pid, req.session.session_overview)
         }
       });
-      res.redirect("/tisch/tisch_kassieren");
+      res.redirect("/table/bill");
     } else if (body.closeSession) {
       // Close session
       console.log("closing session: " + req.session.session_overview)
@@ -256,7 +256,7 @@ router.post('/tisch_kassieren', function (req, res) {
       });
 
     } else {
-      res.redirect("/tisch/tisch_kassieren");
+      res.redirect("/table/bill");
     }
   } else {
     res.redirect("/personal/personal_overview");
@@ -344,7 +344,7 @@ router.get('/productlist/:sid', function (req, res) {
         d=0;
       }
       
-      res.render("tisch/productlist", { products: prods, currentWaitTime: d.toFixed(0) });
+      res.render("table/productlist", { products: prods, currentWaitTime: d.toFixed(0) });
     });
     });
   });

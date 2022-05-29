@@ -7,7 +7,7 @@ const { redirect } = require('express/lib/response');
 
 router.get('/', function (req, res) {
   if (!req.session.admin_id) {
-    res.redirect("/admin/login_admin");
+    res.redirect("/admin/login");
     return;
   }
   db.query('SELECT * FROM account WHERE id_type=3', function (err, rows) {
@@ -29,7 +29,7 @@ router.get('/', function (req, res) {
 
 router.post('/', function (req, res, next) {
   if (!req.session.admin_id) {
-    res.redirect("/admin/login_admin");
+    res.redirect("/admin/login");
     return;
   }
   // store all the user input data
@@ -65,7 +65,7 @@ router.post('/', function (req, res, next) {
 
 router.get('/configuration', function (req, res) {
   if (!req.session.admin_id) {
-    res.redirect("/admin/login_admin");
+    res.redirect("/admin/login");
     return;
   }
   db.query('SELECT * FROM stand', function (err, rows) {
@@ -106,7 +106,7 @@ router.get('/configuration', function (req, res) {
 
 router.post('/configuration', function (req, res) {
   if (!req.session.admin_id) {
-    res.redirect("/admin/login_admin");
+    res.redirect("/admin/login");
     return;
   }
   const body = req.body;
@@ -231,7 +231,7 @@ router.post('/configuration', function (req, res) {
 
 router.get('/orderdata', function (req, res) {
   if (!req.session.admin_id) {
-    res.redirect("/admin/login_admin");
+    res.redirect("/admin/login");
     return;
   }
   // Count all tables
@@ -247,7 +247,7 @@ router.get('/orderdata', function (req, res) {
 
 router.get('/statistics', function (req, res) {
   if (!req.session.admin_id) {
-    res.redirect("/admin/login_admin");
+    res.redirect("/admin/login");
     return;
   }
   // Count all active orders
@@ -298,11 +298,11 @@ router.get('/statistics', function (req, res) {
 });
 
 
-router.get('/login_admin', function (req, res) {
+router.get('/login', function (req, res) {
   res.render("admin/login_admin", { err: false });
 });
 
-router.post('/login_admin', function (req, res) {
+router.post('/login', function (req, res) {
   // check username
   console.log(req.body)
   if (req.body.username && req.body.password) {

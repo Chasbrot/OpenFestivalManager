@@ -73,7 +73,7 @@
             <!--act_sessions: past_sessions:  { s_id: 7, t_id: 1, t_nr: 'A1', t_name: 'Wiese' },-->
             <% if(act_sessions.length){%>
               <% for(var i=0; i< act_sessions.length; i++) {%>
-                <a href="/tisch/tisch_overview/<%= act_sessions[i].s_id%>" class="list-group-item list-group-item-action">
+                <a href="/table/<%= act_sessions[i].s_id%>" class="list-group-item list-group-item-action">
                   <%= act_sessions[i].t_name%>
                     <%= act_sessions[i].t_nr%>
                     <div class="float-right">
@@ -96,7 +96,7 @@
 
   <!-- Neuer Tisch -->
   <div class="fixed-bottom text-center">
-    <a class="btn btn-primary btn-lg btn-block" href="/tisch/tisch_neu" role="button">Neue Sitzung</a>
+    <a class="btn btn-primary btn-lg btn-block" href="/table/new" role="button">Neue Sitzung</a>
   </div>
 
 

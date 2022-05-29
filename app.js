@@ -9,7 +9,7 @@ const sessions = require('express-session');
 var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var personalRouter = require('./routes/personal');
-var tischRouter = require('./routes/tisch');
+var tableRouter = require('./routes/table');
 var stationRouter = require('./routes/station');
 var dataRouter = require('./routes/data');
 
@@ -46,7 +46,7 @@ app.use(sessions({
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/personal', personalRouter);
-app.use('/tisch', tischRouter);
+app.use('/table', tableRouter);
 app.use('/station', stationRouter);
 app.use('/data', dataRouter);
 

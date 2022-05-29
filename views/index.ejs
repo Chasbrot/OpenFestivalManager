@@ -16,61 +16,30 @@
 
     <div class="container">
         <div>
-            <h2>Developer Menü</h2>
+            <h2>Ich bin ...</h2>
         </div>
         <br>
-        <div class="card">
-            <div class="card-header">
-                Tisch
-            </div>
-            <div class="card-body">
-                <a href="tisch/tisch_overview">Tisch Overview</a>
-                <br>
-                <a href="tisch/tisch_neu">Tisch Neu</a>
-                <br>
-                <a href="tisch/tisch_kassieren"> Tisch Kassieren</a>
-            </div>
-        </div>
+        <a class="btn btn-block btn-primary py-4" href="personal/login">
+            <h2>Kellner/In</h2>
+        </a>
         <br>
-        <div class="card">
-            <div class="card-header">
-                Personal
-            </div>
-            <div class="card-body">
-                <a href="personal/personal_overview"> Kellner Übersicht</a>
-                <br>
-                <a href="personal/login_personal">Personal Login</a>
-                <br>
-                <a href="personal/registrierung_personal"> Registrierung</a>
-            </div>
-        </div>
+        <a class="btn btn-block btn-primary py-4" href="station/login">
+            <h2>Station</h2>
+        </a>
         <br>
-        <div class="card">
-            <div class="card-header">
-                Admin
-            </div>
-            <div class="card-body">
-                <a href="/admin"> Admin</a>
-                <br>
-                <a href="/admin/configuration"> Admin Config</a>
-                <br>
-                <a href="/admin/orderdata"> Admin Orderdata</a>
-                <br>
-                <a href="/admin/login_admin">Login Admin</a>
-            </div>
-        </div>
-        <br>
-        <div class="card">
-            <div class="card-header">
-                Station
-            </div>
-            <div class="card-body">
-                <a href="/station/station_overview"> Station Overview</a>
-                <br>
-                <a href="/station/login_station"> Login Station</a>
-            </div>
-        </div>
+        <% if(registrationActive) { %>
+        <a class="btn btn-block btn-info py-4" href="personal/registrierung">
+            <h2>Neu hier!</h2>
+        </a>
+        <% } %>
+
     </div>
+    <nav class="navbar navbar-expand-sm bg-light navbar-light fixed-bottom">
+        <a class="navbar-brand" href="admin/login">Administrator</a>
+        <a class="navbar-brand" href="dev">Developer</a>
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="color: black;">by Michael Selinger 2022</a>
+    </nav>
+
     </div>
 </body>
 

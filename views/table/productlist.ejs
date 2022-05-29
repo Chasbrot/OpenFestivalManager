@@ -6,7 +6,7 @@
 <% if(products.length){%>
 <% for(var i=0; i< products.length; i++) {%>
 <div class="list-group">
-    <form action="#" method="POST">
+    <form action="#" method="POST" autocomplete="off">
         <div class="list-group-item card px-0 py-1  d-flex flex-row">
             <!-- Produkt -->
             <div class="card-header py-1 w-25">
@@ -31,7 +31,8 @@
                 </div>
                 <% } %>
                 <% } %>
-                <input type="text" class="form-control list-group-item" placeholder="Notiz" name="notiz">
+                <input type="text" class="form-control list-group-item" placeholder="Notiz" name="notiz"
+                    autocomplete="off">
             </div>
             <!-- Bestellsteuerung -->
             <div class="card-body py-0 px-1 w-25" style="max-width: 100px">

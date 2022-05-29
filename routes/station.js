@@ -3,7 +3,7 @@ var router = express.Router();
 var db = require("../database");
 
 
-router.get('/station_overview', function (req, res) {
+router.get('/', function (req, res) {
     if (req.session.station_id) {
         var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,NOW()) AS wartezeit, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr, bestellung.notiz\
         FROM bestellung\
@@ -40,13 +40,13 @@ router.get('/station_overview', function (req, res) {
         });
 
     } else {
-        res.redirect("/station/login_station");
+        res.redirect("/station/login");
     }
 
 });
 
 
-router.post('/station_overview', function (req, res) {
+router.post('/', function (req, res) {
     const body = req.body;
     console.log(body);
     if (req.session.station_id) {
@@ -55,7 +55,7 @@ router.post('/station_overview', function (req, res) {
                 console.log(err)
                 console.log("station session destroyed")
             });
-            res.redirect("/station/login_station");
+            res.redirect("/station/login");
             return;
         }
         // Order is sent out
@@ -68,7 +68,7 @@ router.post('/station_overview', function (req, res) {
                 if (err) {
                     console.log(err);
                 }
-                res.redirect("/station/station_overview");
+                res.redirect("/station");
             });
             return;
         }
@@ -83,21 +83,21 @@ router.post('/station_overview', function (req, res) {
                 if (err) {
                     console.log(err);
                 }
-                res.redirect("/station/station_overview");
+                res.redirect("/station");
             });
             return;
         }
     } else {
-        res.redirect("/station/login_station");
+        res.redirect("/station/login");
     }
 });
 
 
-router.get('/login_station', function (req, res) {
+router.get('/login', function (req, res) {
     res.render("station/login_station", {err: false});
 });
 
-router.post('/login_station', function (req, res, next) {
+router.post('/login', function (req, res, next) {
     console.log(req.body)
     // check username
     if (req.body.username) {
@@ -107,7 +107,7 @@ router.post('/login_station', function (req, res, next) {
             if (result[0]) {
                 req.session.station_id = result[0].id;
                 req.session.station_name = result[0].name;
-                res.redirect("/station/station_overview");
+                res.redirect("/station");
             } else {
                 console.log("station " + req.body.username + " not found")
                 res.render("station/login_station", {err: true});

@@ -2,11 +2,11 @@ var express = require('express');
 var router = express.Router();
 var db = require("../database");
 
-router.get('/login_personal', function (req, res) {
+router.get('/login', function (req, res) {
     res.render("personal/login_personal", { err: false });
 });
 
-router.post('/login_personal', function (req, res, next) {
+router.post('/login', function (req, res, next) {
     // check username
     if (req.body.username) {
         var sql = `SELECT id,name FROM account WHERE name ="${req.body.username}" AND id_type= 3`;
@@ -28,7 +28,7 @@ router.post('/login_personal', function (req, res, next) {
 
 router.get('/personal_overview', function (req, res) {
     if (!req.session.personal_id) {
-        res.redirect("/personal/login_personal");
+        res.redirect("/personal/login");
     } else {
 
         // Get Active Sessions
@@ -79,7 +79,7 @@ router.post('/personal_overview', function (req, res) {
             console.log(err)
             console.log("session destroyed")
         });
-        res.redirect("/personal/login_personal");
+        res.redirect("/personal/login");
         return;
     }
 
@@ -87,16 +87,16 @@ router.post('/personal_overview', function (req, res) {
 });
 
 
-router.get('/registrierung_personal', function (req, res) {
+router.get('/registrierung', function (req, res) {
     if (global.registrationActive) {
         res.render("personal/registrierung_personal", {err: false});
     } else {
-        res.redirect("/personal/login_personal");
+        res.redirect("/personal/login");
     }
 
 });
 
-router.post('/registrierung_personal', function (req, res, next) {
+router.post('/registrierung', function (req, res, next) {
     // store all the user input data
     const userDetails = req.body;
     console.log(userDetails);
@@ -112,7 +112,7 @@ router.post('/registrierung_personal', function (req, res, next) {
                 if (err) throw err;
                 console.log('record inserted');
             });
-            res.redirect("/personal/login_personal");  // redirect to user form page after inserting the data
+            res.redirect("/personal/login");  // redirect to user form page after inserting the data
         } else {
             res.render("personal/registrierung_personal", {err: true});
         }

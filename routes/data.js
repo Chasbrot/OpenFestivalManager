@@ -59,7 +59,6 @@ router.post('/getTablesFromTableGroup', function (req, res) {
         });
 });
 
-
 router.post('/getOrdersFromSession', function (req, res) {
     console.log(req.body)
     if (!req.body.session_id) {

@@ -22,7 +22,7 @@
         <div class="navbar-brand float-right">
             <%= t_name%>
         </div>
-        <a class="btn btn-danger float-right btn-md py-0" href="/tisch/tisch_kassieren">Kassieren</a>
+        <a class="btn btn-danger float-right btn-md py-0" href="/table/bill">Kassieren</a>
     </div>
     </nav>
 
@@ -144,7 +144,7 @@
             }
             console.log("loading products for station" + station_id)
             $("#nav-" + station_id).html('');
-            $("#nav-" + station_id).load("/tisch/productlist/" + station_id);
+            $("#nav-" + station_id).load("/table/productlist/" + station_id);
         };
 
         function increment(num) {

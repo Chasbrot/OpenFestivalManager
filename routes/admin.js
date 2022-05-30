@@ -4,12 +4,17 @@ var db = require("../database");
 const fs = require('fs');
 const { groupCollapsed } = require('console');
 const { redirect } = require('express/lib/response');
+var mysqldump = require('mysqldump');
+var multer = require('multer');
+var upload = multer({ dest: 'uploads/' });
+
 
 router.get('/', function (req, res) {
   if (!req.session.admin_id) {
     res.redirect("/admin/login");
     return;
   }
+
   db.query('SELECT * FROM account WHERE id_type=3', function (err, rows) {
     var db_access = true, db_table = true;
     if (err) {
@@ -27,7 +32,9 @@ router.get('/', function (req, res) {
 });
 
 
-router.post('/', function (req, res, next) {
+router.post('/', upload.single("dbfile"), function (req, res, next) {
+  console.log(req.body)
+  console.log(req.files)
   if (!req.session.admin_id) {
     res.redirect("/admin/login");
     return;
@@ -58,6 +65,115 @@ router.post('/', function (req, res, next) {
       });
     });*/
   }
+
+  /* Logout admin session*/
+  if (req.body.logout) {
+    req.session.destroy(function (err) {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log("admin session destroyed")
+      }
+    });
+    res.redirect("/admin/login");
+    return;
+  }
+
+  /* Export database to sql file*/
+  if (req.body.exportdb) {
+    console.log("Exporting Database")
+    mysqldump({
+      connection: {
+        host: 'localhost',
+        user: 'root',
+        password: 'Pa..w0rd',
+        database: 'festivalmanager',
+      },
+      dumpToFile: './dump.sql',
+      dump: {
+        tables: ["account", "zutat", "tisch", "tisch_Gruppe", "stand", "gericht", "gericht_Zutaten", "sitzung", "account_sitzung", "bestellung", "zutat_bestellung"],
+      }
+    }).then(async () => {
+      res.download("./dump.sql");
+    }, () => { }).catch(err => {
+      console.log(err)
+    })
+    return;
+  }
+
+  /* Export database to sql file*/
+  if (req.body.resetDynamic) {
+    console.log("Resetting Dynamic Data")
+    clearDBDynamic((err) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.redirect("/admin");
+      }
+    });
+    return;
+  }
+
+  /* Export database to sql file*/
+  if (req.body.resetComplete) {
+    console.log("Resetting All Data")
+    /* Drop Database and reinitialize */
+    clearDBStatic((err) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.redirect("/admin");
+      }
+    });
+  }
+
+  /* Export database to sql file*/
+  if (req.body.importdb) {
+    console.log("Importing DB")
+    var tmp_path = req.file.path;
+    console.log(tmp_path)
+    /* Clear DB 
+    clearDBStatic((err) => {
+      if (err) {
+        console.log(err)
+      } else {
+        clearDBStatic((err) => {
+          if (err) {
+            console.log(err)
+          } else {
+            console.log("import data")
+          }
+        });
+      }
+    });*/
+
+    
+  }
+
+  /* Change Password */
+  if (req.body.password1 && req.body.password2) {
+    const b = req.body;
+    console.log("Changing Password")
+    // Vaildate Password rules
+    if (b.password1.length >= 8 && b.password1 && b.password2.length >= 8 && b.password2 && b.password1 == b.password2) {
+      db.query(`UPDATE account SET pw = "${b.password1}" WHERE id=${req.session.admin_id}`, function (err, rows) {
+        if (err) {
+          console.log(err);
+        }
+        console.log("password changed")
+        req.session.destroy(function (err) {
+          if (err) {
+            console.log(err)
+          } else {
+            console.log("admin session destroyed")
+          }
+        });
+        res.redirect("/admin/login");
+      });
+    }
+    return;
+  }
+
 
   res.redirect("/admin");  // redirect to user form page after inserting the data
 });
@@ -240,12 +356,10 @@ router.get('/orderdata', function (req, res) {
       console.log(err);
     }
     res.render("admin/admin_orderdata", { table_groups: tables });
-
-
   });
 });
 
-router.get('/statistics', function (req, res) {
+router.get('/statistics', (req, res) => {
   if (!req.session.admin_id) {
     res.redirect("/admin/login");
     return;
@@ -282,7 +396,7 @@ router.get('/statistics', function (req, res) {
               if (err) {
                 console.log(err);
               }
-              console.log(dates)
+              console.log(dates);
               res.render("admin/admin_statistics", { activeOrders: activeOrders[0].c, activeSessions: activeSessions[0].c, countTables: countTables[0].c, todayOrders: todayOrders[0].c, todaySessions: todaySessions[0].c, dates: dates });
 
             });
@@ -302,20 +416,27 @@ router.get('/login', function (req, res) {
   res.render("admin/login_admin", { err: false });
 });
 
-router.post('/login', function (req, res) {
+router.post('/login', (req, res) => {
   // check username
-  console.log(req.body)
   if (req.body.username && req.body.password) {
     var sql = `SELECT id,name FROM account WHERE name ="${req.body.username}" AND id_type= 1 AND pw="${req.body.password}"`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-
-      if (result[0]) {
-        req.session.admin_id = result[0].id;
-        req.session.admin_name = result[0].name;
-        res.redirect("/admin");
+      if (err) {
+        console.log(err);
+        /* If database is not reachable login with default credentials*/
+        if (req.body.username == "admin" && req.body.password == "admin") {
+          req.session.admin_id = 0;
+          req.session.admin_name = "admin";
+          res.redirect("/admin");
+        }
       } else {
-        res.render("admin/login_admin", { err: true });
+        if (result[0]) {
+          req.session.admin_id = result[0].id;
+          req.session.admin_name = result[0].name;
+          res.redirect("/admin");
+        } else {
+          res.render("admin/login_admin", { err: true });
+        }
       }
     });
   } else {
@@ -323,6 +444,55 @@ router.post('/login', function (req, res) {
   }
 
 });
+
+/*
+Remove all dynamiclly generated data and registered personal exept admins and station users. 
+Includes: Orders, Sessions and mappings. Resets all autoincrements to 1;
+*/
+function clearDBDynamic(callback) {
+  var sql = `BEGIN; \
+  DELETE FROM Zutat_Bestellung WHERE id <> -1; \
+  DELETE FROM Bestellung WHERE id <> -1; \
+  DELETE FROM Account_Sitzung WHERE id <> -1; \
+  DELETE FROM Sitzung WHERE id <> -1; \
+  DELETE FROM Account WHERE id_type == 3 \
+  ALTER TABLE Zutat_Bestellung AUTO_INCREMENT = 1; \
+  ALTER TABLE Bestellung AUTO_INCREMENT = 1; \
+  ALTER TABLE Account_Sitzung AUTO_INCREMENT = 1; \
+  ALTER TABLE Sitzung AUTO_INCREMENT = 1; \
+  COMMIT;`;
+  db.query(sql, function (err, rows) {
+    callback(err);
+  });
+}
+
+/*
+Remove all staticly defined data
+Includes: Table_Groups, Tables, Accounts, Product, Station, Options and all Mappings . Resets all autoincrements to 1;
+*/
+function clearDBStatic(callback) {
+  var sql = `BEGIN; \
+  DELETE FROM Gericht WHERE id <> -1; \
+  DELETE FROM Account WHERE id <> -1; \
+  DELETE FROM Tisch WHERE id <> -1; \
+  DELETE FROM Tisch_gruppe WHERE id <> -1; \
+  DELETE FROM Gericht_Zutaten WHERE id <> -1; \
+  DELETE FROM Zutat WHERE id <> -1; \
+  DELETE FROM Stand WHERE id <> -1; \
+  ALTER TABLE Gericht AUTO_INCREMENT = 1; \
+  ALTER TABLE Account AUTO_INCREMENT = 1; \
+  ALTER TABLE Tisch_Sitzung AUTO_INCREMENT = 1; \
+  ALTER TABLE Tisch_Gruppe AUTO_INCREMENT = 1; \
+  ALTER TABLE Gericht_Zutaten AUTO_INCREMENT = 1; \
+  ALTER TABLE Zutat AUTO_INCREMENT = 1; \
+  ALTER TABLE Stand AUTO_INCREMENT = 1; \
+  COMMIT;`;
+  db.query(sql, function (err, rows) {
+    callback(err);
+  });
+}
+
+
 
 
 

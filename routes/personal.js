@@ -76,8 +76,11 @@ router.post('/personal_overview', function (req, res) {
     // Logout request
     if (req.body.logout) {
         req.session.destroy(function (err) {
-            console.log(err)
-            console.log("session destroyed")
+            if (err) {
+                console.log(err);
+            } else {
+                console.log("session destroyed");
+            }
         });
         res.redirect("/personal/login");
         return;

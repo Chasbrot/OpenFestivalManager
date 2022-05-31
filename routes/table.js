@@ -344,7 +344,7 @@ router.get('/productlist/:sid', function (req, res) {
         d=0;
       }
       
-      res.render("table/productlist", { products: prods, currentWaitTime: d.toFixed(0) });
+      res.render("table/productlist_new", { products: prods, currentWaitTime: d.toFixed(0) });
     });
     });
   });

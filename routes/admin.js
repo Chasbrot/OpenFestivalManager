@@ -127,11 +127,12 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
     });
   }
 
-  /* Export database to sql file*/
+  /* Import db from uploaded sql file*/
   if (req.body.importdb) {
     console.log("Importing DB")
     var tmp_path = req.file.path;
     console.log(tmp_path)
+
     /* Clear DB 
     clearDBStatic((err) => {
       if (err) {
@@ -146,6 +147,11 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
         });
       }
     });*/
+
+
+
+
+
 
     
   }

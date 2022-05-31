@@ -11,6 +11,19 @@
     <!--<script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>-->
     <script src="/javascripts/bootstrap5.0.2.bundle.min.js">
     </script>
+    <style>
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
 
 </head>
 
@@ -18,12 +31,12 @@
     <!-- Nav bar -->
     <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
         <div class="container-fluid">
-        <a class="navbar-brand" href="/personal/personal_overview">Übersicht</a>
-        <div class="navbar-brand float-right">
-            <%= t_name%>
+            <a class="navbar-brand" href="/personal/personal_overview">Übersicht</a>
+            <div class="navbar-brand float-right">
+                <%= t_name%>
+            </div>
+            <a class="btn btn-danger float-right btn-md py-0" href="/table/bill">Kassieren</a>
         </div>
-        <a class="btn btn-danger float-right btn-md py-0" href="/table/bill">Kassieren</a>
-    </div>
     </nav>
 
     <!-- Bestellungen -->
@@ -84,30 +97,33 @@
             <div class="card-header py-0">
                 Bestellen
             </div>
-            <div class="card-body px-0 pt-0">
+            <div class="card-body px-0 py-0">
                 <ul class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
 
                     <% if(stations.length){%>
                     <% for(var i=0; i< stations.length; i++) {%>
                     <li class="nav-item" role="presentation">
                         <% if(i==0){ %>
-                        <button class="nav-link active px-2" id="nav-home-tab" type="button" role="tab" aria-controls="home" aria-selected="true"
-                            role="presentation" onclick="loadProducts('<%= stations[i].id%>')" data-bs-toggle="tab" data-bs-target="#nav-<%= stations[i].id%>" >
+                        <button class="nav-link active px-2" id="nav-home-tab" type="button" role="tab"
+                            aria-controls="home" aria-selected="true" role="presentation"
+                            onclick="loadProducts('<%= stations[i].id%>')" data-bs-toggle="tab"
+                            data-bs-target="#nav-<%= stations[i].id%>">
                             <%= stations[i].name%>
                         </button>
                         <% } else {%>
-                        <button class="nav-link px-2" id="nav-contact-tab"  type="button" role="tab" aria-controls="home" aria-selected="false"
-                            role="presentation" onclick="loadProducts('<%= stations[i].id%>')"  data-bs-toggle="tab" data-bs-target="#nav-<%= stations[i].id%>" >
+                        <button class="nav-link px-2" id="nav-contact-tab" type="button" role="tab" aria-controls="home"
+                            aria-selected="false" role="presentation" onclick="loadProducts('<%= stations[i].id%>')"
+                            data-bs-toggle="tab" data-bs-target="#nav-<%= stations[i].id%>">
                             <%= stations[i].name%>
                         </button>
                         <%}%>
                     </li>
 
                     <% } %>
-                    <% } %>
+                        <% } %>
 
                 </ul>
-                <div class="tab-content pb-4" id="station_products">
+                <div class="tab-content" id="station_products">
                     <% if(stations.length){%>
                     <% for(var i=0; i< stations.length; i++) {%>
                     <% if(i==0){ %>

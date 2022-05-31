@@ -3148,12 +3148,12 @@ textarea.form-control.is-invalid {
 .btn:hover {
     color: #212529
 }*/
-
+/* Prevents btn-check shadow on mobile
 .btn-check:focus+.btn,
 .btn:focus {
     outline: 0;
     box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25)
-}
+}*/
 
 .btn.disabled,
 .btn:disabled,
@@ -3532,11 +3532,11 @@ fieldset:disabled .btn {
     background-color: #0d6efd;
     border-color: #0d6efd
 }*/
-
+/* Prevents btn-check shadow on mobile
 .btn-check:focus+.btn-outline-primary,
 .btn-outline-primary:focus {
     box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .5)
-}
+}*/
 
 .btn-check:active+.btn-outline-primary,
 .btn-check:checked+.btn-outline-primary,

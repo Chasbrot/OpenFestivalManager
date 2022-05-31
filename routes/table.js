@@ -35,7 +35,7 @@ router.post('/new', function (req, res) {
           if (result.length != 0) {
             // Es gibt eine aktive Sitzung -> Meinem Katalog hinzufügen und öffnen
             // Link session to my account
-            var sql = `INSERT INTO Account_Sitzung VALUES (0,${req.session.personal_id},${result[0].id})`;
+            sql = `INSERT INTO Account_Sitzung VALUES (0,${req.session.personal_id},${result[0].id})`;
             db.query(sql, function (err, groups) {
               if (err) {
                 console.log(err);
@@ -48,7 +48,7 @@ router.post('/new', function (req, res) {
           } else {
             // Es gibt keine aktive Sitzung -> Neue Erstellen, hinzufügen und öffnen
             // Create new session
-            var sql = `INSERT INTO Sitzung VALUES (0,NOW(),NULL,${body.table},NULL,${req.session.personal_id})`;
+            sql = `INSERT INTO Sitzung VALUES (0,NOW(),NULL,${body.table},NULL,${req.session.personal_id})`;
             db.query(sql, function (err, groups) {
               if (err) {
                 console.log(err);
@@ -97,12 +97,13 @@ router.post('/new', function (req, res) {
 router.post('/:sid', function (req, res) {
   console.log(req.body)
   const body = req.body;
+  var sql;
   if (req.session.personal_id) {
     var sid = req.params.sid;
 
     if (req.body.cancelOrder) {
       // Cancel order
-      var sql = `UPDATE bestellung  SET stoniert=true WHERE id=${req.body.cancelOrder}`;
+      sql = `UPDATE bestellung  SET stoniert=true WHERE id=${req.body.cancelOrder}`;
       db.query(sql, function (err, orders) {
         if (err) throw err;
         console.log("order " + req.body.cancelOrder + " canceled")
@@ -113,7 +114,7 @@ router.post('/:sid', function (req, res) {
       if (body.product_anzahl != 0) {
         console.log("order recieved")
         // SAVE Order 
-        var sql = `INSERT INTO bestellung VALUES (0, ${body.productid}, ${req.session.personal_id}, ${req.session.session_overview}, NOW(),NULL,false,${body.product_anzahl},0,"${body.notiz}",false)`;
+        sql = `INSERT INTO bestellung VALUES (0, ${body.productid}, ${req.session.personal_id}, ${req.session.session_overview}, NOW(),NULL,false,${body.product_anzahl},0,"${body.notiz}",false)`;
         db.query(sql, function (err, result) {
           if (err) throw err;
           console.log("order created")
@@ -138,7 +139,7 @@ router.post('/:sid', function (req, res) {
       res.redirect("/table/" + sid);
     } else if (body.finishOrder) {
       console.log("finish order" + body.finishOrder)
-      var sql = `UPDATE bestellung SET erledigt = NOW() WHERE id = ${body.finishOrder}`;
+      sql = `UPDATE bestellung SET erledigt = NOW() WHERE id = ${body.finishOrder}`;
       db.query(sql, function (err, result) {
         if (err) throw err;
         res.redirect("/table/" + sid);
@@ -284,19 +285,19 @@ function payOrder(remaining, productid, sessionid) {
       if (remaining - orders[0].rem == 0) {
         // Pay and return
         console.log("payOrder: all paid -> returning")
-        var sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
+        sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
         db.query(sql, function (err, orders) { if (err) throw err; });
         return;
       } else if (remaining - orders[0].rem > 0) {
         // Pay and recursive
         console.log("payOrder: paid " + orders[0].rem + " -> continuing")
-        var sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
+        sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
         db.query(sql, function (err, orders) { if (err) throw err; });
         payOrder(remaining - orders[0].rem, productid, sessionid);
       } else if (remaining - orders[0].rem < 0) {
         // Pay partial and return
         console.log("payOrder: paid partial order " + orders[0].rem + " -> returning")
-        var sql = `UPDATE bestellung SET bezahlt=${orders[0].bezahlt + remaining} WHERE id = ${orders[0].id};`;
+        sql = `UPDATE bestellung SET bezahlt=${orders[0].bezahlt + remaining} WHERE id = ${orders[0].id};`;
         db.query(sql, function (err, orders) { if (err) throw err; });
       }
     }

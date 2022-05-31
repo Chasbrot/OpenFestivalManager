@@ -1,0 +1,56 @@
+<!--bestellung.id AS b_id, gericht.name AS g_name, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr-->
+<% if(act_orders.length){ %>
+<% for(var i=0; i < act_orders.length; i++) { %>
+<div class="card">
+    <!-- Bestellung -->
+    <div class="card-header">
+        <a class="card-header btn-light px-5" data-toggle="collapse"
+            style="background-color: rgba(0,0,0,0)!important;border-bottom: 0!important; width: 40%"
+            href="#options_order<%= act_orders[i].b_id%>" onclick="loadOptionsHTML('<%= act_orders[i].b_id%>')"
+            id="order<%= act_orders[i].b_id%>">
+            <!-- Wartezeit -->
+            <span>
+                <%= act_orders[i].wartezeit %> m
+            </span>
+            <!-- Status -->
+            <% if(act_orders[i].in_zubereitung){ %>
+            <img src="/images/loading.gif" style="width: 15px" />
+            <% } else { %>
+            <img src="/images/order.png" style="width: 15px" />
+            <% } %>
+
+            <!-- Gericht -->
+            <span>
+                <%= act_orders[i].b_anz %> x <%= act_orders[i].g_name %>
+            </span>
+        </a>
+        <!-- Gericht buttons -->
+        <% if(act_orders[i].in_zubereitung){ %>
+        <!-- Gericht zubereiten-->
+        <form action="#" method="POST" class="float-right" style="display: inline">
+            <button class="btn btn-success btn-sm  py-1 px-5" name="sendingOrder" value="<%= act_orders[i].b_id%>">
+                <img src="/images/sent.png" style="width: 20px" />
+            </button>
+        </form>
+        <% } else { %>
+        <!-- Gericht aussenden -->
+        <form action="#" method="POST" class="float-right" style="display: inline">
+            <button class="btn btn-info btn-sm float-right py-1 px-5" style="position: relative;" name="processingOrder"
+                value="<%= act_orders[i].b_id%>">
+                <img src="/images/chef.png" style="width: 20px" />
+            </button>
+        </form>
+        <% } %>
+
+        <!-- Tisch Nummer -->
+        <span class="float-right px-5">
+            <%= act_orders[i].t_nr%>
+        </span>
+
+    </div>
+    <!-- Options -->
+    <div id="options_order<%= act_orders[i].b_id%>" class="collapse card-body" data-parent="#orders">
+    </div>
+</div>
+<% } %>
+<% }else{ %> Keine aktiven Sitzungen <% } %>

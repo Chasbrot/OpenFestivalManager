@@ -107,111 +107,57 @@
                 </div>
             </a>
             <div id="collapseTwo" class="collapse show" data-parent="#accordion">
-                <div class="card-body px-1">
-                    <div class="list-group pt-0" id="orders">
-                        <!--bestellung.id AS b_id, gericht.name AS g_name, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr-->
-                        <% if(act_orders.length){ %>
-                        <% for(var i=0; i < act_orders.length; i++) { %>
-                        <!-- Bestellung -->
-                        <div class="list-group-item">
-                            <a class="card-header btn-light px-5" data-toggle="collapse" style="    background-color: rgba(0,0,0,0)!important;border-bottom: 0!important;"
-                                href="#options_order<%= act_orders[i].b_id%>"
-                                onclick="loadOptions('<%= act_orders[i].b_id%>')" id="order<%= act_orders[i].b_id%>">
-                                <!-- Wartezeit -->
-                                <span>
-                                    <%= act_orders[i].wartezeit %> m
-                                </span>
-                                <!-- Status -->
-                                <% if(act_orders[i].in_zubereitung){ %>
-                                <img src="/images/loading.gif" style="width: 15px" />
-                                <% } else { %>
-                                <img src="/images/order.png" style="width: 15px" />
-                                <% } %>
-
-                                <!-- Gericht -->
-                                <span>
-                                    <%= act_orders[i].b_anz %> x <%= act_orders[i].g_name %>
-                                </span>
-                            </a>
-                            <!-- Gericht buttons -->
-                            <% if(act_orders[i].in_zubereitung){ %>
-                            <!-- Gericht zubereiten-->
-                            <form action="#" method="POST" class="float-right" style="display: inline">
-                                <button class="btn btn-success btn-sm  py-1 px-5" name="sendingOrder"
-                                    value="<%= act_orders[i].b_id%>">
-                                    <img src="/images/sent.png" style="width: 20px" />
-                                </button>
-                            </form>
-                            <% } else { %>
-                            <!-- Gericht aussenden -->
-                            <form action="#" method="POST" class="float-right" style="display: inline">
-                                <button class="btn btn-info btn-sm float-right py-1 px-5" style="position: relative;"
-                                    name="processingOrder" value="<%= act_orders[i].b_id%>">
-                                    <img src="/images/chef.png" style="width: 20px" />
-                                </button>
-                            </form>
-                            <% } %>
-
-                            <!-- Tisch Nummer -->
-                            <span class="float-right px-5">
-                                <%= act_orders[i].t_nr%>
-                            </span>
-
-
-                            <!-- Options -->
-                            <div id="options_order<%= act_orders[i].b_id%>" class="collapse" data-parent="#orders">
-                                <div class="list-group pt-3 w-100" id="options_order<%= act_orders[i].b_id%>_detail">
-                                </div>
-                                <% if(act_orders[i].notiz){%>
-                                <div type="text" class="list-group-item" disabled="true">
-                                    <span>Notiz: <%= act_orders[i].notiz%></span>
-                                </div>
-                                <% } %>
-                            </div>
-                        </div>
-                        <% } %>
-                        <% }else{ %> Keine aktiven Sitzungen <% } %>
-                    </div>
+                <div class="list-group pt-2" id="activeorders">
                 </div>
             </div>
         </div>
     </div>
     <script>
-        
-        function loadOptions(order_id) {
-            console.log("load options for orders" + order_id);
-            $("#options_order" + order_id + "_detail").html("");
+        // Load first station entries
+        $(document).ready(function () {
+            loadActiveOrders('<%= station_id%>');
+        });
+
+        // Automatically reload orders if no actions are made
+        var idleTime;
+        $(document).ready(function () {
+            reloadPage();
+            $('html').bind(
+                'mousemove click mouseup mousedown keydown keypress keyup submit change mouseenter scroll resize dblclick',
+                function () {
+                    clearTimeout(idleTime);
+                    reloadPage();
+                });
+        });
+
+        function reloadPage() {
+            clearTimeout(idleTime);
+            idleTime = setTimeout(function () {
+                loadActiveOrders('<%= station_id%>');
+            }, 60000);
+        }
+
+        // Load products for a station
+        function loadActiveOrders(station_id) {
+            if (!station_id) {
+                return;
+            }
+            console.log("loading products for order" + station_id)
+            $("#activeorders").load("/station/activeorders/" + station_id);
+        };
+
+        // Load products for a station
+        function loadOptionsHTML(order_id) {
             if (!order_id) {
                 return;
             }
-            $.ajax({
-                url: "station/getOptionsFromOrder",
-                type: "POST",
-                data: {
-                    name: "options",
-                    order_id: order_id,
-                },
-                dataType: "json",
-                success: function (result) {
-                    console.log(result);
-                    if (result.options.length != 0) {
-                        $.each(result.options, function (key, value) {
-                            var s = "";
-                            s += '<div class="list-group-item py-0">';
-                            s +=
-                                '<input class="form-check-input" type="checkbox" checked disabled="true">';
-                            s += value.name;
-                            s += "</div>";
-                            $("#options_order" + order_id + "_detail").append(s);
-                        });
-                    } else {
-                        $("#options_order" + order_id + "_detail").append(
-                            '<div class="list-group-item py-0">Keine</div>'
-                        );
-                    }
-                },
-            });
-        }
+            console.log("loading products for order" + order_id)
+            if ($("#options_order" + order_id).is(":visible")) {
+                $("#options_order" + order_id).html('');
+            } else {
+                $("#options_order" + order_id).load("/station/orderoptions/" + order_id);
+            }
+        };
     </script>
 </body>
 

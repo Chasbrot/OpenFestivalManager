@@ -19,7 +19,6 @@ router.get('/', function (req, res) {
         ORDER BY wartezeit DESC`;
         db.query(sql, function (err, activeOrders) {
             if (err) throw err;
-            console.log(activeOrders)
             var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, bestellung.stoniert, bestellung.anzahl AS b_anz, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,bestellung.erledigt) AS dauer, TIME_FORMAT(bestellung.erledigt, '%H:%i') as lieferzeit, tisch.nummer AS t_nr, bestellung.notiz, TIME_FORMAT(bestellung.erstellt, '%H:%i') as erstellt\
             FROM bestellung\
             INNER JOIN gericht\
@@ -34,8 +33,7 @@ router.get('/', function (req, res) {
             ORDER BY lieferzeit DESC`;
             db.query(sql, function (err, preOrders) {
                 if (err) throw err;
-                console.log(preOrders)
-                res.render("station/station_overview", { station_name: req.session.station_name, act_orders: activeOrders, pre_orders: preOrders });
+                res.render("station/station_overview_new", { station_name: req.session.station_name, station_id: req.session.station_id, act_orders: activeOrders, pre_orders: preOrders });
             });
         });
 
@@ -119,6 +117,7 @@ router.post('/login', function (req, res, next) {
 });
 
 router.post('/getOptionsFromOrder', function (req, res) {
+    console.log(req.body)
     if (!req.body.order_id) {
       res.json({
         msg: 'error'
@@ -142,6 +141,64 @@ router.post('/getOptionsFromOrder', function (req, res) {
             msg: 'success',
             options: rows
           });
+        }
+      });
+});
+  
+
+router.get('/orderoptions/:sid', function (req, res) {
+    if (!req.params.sid) {
+      res.json({
+        msg: 'error'
+      });
+      return;
+    }
+    // TODO Only submit differences with standard options
+    var sql = `SELECT Zutat.name FROM Zutat_Bestellung
+    INNER JOIN Zutat ON  Zutat.id = Zutat_Bestellung.id_zutat
+    WHERE Zutat_Bestellung.id_bestellung = ${req.params.sid}
+    ORDER BY Zutat.name`;
+    db.query(sql,
+      function (err, rows, fields) {
+        if (err) {
+          console.log(err)
+          res.json({
+            msg: 'error'
+          });
+        } else {
+            res.render("station/optionsFromOrder", { options: rows });
+        }
+      });
+});
+  
+router.get('/activeorders/:sid', function (req, res) {
+    if (!req.params.sid) {
+      res.json({
+        msg: 'error'
+      });
+      return;
+    }
+    var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,NOW()) AS wartezeit, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr, bestellung.notiz\
+    FROM bestellung\
+    INNER JOIN gericht\
+    ON gericht.id = bestellung.id_gericht\
+    INNER JOIN stand\
+    ON stand.id = gericht.id_stand\
+    INNER JOIN sitzung\
+    ON sitzung.id = bestellung.id_sitzung\
+    INNER JOIN tisch\
+    ON tisch.id = sitzung.id_tisch\
+    WHERE stand.id = ${req.params.sid} AND bestellung.erledigt IS NULL AND bestellung.stoniert = false
+    ORDER BY wartezeit DESC`;
+    db.query(sql,
+      function (err, rows, fields) {
+        if (err) {
+          console.log(err)
+          res.json({
+            msg: 'error'
+          });
+        } else {
+            res.render("station/activeorders", { act_orders: rows });
         }
       });
   });

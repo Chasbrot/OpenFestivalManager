@@ -118,13 +118,13 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
   if (req.body.resetComplete) {
     console.log("Resetting All Data")
     /* Drop Database and reinitialize */
-    clearDBStatic((err) => {
-      if (err) {
-        console.log(err)
-      } else {
-        res.redirect("/admin");
-      }
-    });
+    clearDBStatic(function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.redirect("/admin");
+        }
+      });
   }
 
   /* Import db from uploaded sql file*/
@@ -167,13 +167,13 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
           console.log(err);
         }
         console.log("password changed")
-        req.session.destroy(function (err) {
-          if (err) {
-            console.log(err)
-          } else {
-            console.log("admin session destroyed")
-          }
-        });
+        req.session.destroy((err) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log("admin session destroyed");
+            }
+          });
         res.redirect("/admin/login");
       });
     }
@@ -233,10 +233,11 @@ router.post('/configuration', function (req, res) {
   }
   const body = req.body;
   console.log(body)
+  var sql;
 
   // Neue Tisch Gruppe anlegen
   if (body.new_table_group) {
-    var sql = `INSERT INTO Tisch_Gruppe VALUES (0,"${body.new_table_group}")`;
+    sql = `INSERT INTO Tisch_Gruppe VALUES (0,"${body.new_table_group}")`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record inserted');
@@ -245,7 +246,7 @@ router.post('/configuration', function (req, res) {
 
   // Neuen Tisch anlegen
   if (body.new_table) {
-    var sql = `INSERT INTO Tisch VALUES (0,"${body.new_table}",${body.table_group_id})`;
+    sql = `INSERT INTO Tisch VALUES (0,"${body.new_table}",${body.table_group_id})`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record inserted');
@@ -255,7 +256,7 @@ router.post('/configuration', function (req, res) {
 
   // Neue Station anlegen
   if (body.new_station) {
-    var sql = `INSERT INTO stand VALUES (0,"${body.new_station}",NULL)`;
+    sql = `INSERT INTO stand VALUES (0,"${body.new_station}",NULL)`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record inserted');
@@ -264,7 +265,7 @@ router.post('/configuration', function (req, res) {
 
   // Neue Zutat anlegen
   if (body.new_option) {
-    var sql = `INSERT INTO Zutat VALUES (0,"${body.new_option}")`;
+    sql = `INSERT INTO Zutat VALUES (0,"${body.new_option}")`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record inserted');
@@ -281,7 +282,7 @@ router.post('/configuration', function (req, res) {
     var cost = body.product_cost;
 
     // Produkt eintrag anlegen
-    var sql = `INSERT INTO Gericht VALUES (0,${station},"${name}",${cost},${deliverable})`;
+    sql = `INSERT INTO Gericht VALUES (0,${station},"${name}",${cost},${deliverable})`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       // Get Gericht ID!
@@ -307,13 +308,13 @@ router.post('/configuration', function (req, res) {
   // Remove Produkt
   if (body.remove_product) {
     // Gericht_Zutaten entfernen
-    var sql = `DELETE FROM Gericht_Zutaten WHERE id_gericht = ${body.remove_product}`;
+    sql = `DELETE FROM Gericht_Zutaten WHERE id_gericht = ${body.remove_product}`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record  deleted');
     });
     // Gericht entfernen
-    var sql = `DELETE FROM Gericht WHERE id = ${body.remove_product}`;
+    sql = `DELETE FROM Gericht WHERE id = ${body.remove_product}`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record  deleted');
@@ -323,7 +324,7 @@ router.post('/configuration', function (req, res) {
   // Remove Tisch
   if (body.remove_table) {
     // Gericht_Zutaten entfernen
-    var sql = `DELETE FROM Tisch WHERE id = ${body.remove_table}`;
+    sql = `DELETE FROM Tisch WHERE id = ${body.remove_table}`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record  deleted');
@@ -333,7 +334,7 @@ router.post('/configuration', function (req, res) {
   // Remove Tisch Gruppe
   if (body.remove_table_group) {
     // Tische entfernen
-    var sql = `DELETE FROM Tisch WHERE id_tischgruppe = ${body.remove_table_group}`;
+    sql = `DELETE FROM Tisch WHERE id_tischgruppe = ${body.remove_table_group}`;
     db.query(sql, function (err, result) {
       if (err) throw err;
       console.log('record  deleted');

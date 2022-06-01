@@ -11,12 +11,15 @@ router.post('/login', function (req, res, next) {
     if (req.body.username) {
         var sql = `SELECT id,name FROM account WHERE name ="${req.body.username}" AND id_type= 3`;
         db.query(sql, function (err, result) {
-            if (err) throw err;
-            if (result[0]) {
-                req.session.personal_id = result[0].id;
-                req.session.personal_name = result[0].name;
-                res.redirect("/personal/personal_overview");
-                return;
+            if (err) {
+                console.log(err)
+            } else {
+                if (result[0]) {
+                    req.session.personal_id = result[0].id;
+                    req.session.personal_name = result[0].name;
+                    res.redirect("/personal/personal_overview");
+                    return;
+                } 
             }
         });
     } else {
@@ -92,7 +95,7 @@ router.post('/personal_overview', function (req, res) {
 
 router.get('/registrierung', function (req, res) {
     if (global.registrationActive) {
-        res.render("personal/registrierung_personal", {err: false});
+        res.render("personal/registrierung_personal", { err: false });
     } else {
         res.redirect("/personal/login");
     }
@@ -107,23 +110,29 @@ router.post('/registrierung', function (req, res, next) {
     // Check if username as personal exists
     var sql = `SELECT * FROM account WHERE name="${userDetails.name}" AND id_type=3`;
     db.query(sql, function (err, result) {
-        if (err) throw err;
-        if (result.length == 0) {
-            // insert user data into users table
-            var sql = `INSERT INTO account VALUES (0,"${userDetails.name}","",3)`;
-            db.query(sql, function (err, result) {
-                if (err) throw err;
-                console.log('record inserted');
-            });
-            res.redirect("/personal/login");  // redirect to user form page after inserting the data
+        if (err) {
+            console.log(err)
         } else {
-            res.render("personal/registrierung_personal", {err: true});
+            if (result.length == 0) {
+                // insert user data into users table
+                var sql = `INSERT INTO account VALUES (0,"${userDetails.name}","",3)`;
+                db.query(sql, function (err, result) {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        console.log('record inserted');
+                    }
+                });
+                res.redirect("/personal/login");  // redirect to user form page after inserting the data
+            } else {
+                res.render("personal/registrierung_personal", { err: true });
+            }
         }
     });
 
 
 
-    
+
 });
 
 

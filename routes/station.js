@@ -101,14 +101,17 @@ router.post('/login', function (req, res, next) {
   if (req.body.username) {
     var sql = `SELECT id,name FROM stand WHERE name ="${req.body.username}"`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      if (result[0]) {
-        req.session.station_id = result[0].id;
-        req.session.station_name = result[0].name;
-        res.redirect("/station");
+      if (err) {
+        console.log(err)
       } else {
-        console.log("station " + req.body.username + " not found")
-        res.render("station/login_station", { err: true });
+        if (result[0]) {
+          req.session.station_id = result[0].id;
+          req.session.station_name = result[0].name;
+          res.redirect("/station");
+        } else {
+          console.log("station " + req.body.username + " not found")
+          res.render("station/login_station", { err: true });
+        }
       }
     });
   } else {
@@ -187,7 +190,6 @@ router.get('/orderoptions/:sid', function (req, res) {
                 msg: 'error'
               });
             } else {
-              console.log(rows)
               res.render("station/optionsFromOrder", { options: rows, notiz: notiz[0].notiz });
             }
           });

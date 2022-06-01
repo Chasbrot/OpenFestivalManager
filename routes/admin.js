@@ -239,8 +239,11 @@ router.post('/configuration', function (req, res) {
   if (body.new_table_group) {
     sql = `INSERT INTO Tisch_Gruppe VALUES (0,"${body.new_table_group}")`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record inserted');
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: table group record inserted');
+      }
     });
   }
 
@@ -248,8 +251,11 @@ router.post('/configuration', function (req, res) {
   if (body.new_table) {
     sql = `INSERT INTO Tisch VALUES (0,"${body.new_table}",${body.table_group_id})`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record inserted');
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: table record inserted');
+      }
     });
   }
 
@@ -258,8 +264,11 @@ router.post('/configuration', function (req, res) {
   if (body.new_station) {
     sql = `INSERT INTO stand VALUES (0,"${body.new_station}",NULL)`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record inserted');
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: station record inserted');
+      }
     });
   }
 
@@ -267,8 +276,11 @@ router.post('/configuration', function (req, res) {
   if (body.new_option) {
     sql = `INSERT INTO Zutat VALUES (0,"${body.new_option}")`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record inserted');
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: option record inserted');
+      }
     });
   }
 
@@ -295,7 +307,9 @@ router.post('/configuration', function (req, res) {
             var optional = defaults.includes(options[i]);
             var sql = `INSERT INTO Gericht_Zutaten VALUES (0,${result[0].id},${options[i]},1,${optional})`;
             db.query(sql, function (err, result) {
-              if (err) throw err;
+              if (err) {
+                console.log(err)
+              }
             });
             console.log(sql);
           }
@@ -310,24 +324,32 @@ router.post('/configuration', function (req, res) {
     // Gericht_Zutaten entfernen
     sql = `DELETE FROM Gericht_Zutaten WHERE id_gericht = ${body.remove_product}`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record  deleted');
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: product option removed');
+      }
     });
     // Gericht entfernen
     sql = `DELETE FROM Gericht WHERE id = ${body.remove_product}`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record  deleted');
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: product removed');
+      }
     });
   }
 
   // Remove Tisch
   if (body.remove_table) {
-    // Gericht_Zutaten entfernen
     sql = `DELETE FROM Tisch WHERE id = ${body.remove_table}`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record  deleted');
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: table removed');
+      }
     });
   }
 
@@ -336,13 +358,19 @@ router.post('/configuration', function (req, res) {
     // Tische entfernen
     sql = `DELETE FROM Tisch WHERE id_tischgruppe = ${body.remove_table_group}`;
     db.query(sql, function (err, result) {
-      if (err) throw err;
-      console.log('record  deleted');
-      var sql = `DELETE FROM Tisch_Gruppe WHERE id = ${body.remove_table_group}`;
-      db.query(sql, function (err, result) {
-        if (err) throw err;
-        console.log('record  deleted');
-      });
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: tables from group removed');
+        var sql = `DELETE FROM Tisch_Gruppe WHERE id = ${body.remove_table_group}`;
+        db.query(sql, function (err, result) {
+          if (err) {
+            console.log(err)
+          } else {
+            console.log('admin/config: table group removed');
+          }
+        });
+      }
     });
   }
 

@@ -85,7 +85,7 @@ router.post('/new', function (req, res) {
         }
       });
 
-    }else{
+    } else {
       res.redirect("/table/new");
     }
 
@@ -205,7 +205,7 @@ router.get('/bill', function (req, res) {
         console.log(err);
       }
       if (result[0].anz != 0) {
-        console.log("aborting kassieren: "+result[0].anz + " oders are open on session "+ req.session.session_overview)
+        console.log("aborting kassieren: " + result[0].anz + " oders are open on session " + req.session.session_overview)
         res.redirect("/table/" + req.session.session_overview);
       } else {
         // Load orders
@@ -317,36 +317,38 @@ router.get('/productlist/:sid', function (req, res) {
     db.query(sql, function (err, zutaten) {
       if (err) {
         console.log(err);
-      }
-      // Allen Produkten ihre Zutaten zuteilen. Keine bessere Idee, aber die listen sind eh ned so groß
-      for (var p = 0; p < prods.length; p++) {
-        for (var z = 0; z < zutaten.length; z++) {
-          if (zutaten[z].id_gericht == prods[p].id) {
-            if (prods[p].zutaten) {
-              prods[p].zutaten.push(zutaten[z]);
-            } else {
-              prods[p].zutaten = [];
+      } else {
+        console.log(zutaten)
+        // Allen Produkten ihre Zutaten zuteilen. Keine bessere Idee, aber die listen sind eh ned so groß
+        for (var p = 0; p < prods.length; p++) {
+          prods[p].zutaten = [];
+          for (var z = 0; z < zutaten.length; z++) {
+            if (zutaten[z].id_gericht == prods[p].id) {
+              if (prods[p].zutaten) {
+                prods[p].zutaten.push(zutaten[z]);
+              }
             }
           }
         }
+        // Lade aktuelle Wartezeit
+        var sql = `SELECT AVG(TIMESTAMPDIFF(MINUTE, bestellung.erstellt, bestellung.erledigt)) as dauer\
+        FROM bestellung \
+        INNER JOIN gericht ON gericht.id = bestellung.id_gericht\
+        INNER JOIN stand ON gericht.id_stand = stand.id\
+        WHERE stand.id= ${req.params.sid} AND bestellung.erledigt IS NOT NULL AND TIMESTAMPDIFF(MINUTE, bestellung.erledigt, NOW()) < 30`;
+        db.query(sql, function (err, wartezeit) {
+          if (err) {
+            console.log(err);
+          }
+          var d = parseFloat(wartezeit[0].dauer)
+          if (isNaN(d)) {
+            d = 0;
+          }
+
+          res.render("table/productlist_new", { products: prods, currentWaitTime: d.toFixed(0) });
+        });
       }
-      // Lade aktuelle Wartezeit
-    var sql = `SELECT AVG(TIMESTAMPDIFF(MINUTE, bestellung.erstellt, bestellung.erledigt)) as dauer\
-    FROM bestellung \
-    INNER JOIN gericht ON gericht.id = bestellung.id_gericht\
-    INNER JOIN stand ON gericht.id_stand = stand.id\
-    WHERE stand.id= ${req.params.sid} AND bestellung.erledigt IS NOT NULL AND TIMESTAMPDIFF(MINUTE, bestellung.erledigt, NOW()) < 30`;
-    db.query(sql, function (err, wartezeit) {
-      if (err) {
-        console.log(err);
-      }
-      var d = parseFloat(wartezeit[0].dauer)
-      if(isNaN(d)){
-        d=0;
-      }
-      
-      res.render("table/productlist_new", { products: prods, currentWaitTime: d.toFixed(0) });
-    });
+
     });
   });
 });

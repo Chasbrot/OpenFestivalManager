@@ -13,7 +13,7 @@ router.get('/new', function (req, res) {
       res.render("table/table_new", { table_groups: groups });
     });
   } else {
-    res.redirect("/personal/personal_overview");
+    res.redirect("/personal/overview");
   }
 });
 
@@ -90,7 +90,56 @@ router.post('/new', function (req, res) {
     }
 
   } else {
-    res.redirect("/personal/personal_overview");
+    res.redirect("/personal/overview");
+  }
+});
+
+router.get('/move/:sid', function (req, res) {
+  if (req.session.personal_id) {
+    // Lade Tischgruppen
+    db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
+      if (err) {
+        console.log(err);
+      }
+      res.render("table/table_move", { table_groups: groups, err: null });
+    });
+  } else {
+    res.redirect("/personal/login");
+  }
+});
+
+router.post('/move/:sid', function (req, res) {
+  const body = req.body;
+  if (req.session.personal_id) {
+    if (body.table && body.move_session) {
+      // Check if current sitzung?
+      var sql = `SELECT COUNT(id) AS num FROM Sitzung WHERE end IS NULL AND id_tisch = ${body.table}`;
+      db.query(sql, function (err, result) {
+        if (err) {
+          console.log("table/move: Can't move session " + err)
+          res.redirect("/table/move/" + req.params.sid);
+        } else {
+          if (result[0].num != 0) {
+            console.log("table/move: Can't move session " + req.params.sid + ", Table " + body.table + " occupied")
+            res.redirect("/table/move/" + req.params.sid);
+          } else {
+            sql = `UPDATE Sitzung SET id_tisch = ${body.table} WHERE Sitzung.id = ${req.params.sid};`;
+            db.query(sql, function (err, result) {
+              if (err) {
+                console.log("table/move: Can't move session " + err)
+                res.redirect("/table/move/" + req.params.sid);
+              } else {
+                res.redirect("/personal/overview");
+              }
+            });
+          }
+        }
+      });
+    } else {
+      res.redirect("/table/move/" + req.params.sid);
+    }
+  } else {
+    res.redirect("/personal/login");
   }
 });
 
@@ -128,7 +177,7 @@ router.get('/bill', function (req, res) {
       }
     });
   } else {
-    res.redirect("/personal/personal_overview");
+    res.redirect("/personal/overview");
   }
 });
 
@@ -160,7 +209,7 @@ router.post('/bill', function (req, res) {
           console.log(err)
           res.redirect("/table/bill");
         } else {
-          res.redirect("/personal/personal_overview");
+          res.redirect("/personal/overview");
         }
       });
 
@@ -168,7 +217,7 @@ router.post('/bill', function (req, res) {
       res.redirect("/table/bill");
     }
   } else {
-    res.redirect("/personal/personal_overview");
+    res.redirect("/personal/overview");
   }
 });
 
@@ -211,7 +260,7 @@ router.get('/:sid', function (req, res) {
           });
         } else {
           console.log("session " + req.params.tid + " not found")
-          res.redirect("/personal/personal_overview");
+          res.redirect("/personal/overview");
         }
       }
     });
@@ -219,7 +268,7 @@ router.get('/:sid', function (req, res) {
 
 
   } else {
-    res.redirect("/personal/personal_overview");
+    res.redirect("/personal/overview");
   }
 });
 
@@ -273,7 +322,7 @@ router.post('/:sid', function (req, res) {
                   }
                 }
               });
-            } 
+            }
           }
         });
       }
@@ -289,7 +338,7 @@ router.post('/:sid', function (req, res) {
       });
     }
   } else {
-    res.redirect("/personal/personal_overview");
+    res.redirect("/personal/overview");
   }
 });
 
@@ -317,19 +366,19 @@ function payOrder(remaining, productid, sessionid) {
         // Pay and return
         console.log("payOrder: all paid -> returning")
         sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
-        db.query(sql, function (err, orders) { if (err){console.log(err)}});
+        db.query(sql, function (err, orders) { if (err) { console.log(err) } });
         return;
       } else if (remaining - orders[0].rem > 0) {
         // Pay and recursive
         console.log("payOrder: paid " + orders[0].rem + " -> continuing")
         sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
-        db.query(sql, function (err, orders) { if (err){console.log(err)}});
+        db.query(sql, function (err, orders) { if (err) { console.log(err) } });
         payOrder(remaining - orders[0].rem, productid, sessionid);
       } else if (remaining - orders[0].rem < 0) {
         // Pay partial and return
         console.log("payOrder: paid partial order " + orders[0].rem + " -> returning")
         sql = `UPDATE bestellung SET bezahlt=${orders[0].bezahlt + remaining} WHERE id = ${orders[0].id};`;
-        db.query(sql, function (err, orders) { if (err){console.log(err)}});
+        db.query(sql, function (err, orders) { if (err) { console.log(err) } });
       }
     }
   });

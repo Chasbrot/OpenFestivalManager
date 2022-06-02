@@ -17,19 +17,19 @@ router.post('/login', function (req, res, next) {
                 if (result[0]) {
                     req.session.personal_id = result[0].id;
                     req.session.personal_name = result[0].name;
-                    res.redirect("/personal/personal_overview");
+                    res.redirect("/personal/overview");
                     return;
-                } 
+                }
+                res.render("personal/login_personal", { err: true });
             }
         });
     } else {
-        res.render("personal/login_personal", { err: true });  // redirect to user form page after inserting the data
+        res.render("personal/login_personal", { err: true });  // redirect to user form page after inserting the data 
     }
-
 });
 
 
-router.get('/personal_overview', function (req, res) {
+router.get('/overview', function (req, res) {
     if (!req.session.personal_id) {
         res.redirect("/personal/login");
     } else {
@@ -75,7 +75,7 @@ router.get('/personal_overview', function (req, res) {
     }
 });
 
-router.post('/personal_overview', function (req, res) {
+router.post('/overview', function (req, res) {
     // Logout request
     if (req.body.logout) {
         req.session.destroy(function (err) {

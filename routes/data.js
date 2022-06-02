@@ -59,6 +59,78 @@ router.post('/getTablesFromTableGroup', function (req, res) {
         });
 });
 
+
+/*
+* Get all Tables from a Group where a personal has no associated session
+*/
+router.post('/getFreeTablesFromGroupForPersonal', function (req, res) {
+    if (!req.body.group_id) {
+        res.json({
+            msg: 'error'
+        });
+        return;
+    }
+    var sql = `SELECT *
+        FROM Tisch
+        WHERE Tisch.id_tischgruppe= ${req.body.group_id} AND Tisch.id NOT IN 
+        (
+            SELECT Tisch.id FROM Tisch
+            INNER JOIN Sitzung ON Sitzung.id_tisch = Tisch.id
+            INNER JOIN account_sitzung ON account_sitzung.id_sitzung = Sitzung.id
+            WHERE Sitzung.end IS NULL AND account_sitzung.id_account = ${req.session.personal_id}
+        );`;
+    db.query(sql,
+        function (err, rows, fields) {
+            if (err) {
+                console.log(err)
+                res.json({
+                    msg: 'error'
+                });
+            } else {
+                res.json({
+                    msg: 'success',
+                    tables: rows
+                });
+            }
+        });
+});
+
+/*
+* Get all Tables from a Group where no session
+*/
+router.post('/getFreeTablesFromGroup', function (req, res) {
+    if (!req.body.group_id || !req.session.personal_id) {
+        res.json({
+            msg: 'error'
+        });
+        return;
+    }
+    var sql = `SELECT *
+        FROM Tisch
+        WHERE Tisch.id_tischgruppe= ${req.body.group_id} AND Tisch.id NOT IN 
+        (
+            SELECT Tisch.id FROM Tisch
+            INNER JOIN Sitzung ON Sitzung.id_tisch = Tisch.id
+            INNER JOIN account_sitzung ON account_sitzung.id_sitzung = Sitzung.id
+            WHERE Sitzung.end IS NULL
+        );`;
+    db.query(sql,
+        function (err, rows, fields) {
+            if (err) {
+                console.log(err)
+                res.json({
+                    msg: 'error'
+                });
+            } else {
+                res.json({
+                    msg: 'success',
+                    tables: rows
+                });
+            }
+        });
+});
+
+
 router.post('/getOrdersFromSession', function (req, res) {
     console.log(req.body)
     if (!req.body.session_id) {

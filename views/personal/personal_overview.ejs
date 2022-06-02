@@ -14,18 +14,19 @@
 <body>
 
   <!-- Nav bar -->
-  <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
     <a class="navbar-brand" href="/">Übersicht</a>
     <ul class="navbar-nav mr-auto">
     </ul>
-    <div class="navbar-brand ">
+    <span class="navbar-brand">
       <%= personal_name%>
-    </div>
-    <form action="personal_overview" method="POST">
-      <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout" value="true">Logout</button>
+    </span>
+    <form action="#" method="POST">
+      <button class="btn btn-outline-danger btn-sm" type="submit" name="logout" value="true">Logout</button>
     </form>
 
   </nav>
+
 
   <div id="accordion">
     <div class="card">
@@ -42,19 +43,19 @@
           <div class="list-group">
             <!--act_sessions: past_sessions:  { s_id: 7, t_id: 1, t_nr: 'A1', t_name: 'Wiese' },-->
             <% if(past_sessions.length){%>
-              <% for(var i=0; i< past_sessions.length; i++) {%>
-                <button href="#" class="list-group-item list-group-item-action" name="tisch_id"
-                  value="<%= past_sessions[i].s_id%>">
-                  <%= past_sessions[i].t_name%>
-                    <%= past_sessions[i].t_nr%>
-                    <div class="float-right">
-                      <%= past_sessions[i].end%>
-                    </div>
-                </button>
-                <% } %>
-                  <% }else{ %>
-                    Keine vergangenen Sitzungen
-                    <% } %>
+            <% for(var i=0; i< past_sessions.length; i++) {%>
+            <button href="#" class="list-group-item list-group-item-action" name="tisch_id"
+              value="<%= past_sessions[i].s_id%>">
+              <%= past_sessions[i].t_name%>
+              <%= past_sessions[i].t_nr%>
+              <div class="float-right">
+                <%= past_sessions[i].end%>
+              </div>
+            </button>
+            <% } %>
+            <% }else{ %>
+            Keine vergangenen Sitzungen
+            <% } %>
           </div>
         </div>
       </div>
@@ -72,18 +73,27 @@
           <div class="list-group">
             <!--act_sessions: past_sessions:  { s_id: 7, t_id: 1, t_nr: 'A1', t_name: 'Wiese' },-->
             <% if(act_sessions.length){%>
-              <% for(var i=0; i< act_sessions.length; i++) {%>
-                <a href="/table/<%= act_sessions[i].s_id%>" class="list-group-item list-group-item-action">
-                  <%= act_sessions[i].t_name%>
-                    <%= act_sessions[i].t_nr%>
-                    <div class="float-right">
-                      <%= act_sessions[i].start%>
-                    </div>
+            <% for(var i=0; i< act_sessions.length; i++) {%>
+            <div class="list-group-item pl-0">
+              <a href="/table/<%= act_sessions[i].s_id%>" class="py-3 pl-4" style="padding-right: 35vw; color: black;">
+                <%= act_sessions[i].t_name%>
+                <%= act_sessions[i].t_nr%>
+              </a>
+              <div class="float-right">
+                <span><%= act_sessions[i].start%></span>
+                <a class="pl-2" href="/table/move/<%= act_sessions[i].s_id%>">
+                  <img src="/images/transfer.png" style="width: 20px;">
                 </a>
-                <% } %>
-                  <% }else{ %>
-                    Keine aktiven Sitzungen
-                    <% } %>
+              </div>
+            </div>
+
+            <% } %>
+            <% }else{ %>
+            <div class="list-group-item">
+              Keine aktiven Sitzungen
+            </div>
+
+            <% } %>
           </div>
         </div>
       </div>

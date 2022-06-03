@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
     <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
-        crossorigin="anonymous"></script>
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous">
+    </script>
 </head>
 
 <body>
@@ -23,42 +23,35 @@
         <span class="navbar-brand ">Neue Sitzung</span>
     </nav>
     <br>
-    <form action="/table/new" method="POST">
-        <div class="card">
-            <div class="card-body">
-                <h3>Kategorie</h3>
-                <% if(table_groups.length){%>
-                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                        <% for(var i=0; i< table_groups.length; i++) {%>
-                            <label class="btn btn-primary btn-lg">
-                                <input type="radio" name="table_group" id="option<%= table_groups[i].id%>"
-                                    value="<%= table_groups[i].id%>" autocomplete="off" onclick="loadTables(this)">
-                                <%= table_groups[i].groupname%>
-                            </label>
-                            <% } %>
-                    </div>
-                    <% }else{ %>
-                        <div class="list-group-item">
-                            Keine Tisch Gruppen definiert
-                        </div>
-                        <% } %>
-
+    <div class="container">
+        <form action="#" method="POST" id="new">
+            <h4>Gruppe</h4>
+            <% if(table_groups.length){%>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <% for(var i=0; i< table_groups.length; i++) {%>
+                <label class="btn btn-primary btn-lg">
+                    <input type="radio" name="table_group" id="option<%= table_groups[i].id%>"
+                        value="<%= table_groups[i].id%>" autocomplete="off" onclick="loadTables(this)">
+                    <%= table_groups[i].groupname%>
+                </label>
+                <% } %>
             </div>
-            <div class="card-body">
-                <h3>Tisch</h3>
-                    <select class="custom-select" id="table" name="table">
-                    </select>
+            <% }else{ %>
+            <div class="list-group-item">
+                Keine Tisch Gruppen definiert
             </div>
+            <% } %>
+            <br>
+            <h4 class="pt-3">Tisch</h4>
+            <select class="custom-select" id="table" name="table"></select>
+        </form>
+    </div>
 
-        </div>
-
-
-        <!-- Neuer Tisch -->
-        <div class="fixed-bottom text-center">
-            <button class="btn btn-primary btn-lg btn-block" type="submit" name="new_session"
-                value="true">Start</button>
-        </div>
-    </form>
+    <!-- Neuer Tisch -->
+    <div class="fixed-bottom text-center">
+        <button class="btn btn-primary btn-lg btn-block" type="submit" form="new" name="new_session"
+            value="true">Start</button>
+    </div>
 
     <script>
         function loadTables(dropdown) {
@@ -83,7 +76,8 @@
                     if (result.tables.length != 0) {
                         $("#table").append('<option value="" selected>' + "Choose ..." + '</option>');
                         $.each(result.tables, function (key, value) {
-                            $("#table").append('<option value="' + value.id + '">' + value.nummer + '</option>');
+                            $("#table").append('<option value="' + value.id + '">' + value.nummer +
+                                '</option>');
                         });
                     } else {
                         $("#table").append('<option value="-1">' + Leer + '</option>');

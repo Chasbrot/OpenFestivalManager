@@ -1,17 +1,16 @@
-<div class="card">
-    <!--bestellung.id AS b_id, gericht.name AS g_name, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr-->
-    <% if(act_orders.length){ %>
-    <% for(var i=0; i < act_orders.length; i++) { %>
-
+<!--bestellung.id AS b_id, gericht.name AS g_name, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr-->
+<% if(act_orders.length){ %>
+<% for(var i=0; i < act_orders.length; i++) { %>
+<div class="list-group-item">
     <!-- Order header -->
-    <div class="card-header px-1">
+    <div class="pb-2">
         <!-- Collapse button -->
         <a class=" btn-light card-header" data-toggle="collapse"
             style="background-color: rgba(0,0,0,0)!important;border-bottom: 0!important; padding-right: 30%"
             href="#options_order<%= act_orders[i].b_id%>" onclick="loadOptionsHTML('<%= act_orders[i].b_id%>')"
             id="order<%= act_orders[i].b_id%>">
 
-            <img src="/images/caret-down-fill.svg" />
+            <img id="caret<%= act_orders[i].b_id%>" src="/images/caret-down-fill.svg" style="width: 17px" />
             <!-- Status -->
             <% if(act_orders[i].in_zubereitung){ %>
             <img src="/images/loading.gif" style="width: 15px" />
@@ -30,7 +29,8 @@
         <div class="float-right">
             <!-- Wartezeit -->
             <span class="align-middle px-2">
-                <%= act_orders[i].wartezeit %> m
+                Seit:
+                <%= act_orders[i].wartezeit %>m
             </span>
 
             <!-- Tisch Nummer -->
@@ -46,6 +46,11 @@
                     <img src="/images/sent.png" style="width: 20px" />
                 </button>
             </form>
+            <form action="#" method="POST" style="display: inline">
+                <button class="btn btn-danger btn-sm  py-1 px-5" name="cancelOrder" value="<%= act_orders[i].b_id%>">
+                    <img src="/images/sent_failed.png" style="width: 22px" />
+                </button>
+            </form>
             <% } else { %>
             <!-- Gericht zubereiten-->
             <form action="#" method="POST" style="display: inline">
@@ -59,16 +64,15 @@
     </div>
     <!-- Options -->
     <div class="collapse" data-parent="#orders" id="options_order<%= act_orders[i].b_id%>">
-        <div class="card card-body" id="div_options_order<%= act_orders[i].b_id%>" style="min-height: 60px">
+        <div class="card card-body py-0" id="div_options_order<%= act_orders[i].b_id%>" style="min-height: 60px">
         </div>
     </div>
-
-    <% } %>
-    <% }else{ %>
-    <div class="card-header px-1">
-        <span>
-            Keine aktiven Bestellungen
-        </span>
-    </div>
-    <% } %>
 </div>
+<% } %>
+<% }else{ %>
+<div class="list-group-item">
+    <span>
+        Keine aktiven Bestellungen
+    </span>
+</div>
+<% } %>

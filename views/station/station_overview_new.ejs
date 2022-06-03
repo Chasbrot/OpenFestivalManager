@@ -96,7 +96,7 @@
         </div>
         <div class="card">
             <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo">
-                <img src="/images/caret-down-fill.svg" />
+                <img src="/images/caret-down-fill.svg"/>
                 Aktive Bestellungen
                 <div class="float-right">
                     <% if(act_orders.length){ %>
@@ -105,7 +105,7 @@
                 </div>
             </a>
             <div id="collapseTwo" class="collapse show" data-parent="#accordion">
-                <div class="list-group pt-2" id="activeorders"></div>
+                <div class="list-group pt-2 px-2" id="activeorders"></div>
             </div>
         </div>
     </div>
@@ -151,6 +151,14 @@
             console.log("loading products for order" + order_id)
             if ($("#div_options_order" + order_id).html().length == 9) {
                 $("#div_options_order" + order_id).load("/station/orderoptions/" + order_id);
+            }
+
+            // Change caret up/down
+            if($("#options_order" + order_id).hasClass('show')){
+                document.getElementById("caret"  + order_id ).src = "images/caret-down-fill.svg";
+            }else{
+                document.getElementById("caret"  + order_id ).src = "images/caret-up.png";
+                
             }
         };
     </script>

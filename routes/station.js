@@ -85,6 +85,21 @@ router.post('/', function (req, res) {
       });
       return;
     }
+
+    // Order is being canceled because not deliverable
+    if (body.cancelOrder) {
+      var sql = `UPDATE bestellung\
+            SET bestellung.stoniert = true\
+            WHERE bestellung.id="${body.cancelOrder}"`;
+      console.log(sql);
+      db.query(sql, function (err, result) {
+        if (err) {
+          console.log(err);
+        }
+        res.redirect("/station");
+      });
+      return;
+    }
   } else {
     res.redirect("/station/login");
   }

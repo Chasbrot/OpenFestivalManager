@@ -105,7 +105,19 @@
                 </div>
             </a>
             <div id="collapseTwo" class="collapse show" data-parent="#accordion">
-                <div class="list-group pt-2 px-2" id="activeorders">
+                <div class="list-group pt-2 px-2">
+                    <% if(act_orders.length){%>
+                        <% for(var i=0; i < act_orders.length; i++) { %>
+                            <div class="list-group-item" id="list_<%=act_orders[i].b_id%>">
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="list-group-item">
+                            <span>
+                                Keine aktiven Bestellungen
+                            </span>
+                        </div>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -113,7 +125,12 @@
     <script>
         // Load first station entries
         $(document).ready(function () {
-            loadActiveOrders('<%= station_id%>');
+            const o= document.querySelectorAll(`[id^="list_"]`);
+            o.forEach((element) => {
+                console.log(element.id.split("_")[1])
+                const i = element.id.split("_")[1];
+                $("#list_"+i).load("/station/orderentry/" + i);
+            });
         });
 
         // Automatically reload orders if no actions are made
@@ -131,30 +148,15 @@
         function reloadPage() {
             clearTimeout(idleTime);
             idleTime = setTimeout(function () {
-                loadActiveOrders('<%= station_id%>');
+                location.reload();
             }, 60000);
         }
 
-        // Load products for a station
-        function loadActiveOrders(station_id) {
-            if (!station_id) {
-                return;
-            }
-            console.log("loading products for order" + station_id)
-            $("#activeorders").load("/station/activeorders/" + station_id);
-        };
-
-        // Load options for a order
-        function loadOptionsHTML(order_id) {
+        // Change caret up/down
+        function changeCaret(order_id) {
             if (!order_id) {
                 return;
             }
-            console.log("loading products for order" + order_id)
-            if ($("#div_options_order" + order_id).html().length == 9) {
-                $("#div_options_order" + order_id).load("/station/orderoptions/" + order_id);
-            }
-
-            // Change caret up/down
             if($("#options_order" + order_id).hasClass('show')){
                 document.getElementById("caret"  + order_id ).src = "images/caret-down-fill.svg";
             }else{

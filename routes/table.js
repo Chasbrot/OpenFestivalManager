@@ -146,34 +146,20 @@ router.post('/move/:sid', function (req, res) {
 
 router.get('/bill', function (req, res) {
   if (req.session.personal_id) {
-    // Check if there are open orders
-    var sql = `SELECT count(*) AS anz FROM bestellung
-    WHERE bestellung.id_sitzung = ${req.session.session_overview} AND (bestellung.erledigt IS NULL AND bestellung.stoniert = FALSE)`;
-    db.query(sql, function (err, result) {
-      if (err) {
-        console.log(err);
-      }
-      if (result[0].anz != 0) {
-        console.log("aborting kassieren: " + result[0].anz + " oders are open on session " + req.session.session_overview)
-        res.redirect("/table/" + req.session.session_overview);
-      } else {
-        // Load orders
-        var sql = `SELECT SUM(bestellung.anzahl- bestellung.bezahlt) AS uebrig, gericht.name, gericht.id, gericht.preis\
+    // Load orders
+    var sql = `SELECT SUM(bestellung.anzahl- bestellung.bezahlt) AS uebrig, gericht.name, gericht.id, gericht.preis\
         FROM bestellung\
         INNER JOIN gericht ON bestellung.id_gericht = gericht.id\
         WHERE bestellung.id_sitzung = ${req.session.session_overview} AND (bestellung.erledigt IS NOT NULL AND bestellung.stoniert=false)  AND (anzahl-bezahlt)>0\
         GROUP BY name`;
-        db.query(sql, function (err, orders) {
-          if (err) {
-            console.log(err)
-          } else {
-            if (orders.length == 0) {
-              console.log("payment session " + req.params.sid + " no orders found")
-            }
-            res.render("table/table_bill", { session_id: req.session.session_overview, orders: orders });
-          }
-        });
-
+    db.query(sql, function (err, orders) {
+      if (err) {
+        console.log(err)
+      } else {
+        if (orders.length == 0) {
+          console.log("payment session " + req.params.sid + " no orders found")
+        }
+        res.render("table/table_bill", { session_id: req.session.session_overview, orders: orders });
       }
     });
   } else {

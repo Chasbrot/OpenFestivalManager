@@ -43,6 +43,7 @@ router.get('/', function (req, res) {
 router.post('/', function (req, res) {
   const body = req.body;
   if (req.session.station_id) {
+    console.log(body)
     if (body.logout) {
       req.session.destroy(function (err) {
         console.log(err)
@@ -94,6 +95,19 @@ router.post('/', function (req, res) {
       });
       return;
     }
+
+    // Make help request
+    if (body.makeAlert) {
+      sql = `INSERT INTO Alert VALUES (0,${body.makeAlert},${req.session.station_id},true,NOW());`;
+      console.log(sql);
+      db.query(sql, function (err, result) {
+        if (err) {
+          console.log(err);
+        }
+      });
+    }
+
+    res.redirect("/station");
   } else {
     res.redirect("/station/login");
   }

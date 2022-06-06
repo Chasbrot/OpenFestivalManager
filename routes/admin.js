@@ -119,12 +119,12 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
     console.log("Resetting All Data")
     /* Drop Database and reinitialize */
     clearDBStatic(function (err) {
-        if (err) {
-          console.log(err);
-        } else {
-          res.redirect("/admin");
-        }
-      });
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/admin");
+      }
+    });
   }
 
   /* Import db from uploaded sql file*/
@@ -153,7 +153,7 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
 
 
 
-    
+
   }
 
   /* Change Password */
@@ -168,12 +168,12 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
         }
         console.log("password changed")
         req.session.destroy((err) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log("admin session destroyed");
-            }
-          });
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("admin session destroyed");
+          }
+        });
         res.redirect("/admin/login");
       });
     }
@@ -190,34 +190,27 @@ router.get('/configuration', function (req, res) {
     res.redirect("/admin/login");
     return;
   }
-  db.query('SELECT * FROM stand', function (err, rows) {
+  db.query('SELECT * FROM Zutat', function (err, opts) {
     if (err) {
       console.log("error");
     }
 
-    db.query('SELECT * FROM Zutat', function (err, opts) {
+    db.query('SELECT * FROM Gericht', function (err, prod) {
       if (err) {
-        console.log("error");
+        console.log(err);
       }
-
-      db.query('SELECT * FROM Gericht', function (err, prod) {
+      db.query('SELECT * FROM Tisch', function (err, table) {
         if (err) {
           console.log(err);
         }
-        db.query('SELECT * FROM Tisch', function (err, table) {
+
+        db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
           if (err) {
             console.log(err);
           }
 
-          db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
-            if (err) {
-              console.log(err);
-            }
-
-            res.render("admin/admin_configuration", { stations: rows, options: opts, products: prod, table_groups: groups, tables: table });
-          });
+          res.render("admin/admin_configuration", {options: opts, products: prod, table_groups: groups, tables: table });
         });
-
       });
 
     });
@@ -374,8 +367,32 @@ router.post('/configuration', function (req, res) {
     });
   }
 
+  // New alert type
+  if (body.newAlertType) {
+    sql = `INSERT INTO AlertType VALUES (0,"${body.newAlertType}")`;
+    db.query(sql, function (err, result) {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: alerttype record inserted');
+      }
+    });
+  }
 
-  res.redirect("/admin/configuration");
+  // New alert type
+  if (body.deleteAlertType) {
+    sql = `DELETE FROM AlertType WHERE id = "${body.deleteAlertType}"`;
+    db.query(sql, function (err, result) {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('admin/config: alerttype ' + body.deleteAlertType + ' record deleted');
+      }
+    });
+  }
+
+
+  res.redirect("/admin/configuration#v-pills-organization");
 
 });
 
@@ -399,51 +416,13 @@ router.get('/statistics', (req, res) => {
     res.redirect("/admin/login");
     return;
   }
-  // Count all active orders
-  var sql = 'SELECT COUNT(id) AS c FROM bestellung\
-    WHERE bestellung.erledigt IS NULL AND bestellung.stoniert = false';
-  db.query(sql, function (err, activeOrders) {
+  // Count all sessions today
+  db.query('SELECT DISTINCT(DATE_FORMAT(erledigt,"%d.%m.%Y")) AS date, DATE_FORMAT(erledigt,"%Y-%m-%d") AS date_machine FROM bestellung WHERE erledigt IS NOT NULL', function (err, dates) {
     if (err) {
       console.log(err);
     }
-    // Count all active sessions
-    db.query("SELECT COUNT(id) AS c FROM sitzung WHERE end IS NULL", function (err, activeSessions) {
-      if (err) {
-        console.log(err);
-      }
-      // Count all tables
-      db.query("SELECT COUNT(id) AS c FROM tisch", function (err, countTables) {
-        if (err) {
-          console.log(err);
-        }
-        // Count all orders today
-        db.query("SELECT COUNT(id) AS c FROM sitzung WHERE end IS NOT NULL AND DATEDIFF(DATE(end),NOW())=0", function (err, todaySessions) {
-          if (err) {
-            console.log(err);
-          }
-          // Count all sessions today
-          db.query("SELECT COUNT(id) AS c FROM bestellung WHERE erledigt IS NOT NULL AND DATEDIFF(DATE(erledigt),NOW())=0", function (err, todayOrders) {
-            if (err) {
-              console.log(err);
-            }
-            // Count all sessions today
-            db.query('SELECT DISTINCT(DATE_FORMAT(erledigt,"%d.%m.%Y")) AS date, DATE_FORMAT(erledigt,"%Y-%m-%d") AS date_machine FROM bestellung WHERE erledigt IS NOT NULL', function (err, dates) {
-              if (err) {
-                console.log(err);
-              }
-              console.log(dates);
-              res.render("admin/admin_statistics", { activeOrders: activeOrders[0].c, activeSessions: activeSessions[0].c, countTables: countTables[0].c, todayOrders: todayOrders[0].c, todaySessions: todaySessions[0].c, dates: dates });
-
-            });
-          });
-        });
-
-      });
-    });
+    res.render("admin/admin_statistics", { dates: dates });
   });
-
-
-
 });
 
 

@@ -196,5 +196,137 @@ router.get('/getAllStations', function (req, res) {
         });
 });
 
+router.get('/getActiveOrdersCount', function (req, res) {
+    var sql = 'SELECT COUNT(id) AS c FROM bestellung\
+    WHERE bestellung.erledigt IS NULL AND bestellung.stoniert = false';
+    db.query(sql,
+        function (err, rows) {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows[0].c
+                });
+            }
+        });
+});
+
+// Count all active sessions
+router.get('/getActiveSessionsCount', function (req, res) {
+    var sql = "SELECT COUNT(id) AS c FROM sitzung WHERE end IS NULL";
+    db.query(sql,
+        function (err, rows) {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows[0].c
+                });
+            }
+        });
+});
+
+// Count all tables
+router.get('/getTablesCount', function (req, res) {
+    var sql = "SELECT COUNT(id) AS c FROM tisch";
+    db.query(sql,
+        function (err, rows) {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows[0].c
+                });
+            }
+        });
+});
+
+// Count all sessions today
+router.get('/getSessionsTodayCount', function (req, res) {
+    var sql = "SELECT COUNT(id) AS c FROM sitzung WHERE end IS NOT NULL AND DATEDIFF(DATE(end),NOW())=0";
+    db.query(sql,
+        function (err, rows) {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows[0].c
+                });
+            }
+        });
+});
+
+// Count all orders today
+router.get('/getOrdersTodayCount', function (req, res) {
+    var sql = "SELECT COUNT(id) AS c FROM bestellung WHERE erledigt IS NOT NULL AND DATEDIFF(DATE(erledigt),NOW())=0";
+    db.query(sql,
+        function (err, rows) {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows[0].c
+                });
+            }
+        });
+});
+
+// Count all orders today
+router.get('/alerttypes', function (req, res) {
+    var sql = "SELECT * FROM alerttype";
+    db.query(sql,
+        function (err, rows) {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows
+                });
+            }
+        });
+});
+
+// Count all orders today
+router.get('/alerts', function (req, res) {
+    var sql = "SELECT alert.id, alerttype.name, TIME_FORMAT(alert.triggered, '%H:%i') as triggered, Stand.name as stationname  FROM alert \
+    INNER JOIN AlertType ON Alert.id_alerttype = AlertType.id \
+    INNER JOIN Stand ON Stand.id = Alert.id_station \
+    WHERE alert.active";
+    db.query(sql,
+        function (err, rows) {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows
+                });
+            }
+        });
+});
+
+router.post('/alert', (req, res) => {
+    const body = req.body;
+    console.log(body)
+  
+    if (body.clearAlert) {
+      sql = `UPDATE Alert SET active=false WHERE id = ${body.clearAlert}`;
+      db.query(sql, function (err, dates) {
+        if (err) {
+          console.log(err);
+          res.sendStatus(500)
+        } else {
+          res.sendStatus(200)
+        }
+      });
+    }
+    
+  });
 
 module.exports = router;

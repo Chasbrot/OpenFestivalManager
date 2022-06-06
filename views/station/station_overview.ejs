@@ -17,17 +17,24 @@
         <div class="navbar-brand flex-right">
             <%= station_name%>
         </div>
-        <form action="#" method="POST">
-            <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout" value="true">
-                Logout
+        <div class="float-right">
+            <button type="button" class="btn btn-warning my-2 my-sm-0" data-toggle="modal" data-target="#alertModal">
+                Hilfe
             </button>
-        </form>
+            <form action="#" method="POST" style="display: inline;">
+                <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout" value="true">
+                    Logout
+                </button>
+            </form>
+        </div>
+
     </nav>
 
     <div id="accordion">
         <div class="card">
-            <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne"  onclick='changeCaret("caretfinished", "collapseOne")'>
-                <img src="/images/caret-down-fill.svg"  id="caretfinished" style="width: 17px" />
+            <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne"
+                onclick='changeCaret("caretfinished", "collapseOne")'>
+                <img src="/images/caret-down-fill.svg" id="caretfinished" style="width: 17px" />
                 Abgeschlossene Bestellungen
                 <div class="float-right">
                     <% if(pre_orders.length){%>
@@ -54,7 +61,8 @@
             </div>
         </div>
         <div class="card">
-            <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo" onclick='changeCaret("caretorders", "collapseTwo")'>
+            <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo"
+                onclick='changeCaret("caretorders", "collapseTwo")'>
                 <img src="/images/caret-up.png" id="caretorders" style="width: 17px" />
                 Aktive Bestellungen
                 <div class="float-right">
@@ -81,6 +89,28 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Unterstützung anfordern</h5>
+                </div>
+                <div class="modal-body">
+                    <form action="#" method="POST" id="alertform">
+                        <select class="form-control" id="alerttypes" name="makeAlert">
+                        </select>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+                    <button type="submit" class="btn btn-primary" form="alertform">Anfordern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Load first station entries
         $(document).ready(function () {
@@ -90,6 +120,20 @@
                 const i = element.id.split("_")[1];
                 $("#list_" + i).load("/station/orderentry/" + i);
             });
+
+            $.ajax({
+            url: "/data/alerttypes",
+            success: (result) => {
+                if (result.data.length > 0) {
+                    result.data.forEach((element) => {
+                        document.getElementById("alerttypes").innerHTML += '<option value="'+element.id+'">'+element.name +'</option>'
+                    });
+                } else {
+                    document.getElementById("alerttypes").innerHTML +=
+                        '<option selected> Keine Alarmtypen gefunden </option>'
+                }
+            }
+        });
         });
 
         // Automatically reload orders if no actions are made

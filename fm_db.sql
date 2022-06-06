@@ -82,7 +82,25 @@ CREATE TABLE `Zutat_Bestellung` (
   `id_bestellung` int
 );
 
+CREATE TABLE `Alert` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `id_alerttype` int,
+  `id_station` int,
+  `active` bool,
+  `triggered` datetime
+);
+
+CREATE TABLE `AlertType` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(255)
+);
+
+ALTER TABLE `Alert` ADD FOREIGN KEY (`id_station`) REFERENCES `Stand` (`id`);
+
+ALTER TABLE `Alert` ADD FOREIGN KEY (`id_alerttype`) REFERENCES `AlertType` (`id`);
+
 ALTER TABLE `Account_Sitzung` ADD FOREIGN KEY (`id_account`) REFERENCES `Account` (`id`);
+
 ALTER TABLE `Account_Sitzung` ADD FOREIGN KEY (`id_sitzung`) REFERENCES `Sitzung` (`id`);
 
 ALTER TABLE `Account` ADD FOREIGN KEY (`id_type`) REFERENCES `AccountType` (`id`);

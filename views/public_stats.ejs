@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Public</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/javascripts/mdb.js"></script>
+    <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <!-- Brand/logo -->
+        <a class="navbar-brand" href="/">Home</a>
+        <div class="navbar-brand ml-auto">
+            Öffentliche Daten
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                Aktuelle Auslastung
+            </div>
+            <div class="card-body">
+                Offene Bestellungen: <span id="openOrders"></span>
+                <br>
+                Belegung: <span id="activeSessions"></span>/<span id="allTables"></span>
+                <br>
+                Abgeschlossene Bestellungen heute: <span id="todayOrders"></span>
+                <br>
+                Abgeschlossene Sitzungen heute: <span id="todaySessions"></span>
+            </div>
+        </div>
+        <br>
+        <div class="card">
+            <div class="card-header">
+                Benachrichtigungen
+            </div>
+            <div class="card-body" id="alerts">
+            </div>
+        </div>
+        <br>
+    </div>
+</body>
+
+<script>
+    var chart = null;
+
+    $(document).ready(function () {
+        loadCurrentLoad();
+        setInterval(function () {
+            loadCurrentLoad()
+        }, 30000)
+
+    });
+
+    function clearAlert(alert_id) {
+        $.ajax({
+            type: "POST",
+            url: "/data/alert",
+            data: {
+                clearAlert: alert_id
+            }
+        });
+    }
+
+    function loadCurrentLoad() {
+        $.ajax({
+            url: "/data/getActiveOrdersCount",
+            success: (result) => {
+                document.getElementById("openOrders").innerHTML = result.data
+            }
+        });
+        $.ajax({
+            url: "/data/getActiveSessionsCount",
+            success: (result) => {
+                document.getElementById("activeSessions").innerHTML = result.data
+            }
+        });
+        $.ajax({
+            url: "/data/getTablesCount",
+            success: (result) => {
+                document.getElementById("allTables").innerHTML = result.data
+            }
+        });
+        $.ajax({
+            url: "/data/getOrdersTodayCount",
+            success: (result) => {
+                document.getElementById("todayOrders").innerHTML = result.data
+            }
+        });
+        $.ajax({
+            url: "/data/getSessionsTodayCount",
+            success: (result) => {
+                document.getElementById("todaySessions").innerHTML = result.data
+            }
+        });
+
+        // Load alerts
+        $.ajax({
+            url: "/data/alerts",
+            success: (result) => {
+                document.getElementById("alerts").innerHTML="";
+                if (result.data.length > 0) {
+                    result.data.forEach((element) => {
+                        document.getElementById("alerts").innerHTML +=
+                            '<div class="alert alert-warning alert-dismissible fade show" role="alert">' +
+                            '<img src="/images/alert.png" style="width: 20px; "> ' + element
+                            .triggered + ' <strong>' + element.stationname +
+                            '</strong> <span class="float-right">' +
+                            element.name +
+                            '</span><form action="#" method="POST"><button type="button" onclick="clearAlert(' +
+                            element.id +
+                            ')" class="close" data-dismiss="alert" aria-label="Close">' +
+                            '<span aria-hidden="true">&times;</span></button></form></div>'
+                    });
+                } else {
+                    document.getElementById("alerts").innerHTML = "Keine Benachrichtigungen"
+                }
+
+
+            }
+        });
+    }
+
+</script>
+
+</html>

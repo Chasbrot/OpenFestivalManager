@@ -13,6 +13,11 @@ router.get('/dev', function (req, res) {
   res.render('dev');
 });
 
+/* GET developer page. */
+router.get('/public', function (req, res) {
+  res.render('public_stats');
+});
+
 
 /*
 router.get('/error', function (req, res) {

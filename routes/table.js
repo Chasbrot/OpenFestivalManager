@@ -110,19 +110,43 @@ router.get('/move/:sid', function (req, res) {
 
 router.post('/move/:sid', function (req, res) {
   const body = req.body;
+  console.log(body)
   if (req.session.personal_id) {
     if (body.table && body.move_session) {
       // Check if current sitzung?
-      var sql = `SELECT COUNT(id) AS num FROM Sitzung WHERE end IS NULL AND id_tisch = ${body.table}`;
+      var sql = `SELECT id FROM Sitzung WHERE end IS NULL AND id_tisch = ${body.table}`;
       db.query(sql, function (err, result) {
         if (err) {
           console.log("table/move: Can't move session " + err)
           res.redirect("/table/move/" + req.params.sid);
         } else {
-          if (result[0].num != 0) {
-            console.log("table/move: Can't move session " + req.params.sid + ", Table " + body.table + " occupied")
-            res.redirect("/table/move/" + req.params.sid);
+          // Active session on target table detected
+          if (result.length) {
+            // Check if merge with self
+            if (result[0].id == req.params.sid) {
+              db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
+                if (err) {
+                  console.log(err);
+                }
+                res.render("table/table_move", { table_groups: groups, err: "Can't merge with self" });
+              });
+            } else {
+              // Move all orders to new session and remove session + mappings
+              console.log("table/move: moving session " + req.params.sid + " to target session " + result[0].id)
+              sql = `BEGIN; UPDATE Bestellung SET id_sitzung = ${result[0].id} WHERE id_sitzung = ${req.params.sid};\
+                      DELETE Account_Sitzung WHERE id_sitzung = ${req.params.sid}; \
+                    DELETE Sitzung WHERE id_sitzung = ${req.params.sid}; COMMIT;`;
+              db.query(sql, function (err, result) {
+                if (err) {
+                  console.log("table/move: Can't merge sessions \n" + err)
+                  res.redirect("/table/move/" + req.params.sid);
+                } else {
+                  res.redirect("/personal/overview");
+                }
+              });
+            }
           } else {
+            // No active session on target table
             sql = `UPDATE Sitzung SET id_tisch = ${body.table} WHERE Sitzung.id = ${req.params.sid};`;
             db.query(sql, function (err, result) {
               if (err) {
@@ -136,7 +160,12 @@ router.post('/move/:sid', function (req, res) {
         }
       });
     } else {
-      res.redirect("/table/move/" + req.params.sid);
+      db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
+        if (err) {
+          console.log(err);
+        }
+        res.render("table/table_move", { table_groups: groups, err: "Kein Tisch ausgewählt" });
+      });
     }
   } else {
     res.redirect("/personal/login");

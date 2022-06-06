@@ -28,6 +28,25 @@ app.use(express.urlencoded({ extended: true }));
 // Parse incoming cookies
 app.use(cookieParser());
 
+// Cache Control Header function
+let setCache = function (req, res, next) {
+  // Cache for 24h
+  const period = 60 * 60 * 24 
+
+  // Only cache images, js and css files
+  if (req.method == 'GET' && (req.url.includes("stylesheets") || req.url.includes("images") || req.url.includes("javascripts"))) {
+    res.set('Cache-control', `max-age=${period}`)
+  } else {
+    // for the other requests set strict no caching parameters
+    res.set('Cache-control', `no-store`)
+  }
+
+  // remember to call next() to pass on the request
+  next()
+}
+// Apply cache control header
+app.use(setCache);
+
 // Use public directory as root for web files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -40,7 +59,6 @@ app.use(sessions({
     cookie: { maxAge: oneDay },
     resave: false 
 }));
-
 
 // Send requests for these paths to respective routing files
 app.use('/', indexRouter);

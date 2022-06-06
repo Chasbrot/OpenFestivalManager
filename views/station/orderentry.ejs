@@ -2,9 +2,9 @@
     <div class="pb-2">
         <!-- Collapse button -->
         <% if  (special) { %>
-        <a class=" btn-light card-header" data-toggle="collapse"
+        <a class=" btn-light card-header pl-3" data-toggle="collapse"
             style="background-color: rgba(0,0,0,0)!important;border-bottom: 0!important; padding-right: 30%"
-            href="#options_order<%= order.b_id%>" onclick='changeCaret("<%= order.b_id%>")' id="order<%= order.b_id%>">
+            href="#options_order<%= order.b_id%>" onclick='changeCaret("caret<%= order.b_id%>", "options_order<%= order.b_id%>")' id="order<%= order.b_id%>">
 
             <!-- Extras or Note detected -->
             <% if(special) { %>
@@ -12,7 +12,11 @@
             <img src="/images/alert.png" style="width: 15px" />
             <% } %>
             <!-- Status -->
-            <% if(order.in_zubereitung){ %>
+            <% if(order.stoniert) { %>
+            <img src="/images/canceled.png" style="width: 15px" />
+            <% } else if (order.erledigt) { %>
+            <img src="/images/check.png" style="width: 15px" />
+            <% } else if (order.in_zubereitung){ %>
             <img src="/images/loading.gif" style="width: 15px" />
             <% } else { %>
             <img src="/images/order.png" style="width: 15px" />
@@ -28,7 +32,11 @@
 
         <span class="pl-5 ml-2">
             <!-- Status -->
-            <% if(order.in_zubereitung){ %>
+            <% if(order.stoniert) { %>
+            <img src="/images/canceled.png" style="width: 15px" />
+            <% } else if (order.erledigt) { %>
+            <img src="/images/check.png" style="width: 15px" />
+            <% } else if(order.in_zubereitung){ %>
             <img src="/images/loading.gif" style="width: 15px" />
             <% } else { %>
             <img src="/images/order.png" style="width: 15px" />
@@ -45,9 +53,14 @@
         <div class="float-right">
             <!-- Order recieved and waittime -->
             <span class="align-middle px-2">
-                Seit:
+                <% if(order.erledigt) { %>
+                Geliefert: <%= order.erledigt%>
+                <%= order.lieferzeit%>m
+                <% } else { %>
+                Erstellt:
                 <%= order.erstellt%>
                 <%= order.wartezeit%>m
+                <% } %>
             </span>
 
             <!-- Tisch Nummer -->
@@ -56,6 +69,7 @@
             </span>
 
             <!-- Gericht buttons -->
+            <% if( !order.stoniert && !order.erledigt){ %>
             <% if(order.in_zubereitung){ %>
             <!-- Gericht aussenden -->
             <form action="#" method="POST" style="display: inline">
@@ -77,6 +91,8 @@
                 </button>
             </form>
             <% } %>
+            <% } %>
+
         </div>
 
     </div>

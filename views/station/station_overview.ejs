@@ -26,8 +26,8 @@
 
     <div id="accordion">
         <div class="card">
-            <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne">
-                <img src="/images/caret-down-fill.svg" />
+            <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne"  onclick='changeCaret("caretfinished", "collapseOne")'>
+                <img src="/images/caret-down-fill.svg"  id="caretfinished" style="width: 17px" />
                 Abgeschlossene Bestellungen
                 <div class="float-right">
                     <% if(pre_orders.length){%>
@@ -37,181 +37,92 @@
                 </div>
             </a>
             <div id="collapseOne" class="collapse" data-parent="#accordion">
-                <div class="card-body px-1">
-                    <div class="list-group pt-0" id="orders">
-                        <!-- SELECT bestellung.id AS b_id, gericht.name AS g_name, bestellung.anzahl AS b_anz, AS dauer,  lieferzeit, tisch.nummer AS t_nr\ -->
-
-                        <% if(pre_orders.length){%>
-                        <% for(var i=0; i < pre_orders.length; i++) {%>
-                        <!-- Bestellung -->
-                        <div class="list-group-item px-1">
-                            <!-- Optionen -->
-                            <a class="card-header btn-light align-middle" data-toggle="collapse"
-                                href="#options_order<%= pre_orders[i].b_id%>">
-                                <!-- Status -->
-                                <% if(pre_orders[i].stoniert){%>
-                                <img src="/images/canceled.png" style="width: 20px" />
-                                <% } else {%>
-                                <!-- Wartezeit -->
-                                <%= pre_orders[i].dauer%> m
-                                <img src="/images/check.png" style="width: 20px" />
-                                <%}%>
-                                                        <!-- Gericht -->
-                                                        <%= pre_orders[i].b_anz%> x <%= pre_orders[i].g_name%>
-                            </a>
-                            <!-- Tisch Nummer -->
-                            <div class="float-right pr-3">
-                                <%= pre_orders[i].t_nr%>
-                            </div>
-
-                            <div class="float-right pr-3">
-                                <% if(pre_orders[i].stoniert){%>
-                                <%= pre_orders[i].erstellt%>
-                                <%}else{%>
-                                <%= pre_orders[i].lieferzeit%>
-                                <%}%>
-                                    </div>
-                                    <div id="options_order<%= pre_orders[i].b_id%>" class="collapse"
-                                data-parent="#orders">
-                                <div class="list-group pt-3">
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="true"
-                                            id="item1_option1" disabled="true" />
-                                        Knoblauch
-                                    </div>
-                                    <div class="list-group-item py-0">
-                                        <input class="form-check-input" type="checkbox" value="" checked="false"
-                                            id="item1_option1" disabled="true" />
-                                        Soße extra
-                                    </div>
-                                </div>
-                                <input type="text" class="form-control list-group-item" placeholder="Notiz"
-                                    disabled="true" />
-                            </div>
-                        </div>
-                        <% } %>
-                        <% }else{ %> Keine abgeschlossenen Sitzungen <% } %>
+                <div class="list-group pt-0" id="orders">
+                    <% if(pre_orders.length){ %>
+                    <% for(var i=0; i < pre_orders.length; i++) { %>
+                    <div class="list-group-item" id="list_<%=pre_orders[i].b_id%>">
                     </div>
+                    <% } %>
+                    <% } else { %>
+                    <div class="list-group-item">
+                        <span>
+                            Keine abgeschlossenen Bestellungen
+                        </span>
+                    </div>
+                    <% } %>
                 </div>
             </div>
         </div>
         <div class="card">
-            <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo">
-                <img src="/images/caret-down-fill.svg" />
+            <a class="card-link card-header" data-toggle="collapse" href="#collapseTwo" onclick='changeCaret("caretorders", "collapseTwo")'>
+                <img src="/images/caret-up.png" id="caretorders" style="width: 17px" />
                 Aktive Bestellungen
                 <div class="float-right">
                     <% if(act_orders.length){ %>
                     <%= act_orders.length%>
-                    <% } else { %> 0
                     <% } %>
                 </div>
             </a>
             <div id="collapseTwo" class="collapse show" data-parent="#accordion">
-                <div class="card-body px-1">
-                    <div class="list-group pt-0" id="orders">
-                        <!--bestellung.id AS b_id, gericht.name AS g_name, bestellung.anzahl AS b_anz, bestellung.erstellt, bestellung.in_zubereitung, tisch.nummer AS t_nr-->
-                        <% if(act_orders.length){ %>
-                        <% for(var i=0; i < act_orders.length; i++) { %>
-                        <!-- Bestellung -->
-                        <div class="list-group-item">
-                            <a class="card-header btn-light px-5" data-toggle="collapse" style="    background-color: rgba(0,0,0,0)!important;border-bottom: 0!important;"
-                                href="#options_order<%= act_orders[i].b_id%>"
-                                onclick="loadOptions('<%= act_orders[i].b_id%>')" id="order<%= act_orders[i].b_id%>">
-                                <!-- Wartezeit -->
-                                <span>
-                                    <%= act_orders[i].wartezeit %> m
-                                </span>
-                                <!-- Status -->
-                                <% if(act_orders[i].in_zubereitung){ %>
-                                <img src="/images/loading.gif" style="width: 15px" />
-                                <% } else { %>
-                                <img src="/images/order.png" style="width: 15px" />
-                                <% } %>
-
-                                <!-- Gericht -->
-                                <span>
-                                    <%= act_orders[i].b_anz %> x <%= act_orders[i].g_name %>
-                                </span>
-                            </a>
-                            <!-- Gericht buttons -->
-                            <% if(act_orders[i].in_zubereitung){ %>
-                            <!-- Gericht zubereiten-->
-                            <form action="#" method="POST" class="float-right" style="display: inline">
-                                <button class="btn btn-success btn-sm  py-1 px-5" name="sendingOrder"
-                                    value="<%= act_orders[i].b_id%>">
-                                    <img src="/images/sent.png" style="width: 20px" />
-                                </button>
-                            </form>
-                            <% } else { %>
-                            <!-- Gericht aussenden -->
-                            <form action="#" method="POST" class="float-right" style="display: inline">
-                                <button class="btn btn-info btn-sm float-right py-1 px-5" style="position: relative;"
-                                    name="processingOrder" value="<%= act_orders[i].b_id%>">
-                                    <img src="/images/chef.png" style="width: 20px" />
-                                </button>
-                            </form>
-                            <% } %>
-
-                            <!-- Tisch Nummer -->
-                            <span class="float-right px-5">
-                                <%= act_orders[i].t_nr%>
-                            </span>
-
-
-                            <!-- Options -->
-                            <div id="options_order<%= act_orders[i].b_id%>" class="collapse" data-parent="#orders">
-                                <div class="list-group pt-3 w-100" id="options_order<%= act_orders[i].b_id%>_detail">
-                                </div>
-                                <% if(act_orders[i].notiz){%>
-                                <div type="text" class="list-group-item" disabled="true">
-                                    <span>Notiz: <%= act_orders[i].notiz%></span>
-                                </div>
-                                <% } %>
-                            </div>
-                        </div>
-                        <% } %>
-                        <% }else{ %> Keine aktiven Sitzungen <% } %>
+                <div class="list-group pt-2 px-2">
+                    <% if(act_orders.length){ %>
+                    <% for(var i=0; i < act_orders.length; i++) { %>
+                    <div class="list-group-item" id="list_<%=act_orders[i].b_id%>">
                     </div>
+                    <% } %>
+                    <% } else { %>
+                    <div class="list-group-item">
+                        <span>
+                            Keine aktiven Bestellungen
+                        </span>
+                    </div>
+                    <% } %>
                 </div>
             </div>
         </div>
     </div>
     <script>
-        
-        function loadOptions(order_id) {
-            console.log("load options for orders" + order_id);
-            $("#options_order" + order_id + "_detail").html("");
-            if (!order_id) {
+        // Load first station entries
+        $(document).ready(function () {
+            const o = document.querySelectorAll(`[id^="list_"]`);
+            o.forEach((element) => {
+                console.log(element.id.split("_")[1])
+                const i = element.id.split("_")[1];
+                $("#list_" + i).load("/station/orderentry/" + i);
+            });
+        });
+
+        // Automatically reload orders if no actions are made
+        var idleTime;
+        $(document).ready(function () {
+            reloadPage();
+            $('html').bind(
+                'mousemove click mouseup mousedown keydown keypress keyup submit change mouseenter scroll resize dblclick',
+                function () {
+                    clearTimeout(idleTime);
+                    reloadPage();
+                });
+        });
+
+        function reloadPage() {
+            clearTimeout(idleTime);
+            idleTime = setTimeout(function () {
+                location.reload();
+            }, 60000);
+        }
+
+        // Change caret up/down
+        function changeCaret(caret_id, check_id) {
+            if (!caret_id || !check_id) {
                 return;
             }
-            $.ajax({
-                url: "station/getOptionsFromOrder",
-                type: "POST",
-                data: {
-                    name: "options",
-                    order_id: order_id,
-                },
-                dataType: "json",
-                success: function (result) {
-                    console.log(result);
-                    if (result.options.length != 0) {
-                        $.each(result.options, function (key, value) {
-                            var s = "";
-                            s += '<div class="list-group-item py-0">';
-                            s +=
-                                '<input class="form-check-input" type="checkbox" checked disabled="true">';
-                            s += value.name;
-                            s += "</div>";
-                            $("#options_order" + order_id + "_detail").append(s);
-                        });
-                    } else {
-                        $("#options_order" + order_id + "_detail").append(
-                            '<div class="list-group-item py-0">Keine</div>'
-                        );
-                    }
-                },
-            });
-        }
+            if ($("#" + check_id).hasClass('show')) {
+                document.getElementById(caret_id).src = "images/caret-down-fill.svg";
+            } else {
+                document.getElementById(caret_id).src = "images/caret-up.png";
+
+            }
+        };
     </script>
 </body>
 

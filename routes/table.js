@@ -1,5 +1,7 @@
 var express = require('express');
-const { redirect } = require('express/lib/response');
+const {
+  redirect
+} = require('express/lib/response');
 var router = express.Router();
 var db = require("../database");
 
@@ -10,7 +12,9 @@ router.get('/new', function (req, res) {
       if (err) {
         console.log(err);
       }
-      res.render("table/table_new", { table_groups: groups });
+      res.render("table/table_new", {
+        table_groups: groups
+      });
     });
   } else {
     res.redirect("/personal/overview");
@@ -101,7 +105,10 @@ router.get('/move/:sid', function (req, res) {
       if (err) {
         console.log(err);
       }
-      res.render("table/table_move", { table_groups: groups, err: null });
+      res.render("table/table_move", {
+        table_groups: groups,
+        err: null
+      });
     });
   } else {
     res.redirect("/personal/login");
@@ -128,22 +135,35 @@ router.post('/move/:sid', function (req, res) {
                 if (err) {
                   console.log(err);
                 }
-                res.render("table/table_move", { table_groups: groups, err: "Can't merge with self" });
+                res.render("table/table_move", {
+                  table_groups: groups,
+                  err: "Can't merge with self"
+                });
               });
             } else {
               // Move all orders to new session and remove session + mappings
+              //<!-- DOESNT WORK!!! -->
               console.log("table/move: moving session " + req.params.sid + " to target session " + result[0].id)
-              sql = `BEGIN; UPDATE Bestellung SET id_sitzung = ${result[0].id} WHERE id_sitzung = ${req.params.sid};\
-                      DELETE Account_Sitzung WHERE id_sitzung = ${req.params.sid}; \
-                    DELETE Sitzung WHERE id_sitzung = ${req.params.sid}; COMMIT;`;
-              db.query(sql, function (err, result) {
-                if (err) {
-                  console.log("table/move: Can't merge sessions \n" + err)
-                  res.redirect("/table/move/" + req.params.sid);
-                } else {
-                  res.redirect("/personal/overview");
-                }
+              sql = `BEGIN; UPDATE Bestellung SET id_sitzung = ${result[0].id} WHERE id_sitzung = ${req.params.sid}; ` +
+                `DELETE FROM Account_Sitzung WHERE id_sitzung = ${req.params.sid}; ` +
+                `DELETE FROM Sitzung WHERE id = ${req.params.sid}; COMMIT;`;
+              console.log(sql)
+
+              db.mergeSession(req.params.sid, result[0].id).then(err => {
+                res.redirect("/personal/overview");
+              }).catch(err => {
+                console.log("table/move: Can't merge sessions \n" + err)
+                res.redirect("/table/move/" + req.params.sid);
               });
+              /*
+                            db.query(sql, function (err, result) {
+                              if (err) {
+                                console.log("table/move: Can't merge sessions \n" + err)
+                                res.redirect("/table/move/" + req.params.sid);
+                              } else {
+                                res.redirect("/personal/overview");
+                              }
+                            });*/
             }
           } else {
             // No active session on target table
@@ -164,7 +184,10 @@ router.post('/move/:sid', function (req, res) {
         if (err) {
           console.log(err);
         }
-        res.render("table/table_move", { table_groups: groups, err: "Kein Tisch ausgewählt" });
+        res.render("table/table_move", {
+          table_groups: groups,
+          err: "Kein Tisch ausgewählt"
+        });
       });
     }
   } else {
@@ -179,7 +202,7 @@ router.get('/bill', function (req, res) {
     var sql = `SELECT SUM(bestellung.anzahl- bestellung.bezahlt) AS uebrig, gericht.name, gericht.id, gericht.preis\
         FROM bestellung\
         INNER JOIN gericht ON bestellung.id_gericht = gericht.id\
-        WHERE bestellung.id_sitzung = ${req.session.session_overview} AND (bestellung.erledigt IS NOT NULL AND bestellung.stoniert=false)  AND (anzahl-bezahlt)>0\
+        WHERE bestellung.id_sitzung = ${req.session.session_overview}  AND bestellung.stoniert=false AND (anzahl-bezahlt)>0\
         GROUP BY name`;
     db.query(sql, function (err, orders) {
       if (err) {
@@ -188,7 +211,10 @@ router.get('/bill', function (req, res) {
         if (orders.length == 0) {
           console.log("payment session " + req.params.sid + " no orders found")
         }
-        res.render("table/table_bill", { session_id: req.session.session_overview, orders: orders });
+        res.render("table/table_bill", {
+          session_id: req.session.session_overview,
+          orders: orders
+        });
       }
     });
   } else {
@@ -269,7 +295,11 @@ router.get('/:sid', function (req, res) {
                 } else {
                   req.session.session_overview = req.params.sid // save overview id to session
                 }
-                res.render("table/table_overview", { t_name: result[0].nummer, orders: orders, stations: stations });
+                res.render("table/table_overview", {
+                  t_name: result[0].nummer,
+                  orders: orders,
+                  stations: stations
+                });
               });
             }
           });
@@ -307,7 +337,6 @@ router.post('/:sid', function (req, res) {
         }
       });
     } else if (body.productid) {
-      console.log(body)
       if (body.product_anzahl != 0) {
         console.log("order recieved")
         // SAVE Order 
@@ -363,9 +392,9 @@ router.post('/:sid', function (req, res) {
 
 
 /*
-* Recursive Payment Function
-* Pay Orders until the requested amount of a product in a session is paid
-*/
+ * Recursive Payment Function
+ * Pay Orders until the requested amount of a product in a session is paid
+ */
 function payOrder(remaining, productid, sessionid) {
   console.log("payOrder: start " + remaining + " remaining")
   // Get a possible order from the db
@@ -381,19 +410,31 @@ function payOrder(remaining, productid, sessionid) {
         // Pay and return
         console.log("payOrder: all paid -> returning")
         sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
-        db.query(sql, function (err, orders) { if (err) { console.log(err) } });
+        db.query(sql, function (err, orders) {
+          if (err) {
+            console.log(err)
+          }
+        });
         return;
       } else if (remaining - orders[0].rem > 0) {
         // Pay and recursive
         console.log("payOrder: paid " + orders[0].rem + " -> continuing")
         sql = `UPDATE bestellung SET bezahlt=${orders[0].anzahl} WHERE id = ${orders[0].id};`;
-        db.query(sql, function (err, orders) { if (err) { console.log(err) } });
+        db.query(sql, function (err, orders) {
+          if (err) {
+            console.log(err)
+          }
+        });
         payOrder(remaining - orders[0].rem, productid, sessionid);
       } else if (remaining - orders[0].rem < 0) {
         // Pay partial and return
         console.log("payOrder: paid partial order " + orders[0].rem + " -> returning")
         sql = `UPDATE bestellung SET bezahlt=${orders[0].bezahlt + remaining} WHERE id = ${orders[0].id};`;
-        db.query(sql, function (err, orders) { if (err) { console.log(err) } });
+        db.query(sql, function (err, orders) {
+          if (err) {
+            console.log(err)
+          }
+        });
       }
     }
   });
@@ -439,7 +480,10 @@ router.get('/productlist/:sid', function (req, res) {
             d = 0;
           }
 
-          res.render("table/productlist", { products: prods, currentWaitTime: d.toFixed(0) });
+          res.render("table/productlist", {
+            products: prods,
+            currentWaitTime: d.toFixed(0)
+          });
         });
       }
 

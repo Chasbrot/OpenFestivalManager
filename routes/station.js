@@ -71,7 +71,6 @@ router.post('/', function (req, res) {
       var sql = `UPDATE bestellung\
             SET bestellung.in_zubereitung = true\
             WHERE bestellung.id="${body.processingOrder}"`;
-      console.log(sql);
       db.query(sql, function (err, result) {
         if (err) {
           console.log(err);

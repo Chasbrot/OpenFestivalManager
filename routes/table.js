@@ -39,51 +39,22 @@ router.post('/new', function (req, res) {
           if (result.length != 0) {
             // Es gibt eine aktive Sitzung -> Meinem Katalog hinzufügen und öffnen
             // Link session to my account
-            sql = `INSERT INTO Account_Sitzung VALUES (0,${req.session.personal_id},${result[0].id})`;
-            db.query(sql, function (err, groups) {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log("Session linked to account")
-              }
+            db.mapSessionToAccount(result[0].id,req.session.personal_id).then(err => {
+              console.log("Session linked to account");
+              res.redirect("/table/" + result[0].id);
+            }).catch(err => {
+              console.log(err);
+              res.redirect("/table/" + result[0].id);
             });
-            res.redirect("/table/" + result[0].id);
-
           } else {
             // Es gibt keine aktive Sitzung -> Neue Erstellen, hinzufügen und öffnen
             // Create new session
-            sql = `INSERT INTO Sitzung VALUES (0,NOW(),NULL,${body.table},NULL,${req.session.personal_id})`;
-            db.query(sql, function (err, groups) {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log("New session created")
-                // Get ID from new Session
-                var sql = `SELECT LAST_INSERT_ID() AS id`;
-                db.query(sql, function (err, result) {
-                  if (err) {
-                    console.log(err);
-                  } else {
-                    if (result.length != 1) {
-                      console.log("Error in getting id from new sitzung")
-                      console.log(result)
-                    } else {
-                      // Link Session to my account
-                      var sql = `INSERT INTO Account_Sitzung VALUES (0,${req.session.personal_id},${result[0].id})`;
-                      db.query(sql, function (err, groups) {
-                        if (err) {
-                          console.log(err);
-                        } else {
-                          console.log("Session linked to account")
-                        }
-                        res.redirect("/table/" + result[0].id);
-                      });
-                    }
-
-                  }
-                });
-              }
-
+            db.createSession(body.table, req.session.personal_id).then(result => {
+              console.log("New session created")
+              res.redirect("/table/" + result);
+            }).catch(err => {
+              console.log(err);
+              res.redirect("/table/new");
             });
           }
         }
@@ -142,40 +113,23 @@ router.post('/move/:sid', function (req, res) {
               });
             } else {
               // Move all orders to new session and remove session + mappings
-              //<!-- DOESNT WORK!!! -->
               console.log("table/move: moving session " + req.params.sid + " to target session " + result[0].id)
-              sql = `BEGIN; UPDATE Bestellung SET id_sitzung = ${result[0].id} WHERE id_sitzung = ${req.params.sid}; ` +
-                `DELETE FROM Account_Sitzung WHERE id_sitzung = ${req.params.sid}; ` +
-                `DELETE FROM Sitzung WHERE id = ${req.params.sid}; COMMIT;`;
-              console.log(sql)
-
               db.mergeSession(req.params.sid, result[0].id).then(err => {
                 res.redirect("/personal/overview");
               }).catch(err => {
                 console.log("table/move: Can't merge sessions \n" + err)
                 res.redirect("/table/move/" + req.params.sid);
               });
-              /*
-                            db.query(sql, function (err, result) {
-                              if (err) {
-                                console.log("table/move: Can't merge sessions \n" + err)
-                                res.redirect("/table/move/" + req.params.sid);
-                              } else {
-                                res.redirect("/personal/overview");
-                              }
-                            });*/
             }
           } else {
             // No active session on target table
-            sql = `UPDATE Sitzung SET id_tisch = ${body.table} WHERE Sitzung.id = ${req.params.sid};`;
-            db.query(sql, function (err, result) {
-              if (err) {
+            db.changeSessionTable(req.params.sid, body.table)
+              .then(err => {
+                res.redirect("/personal/overview");
+              }).catch(err => {
                 console.log("table/move: Can't move session " + err)
                 res.redirect("/table/move/" + req.params.sid);
-              } else {
-                res.redirect("/personal/overview");
-              }
-            });
+              });
           }
         }
       });
@@ -199,24 +153,20 @@ router.post('/move/:sid', function (req, res) {
 router.get('/bill', function (req, res) {
   if (req.session.personal_id) {
     // Load orders
-    var sql = `SELECT SUM(bestellung.anzahl- bestellung.bezahlt) AS uebrig, gericht.name, gericht.id, gericht.preis\
-        FROM bestellung\
-        INNER JOIN gericht ON bestellung.id_gericht = gericht.id\
-        WHERE bestellung.id_sitzung = ${req.session.session_overview}  AND bestellung.stoniert=false AND (anzahl-bezahlt)>0\
-        GROUP BY name`;
-    db.query(sql, function (err, orders) {
-      if (err) {
-        console.log(err)
-      } else {
-        if (orders.length == 0) {
-          console.log("payment session " + req.params.sid + " no orders found")
-        }
-        res.render("table/table_bill", {
-          session_id: req.session.session_overview,
-          orders: orders
-        });
+    console.log(req.session.session_overview)
+    db.getBillableOrders(req.session.session_overview).then(result => {
+      if (result.length == 0) {
+        console.log("payment session " + req.params.sid + " no orders found")
       }
+      res.render("table/table_bill", {
+        session_id: req.session.session_overview,
+        orders: result
+      });
+    }).catch(err => {
+      console.log("table/bill: Can't get orders \n" + err)
+      res.redirect("/table/" + req.params.sid);
     });
+
   } else {
     res.redirect("/personal/overview");
   }
@@ -340,6 +290,7 @@ router.post('/:sid', function (req, res) {
       if (body.product_anzahl != 0) {
         console.log("order recieved")
         // SAVE Order 
+        // MAKE TRANSACTION IMPORTANT 
         sql = `INSERT INTO bestellung VALUES (0, ${body.productid}, ${req.session.personal_id}, ${req.session.session_overview}, NOW(),NULL,false,${body.product_anzahl},0,"${body.notiz}",false)`;
         db.query(sql, function (err, result) {
           if (err) {
@@ -348,11 +299,13 @@ router.post('/:sid', function (req, res) {
             console.log("order created")
             if (body.option) {
               //  Get id of last inserted record
+              // RACE CONDITION !!!!!
               var sql = "SELECT LAST_INSERT_ID() AS id";
               db.query(sql, function (err, result) {
                 if (err) {
                   console.log(err)
                 } else {
+                  console.log(result)
                   if (result[0]) {
                     // Create Order - Options Mappings
                     for (var i = 0; i < body.option.length; i++) {

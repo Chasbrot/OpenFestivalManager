@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var db = require("../database");
+const { options } = require('./personal');
 
 
 router.get('/', function (req, res) {
@@ -149,58 +150,23 @@ router.get('/orderentry/:oid', function (req, res) {
     });
     return;
   }
-  var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,NOW()) AS wartezeit,\
-            bestellung.anzahl AS b_anz, TIME_FORMAT(bestellung.erstellt, '%H:%i') as erstellt,\
-            bestellung.in_zubereitung, tisch.nummer AS t_nr, bestellung.notiz as notiz,  TIME_FORMAT(bestellung.erledigt, '%H:%i') as erledigt,\
-            TIMESTAMPDIFF(MINUTE,bestellung.erstellt,bestellung.erledigt) AS lieferzeit, bestellung.stoniert\
-    FROM bestellung\
-    INNER JOIN gericht\
-    ON gericht.id = bestellung.id_gericht\
-    INNER JOIN stand\
-    ON stand.id = gericht.id_stand\
-    INNER JOIN sitzung\
-    ON sitzung.id = bestellung.id_sitzung\
-    INNER JOIN tisch\
-    ON tisch.id = sitzung.id_tisch\
-    WHERE bestellung.id = ${req.params.oid}
-    ORDER BY wartezeit DESC`;
-  db.query(sql,
-    function (err, order, fields) {
-      if (err) {
-        console.log(err)
-        res.json({
-          msg: 'error'
-        });
-      } else {
-        // Get all options from the product of the order and if it was ordered
-        var sql = `SELECT Gericht_Zutaten.optional AS standard, Zutat.name, \
-                    (\
-                    SELECT COUNT(*) FROM Bestellung b\
-                    INNER JOIN Zutat_Bestellung ON zutat_bestellung.id_bestellung = bestellung.id\
-                    WHERE b.id = Bestellung.id AND zutat_bestellung.id_zutat=Zutat.id\
-                    ) as ordered\
-                  FROM Bestellung\
-                  INNER JOIN Gericht ON Gericht.id = Bestellung.id_gericht\
-                  INNER JOIN Gericht_Zutaten ON Gericht_Zutaten.id_gericht = Gericht.id\
-                  INNER JOIN Zutat ON Gericht_Zutaten.id_zutat = Zutat.id\
-                  WHERE Bestellung.id = ${req.params.oid} AND Gericht_Zutaten.optional <> (\
-                  SELECT COUNT(*) FROM Bestellung b\
-                  INNER JOIN Zutat_Bestellung ON zutat_bestellung.id_bestellung = bestellung.id\
-                  WHERE b.id = Bestellung.id AND zutat_bestellung.id_zutat=Zutat.id\
-                  )`;
-        db.query(sql,
-          function (err, options, fields) {
-            if (err) {
-              console.log(err)
-              res.json({
-                msg: 'error'
-              });
-            } else {
-              res.render("station/orderentry", { options: options, order: order[0], special: (options.length > 0 || order[0].notiz ) });
-            }
-          });
-      }
+
+  db.getOrderentry(req.params.oid).then(order => {
+    // Get all options from the product of the order and if it was ordered
+    db.getSelectedOptions(req.params.oid).then(options => {
+      res.render("station/orderentry", { options: options, order: order[0], special: (options.length > 0 || order[0].notiz) });
+    }).catch(err => {
+      console.log(err)
+      res.json({
+        msg: 'error'
+      });
     });
+  }).catch(err => {
+    console.log(err)
+    res.json({
+      msg: 'error'
+    });
+  });
 });
 
 module.exports = router;

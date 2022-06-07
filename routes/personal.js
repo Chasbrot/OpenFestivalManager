@@ -66,12 +66,6 @@ router.get('/overview', function (req, res) {
             });
         });
 
-        // Get inactive tables
-        var inactiveSessions;
-
-
-
-
     }
 });
 

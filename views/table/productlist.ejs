@@ -38,7 +38,7 @@
                     <!-- Optionen -->
                     <% for(var z=0; z< products[i].zutaten.length; z+=2) {%>
                     <div class="row m-0 ms-1 py-1" style="width: 98vw">
-                        <div class="col ps-0">
+                        <div class="col-6 ps-0">
                             <% if(products[i].zutaten[z].optional){%>
                             <input type="checkbox" class="btn-check" value="<%=products[i].zutaten[z].id%>"
                                 name="option" id="<%=products[i].id%>_option<%=products[i].zutaten[z].id%>" checked>
@@ -52,7 +52,7 @@
                             </label>
                         </div>
                         <% if(products[i].zutaten[z+1]) { %>
-                        <div class="col px-0">
+                        <div class="col-6 px-0">
                             <% if(products[i].zutaten[z+1].optional){%>
                             <input type="checkbox" class="btn-check" value="<%=products[i].zutaten[z+1].id%>"
                                 name="option" id="<%=products[i].id%>_option<%=products[i].zutaten[z+1].id%>" checked>

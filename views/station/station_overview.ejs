@@ -30,6 +30,7 @@
 
     </nav>
 
+    <!-- Orders -->
     <div id="accordion">
         <div class="card">
             <a class="card-link card-header collapsed" data-toggle="collapse" href="#collapseOne"
@@ -44,7 +45,7 @@
                 </div>
             </a>
             <div id="collapseOne" class="collapse" data-parent="#accordion">
-                <div class="list-group pt-0" id="orders">
+                <div class="list-group py-2 px-2" id="orders">
                     <% if(pre_orders.length){ %>
                     <% for(var i=0; i < pre_orders.length; i++) { %>
                     <div class="list-group-item" id="list_<%=pre_orders[i].b_id%>">
@@ -75,7 +76,7 @@
                 <div class="list-group pt-2 px-2">
                     <% if(act_orders.length){ %>
                     <% for(var i=0; i < act_orders.length; i++) { %>
-                    <div class="list-group-item" id="list_<%=act_orders[i].b_id%>">
+                    <div class="list-group-item pr-2 pl-1" id="list_<%=act_orders[i].b_id%>">
                     </div>
                     <% } %>
                     <% } else { %>

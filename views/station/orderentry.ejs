@@ -3,7 +3,7 @@
         <!-- Collapse button -->
         <% if  (special) { %>
         <a class=" btn-light card-header pl-3" data-toggle="collapse"
-            style="background-color: rgba(0,0,0,0)!important;border-bottom: 0!important; padding-right: 30%"
+            style="background-color: rgba(0,0,0,0)!important;border-bottom: 0!important; padding-right: 28%"
             href="#options_order<%= order.b_id%>" onclick='changeCaret("caret<%= order.b_id%>", "options_order<%= order.b_id%>")' id="order<%= order.b_id%>">
 
             <!-- Extras or Note detected -->
@@ -52,13 +52,16 @@
         <!-- Right side of header-->
         <div class="float-right">
             <!-- Order recieved and waittime -->
-            <span class="align-middle px-2">
+            <span class="align-middle">
                 <% if(order.erledigt) { %>
-                Geliefert: <%= order.erledigt%>
+                <img src="/images/outbox.png" style="width: 18px">
+                <%= order.erledigt%>
+                <img src="/images/history.png" style="width: 18px">
                 <%= order.lieferzeit%>m
                 <% } else { %>
-                Erstellt:
+                <img src="/images/inbox.png" style="width: 18px">
                 <%= order.erstellt%>
+                <img src="/images/sand_clock.png" style="width: 18px">
                 <%= order.wartezeit%>m
                 <% } %>
             </span>
@@ -73,20 +76,20 @@
             <% if(order.in_zubereitung){ %>
             <!-- Gericht aussenden -->
             <form action="#" method="POST" style="display: inline">
-                <button class="btn btn-success btn-sm  py-1 px-5" name="sendingOrder" value="<%= order.b_id%>">
-                    <img src="/images/sent.png" style="width: 20px" />
+                <button class="btn btn-success btn-sm" style="width:80px;" name="sendingOrder" value="<%= order.b_id%>">
+                    <img src="/images/sent.png" style="width: 20px; height: 22px" />
                 </button>
             </form>
             <form action="#" method="POST" style="display: inline">
-                <button class="btn btn-danger btn-sm  py-1 px-5" name="cancelOrder" value="<%= order.b_id%>">
+                <button class="btn btn-danger btn-sm " style="width:80px;" name="cancelOrder" value="<%= order.b_id%>">
                     <img src="/images/sent_failed.png" style="width: 22px" />
                 </button>
             </form>
             <% } else { %>
             <!-- Gericht zubereiten-->
             <form action="#" method="POST" style="display: inline">
-                <button class="btn btn-info btn-sm py-1 px-5" name="processingOrder" value="<%= order.b_id%>"
-                    style="width: 242px">
+                <button class="btn btn-info btn-sm py-1 px-4" name="processingOrder" value="<%= order.b_id%>"
+                    style="width: 165px">
                     <img src="/images/chef.png" style="width: 20px" />
                 </button>
             </form>
@@ -103,10 +106,8 @@
         <div class="card card-body p-2" id="div_options_order<%= order.b_id%>" style="min-height: 60px">
             <% if(options.length) { %>
             <div class="container pb-2">
-                <div class="row row-cols-3">
-                    <div class="col">
-                        <span>Optionen: </span>
-                    </div>
+                <span>Optionen: </span>
+                <div class="row row-cols-3"> 
                     <% for(var i=0; i< options.length; i++) { %>
                     <div class="col">
                         <% if(options[i].ordered == 1  && options[i].standard == 0) { %>

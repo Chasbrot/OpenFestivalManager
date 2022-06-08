@@ -8,6 +8,9 @@ var mysqldump = require('mysqldump');
 var multer = require('multer');
 var upload = multer({ dest: 'uploads/' });
 
+var crypto = require('crypto');
+var hash = crypto.createHash('sha256');
+
 
 router.get('/', function (req, res) {
   if (!req.session.admin_id) {
@@ -161,21 +164,24 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
     const b = req.body;
     console.log("Changing Password")
     // Vaildate Password rules
-    if (b.password1.length >= 8 && b.password1 && b.password2.length >= 8 && b.password2 && b.password1 == b.password2) {
-      db.query(`UPDATE account SET pw = "${b.password1}" WHERE id=${req.session.admin_id}`, function (err, rows) {
-        if (err) {
+    if (b.password1.length >= 8 && b.password1) {
+      const hash = crypto.createHash('sha256').update(b.password1).digest('hex');
+      db.updateAccountPW(hash, req.session.admin_id)
+        .then(() => {
+          console.log("password changed")
+          req.session.destroy((err) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log("admin session destroyed");
+            }
+            res.redirect("/admin/login");
+          });
+        })
+        .catch((err) => {
           console.log(err);
-        }
-        console.log("password changed")
-        req.session.destroy((err) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("admin session destroyed");
-          }
-        });
-        res.redirect("/admin/login");
-      });
+          res.redirect("/admin");
+        })
     }
     return;
   }
@@ -433,7 +439,8 @@ router.get('/login', function (req, res) {
 router.post('/login', (req, res) => {
   // check username
   if (req.body.username && req.body.password) {
-    var sql = `SELECT id,name FROM account WHERE name ="${req.body.username}" AND id_type= 1 AND pw="${req.body.password}"`;
+    const hash = crypto.createHash('sha256').update(req.body.password).digest('hex');
+    var sql = `SELECT id,name FROM account WHERE name ="${req.body.username}" AND id_type= 1 AND pw="${hash}"`;
     db.query(sql, function (err, result) {
       if (err) {
         console.log(err);

@@ -39,7 +39,7 @@ router.post('/new', function (req, res) {
           if (result.length != 0) {
             // Es gibt eine aktive Sitzung -> Meinem Katalog hinzufügen und öffnen
             // Link session to my account
-            db.mapSessionToAccount(result[0].id,req.session.personal_id).then(err => {
+            db.mapSessionToAccount(result[0].id, req.session.personal_id).then(() => {
               console.log("Session linked to account");
               res.redirect("/table/" + result[0].id);
             }).catch(err => {
@@ -92,16 +92,13 @@ router.post('/move/:sid', function (req, res) {
   if (req.session.personal_id) {
     if (body.table && body.move_session) {
       // Check if current sitzung?
-      var sql = `SELECT id FROM Sitzung WHERE end IS NULL AND id_tisch = ${body.table}`;
-      db.query(sql, function (err, result) {
-        if (err) {
-          console.log("table/move: Can't move session " + err)
-          res.redirect("/table/move/" + req.params.sid);
-        } else {
+      db.getActiveSessionFromTable(body.table)
+        .then((result) => {
           // Active session on target table detected
-          if (result.length) {
+          console.log(result)
+          if (result != -1) {
             // Check if merge with self
-            if (result[0].id == req.params.sid) {
+            if (result == req.params.sid) {
               db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
                 if (err) {
                   console.log(err);
@@ -113,8 +110,8 @@ router.post('/move/:sid', function (req, res) {
               });
             } else {
               // Move all orders to new session and remove session + mappings
-              console.log("table/move: moving session " + req.params.sid + " to target session " + result[0].id)
-              db.mergeSession(req.params.sid, result[0].id).then(err => {
+              console.log("table/move: moving session " + req.params.sid + " to target session " + result)
+              db.mergeSession(req.params.sid, result).then(err => {
                 res.redirect("/personal/overview");
               }).catch(err => {
                 console.log("table/move: Can't merge sessions \n" + err)
@@ -131,8 +128,11 @@ router.post('/move/:sid', function (req, res) {
                 res.redirect("/table/move/" + req.params.sid);
               });
           }
-        }
-      });
+        })
+        .catch((err) => {
+          console.log("table/move: Can't move session " + err)
+          res.redirect("/table/move/" + req.params.sid);
+        });
     } else {
       db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
         if (err) {
@@ -288,40 +288,10 @@ router.post('/:sid', function (req, res) {
       });
     } else if (body.productid) {
       if (body.product_anzahl != 0) {
-        console.log("order recieved")
-        // SAVE Order 
-        // MAKE TRANSACTION IMPORTANT 
-        sql = `INSERT INTO bestellung VALUES (0, ${body.productid}, ${req.session.personal_id}, ${req.session.session_overview}, NOW(),NULL,false,${body.product_anzahl},0,"${body.notiz}",false)`;
-        db.query(sql, function (err, result) {
-          if (err) {
+        db.createOrder(req.session.personal_id, req.session.session_overview, body.productid, body.product_anzahl, body.notiz, body.option)
+          .catch(err => {
             console.log(err)
-          } else {
-            console.log("order created")
-            if (body.option) {
-              //  Get id of last inserted record
-              // RACE CONDITION !!!!!
-              var sql = "SELECT LAST_INSERT_ID() AS id";
-              db.query(sql, function (err, result) {
-                if (err) {
-                  console.log(err)
-                } else {
-                  console.log(result)
-                  if (result[0]) {
-                    // Create Order - Options Mappings
-                    for (var i = 0; i < body.option.length; i++) {
-                      var sql = `INSERT INTO Zutat_Bestellung VALUES (0,${body.option[i]},${result[0].id})`;
-                      db.query(sql, function (err, result) {
-                        if (err) {
-                          console.log(err)
-                        }
-                      });
-                    }
-                  }
-                }
-              });
-            }
-          }
-        });
+          });
       }
       res.redirect("/table/" + sid);
     } else if (body.finishOrder) {

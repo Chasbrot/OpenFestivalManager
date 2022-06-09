@@ -685,6 +685,22 @@ const removeTable = function (tableId) {
     });
 };
 
+ /**
+ * Remove Option
+ * @param  {Number} optionId
+ * @return {Promise} Returns a promise
+ */
+  const removeOption = function (tableId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('DELETE FROM Zutat WHERE id = ?', [optionId])
+        } catch (e) {
+            return reject("db/removeTable: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
 
 
           
@@ -717,6 +733,51 @@ const removeTable = function (tableId) {
     });
 };
 
+ /**
+ * Get all products from a station
+ * @param  {Number} optionId
+ * @return {Promise} Returns a promise
+ */
+  const getProductsByStation = function (stationId) {
+      return new Promise(async (resolve, reject) => {
+          var result;
+        try {
+            result = await poolawait.query('SELECT * FROM Gericht WHERE id_stand = ?', [stationId])
+        } catch (e) {
+            return reject("db/getProductsByStation: Failed to query" + e)
+          }
+          if (result[0].length == 0) {
+              return resolve([]);
+          } else {
+              return resolve(result[0]);
+          }
+        
+    });
+};
+
+ /**
+ * Get a product
+ * @param  {Number} productId
+ * @return {Promise} Returns a promise
+ */
+  const getProduct = function (productId) {
+    return new Promise(async (resolve, reject) => {
+        var result;
+      try {
+          result = await poolawait.query('SELECT * FROM Gericht WHERE id = ?', [productId])
+      } catch (e) {
+          return reject("db/getProduct: Failed to query" + e)
+        }
+        if (result[0].length == 0) {
+            return resolve([]);
+        } else {
+            return resolve(result[0]);
+        }
+      
+  });
+};
+
+
 const query = function (sql, callback) {
     pool.query(sql, callback);
 }
@@ -737,5 +798,5 @@ module.exports = {
     setOrderStatusCancled, createAlert, getActiveOrdersForStation,
     getPastOrdersForStation, clearAlert, clearDynamicData,
     createTableGroup, createTable, createStation, createOption, createProduct, removeProduct, removeTable, removeTableGroup,
-    createAlertType, removeAlertType
+    createAlertType, removeAlertType,removeOption,getProduct, getProductsByStation
 };

@@ -293,6 +293,22 @@ router.get('/alerttypes', function (req, res) {
 });
 
 // Count all orders today
+router.get('/options', async function (req, res) {
+    var sql = "SELECT * FROM Zutat";
+    db.query(sql,
+     (err, rows) => {
+            if (err) {
+                console.log(err)
+                res.sendStatus(500)
+            } else {
+                res.json({
+                    data: rows
+                });
+            }
+        });
+});
+
+// Count all orders today
 router.get('/alerts', function (req, res) {
     var sql = "SELECT alert.id, alerttype.name, TIME_FORMAT(alert.triggered, '%H:%i') as triggered, Stand.name as stationname  FROM alert \
     INNER JOIN AlertType ON Alert.id_alerttype = AlertType.id \
@@ -325,6 +341,34 @@ router.post('/alert', (req, res) => {
                 res.sendStatus(500)
             })
     }
+});
+
+// Count all orders today
+router.get('/product/station/:sid', function (req, res) {
+    db.getProductsByStation(req.params.sid)
+            .then((result) => {
+                res.json({
+                    data: result
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+                res.sendStatus(500)
+            })
+});
+
+// Count all orders today
+router.get('/product/:pid', function (req, res) {
+    db.getProduct(req.params.pid)
+            .then((result) => {
+                res.json({
+                    data: result
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+                res.sendStatus(500)
+            })
 });
 
 module.exports = router;

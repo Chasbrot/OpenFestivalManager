@@ -195,31 +195,17 @@ router.get('/configuration', function (req, res) {
     res.redirect("/admin/login");
     return;
   }
-  db.query('SELECT * FROM Zutat', function (err, opts) {
+  db.query('SELECT * FROM Tisch', function (err, table) {
     if (err) {
-      console.log("error");
+      console.log(err);
     }
 
-    db.query('SELECT * FROM Gericht', function (err, prod) {
+    db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
       if (err) {
         console.log(err);
       }
-      db.query('SELECT * FROM Tisch', function (err, table) {
-        if (err) {
-          console.log(err);
-        }
-
-        db.query('SELECT * FROM Tisch_Gruppe', function (err, groups) {
-          if (err) {
-            console.log(err);
-          }
-
-          res.render("admin/admin_configuration", { options: opts, products: prod, table_groups: groups, tables: table });
-        });
-      });
-
+      res.render("admin/admin_configuration", { table_groups: groups, tables: table });
     });
-
   });
 
 });
@@ -296,16 +282,24 @@ router.post('/configuration', function (req, res) {
   if (body.remove_product) {
     db.removeProduct(body.remove_product)
       .catch((err) => {
-      console.log(err)
-    })
+        console.log(err)
+      })
+  }
+
+  // Remove Produkt
+  if (body.remove_option) {
+    db.removeOption(body.remove_option)
+      .catch((err) => {
+        console.log(err)
+      })
   }
 
   // Remove Tisch
   if (body.remove_table) {
     db.removeTable(remove_table)
       .catch((err) => {
-      console.log(err)
-    })
+        console.log(err)
+      })
   }
 
   // Remove Tisch Gruppe
@@ -313,24 +307,24 @@ router.post('/configuration', function (req, res) {
     // Tische entfernen
     db.removeTableGroup(body, remove_table_group)
       .catch((err) => {
-      console.log(err)
-    })
+        console.log(err)
+      })
   }
 
   // New alert type
   if (body.newAlertType) {
     db.createAlertType(body.newAlertType)
       .catch((err) => {
-      console.log(err)
-    })
+        console.log(err)
+      })
   }
 
   // New alert type
   if (body.deleteAlertType) {
     db.removeAlertType(body.deleteAlertType)
       .catch((err) => {
-      console.log(err)
-    })
+        console.log(err)
+      })
   }
 
 

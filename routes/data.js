@@ -314,19 +314,17 @@ router.get('/alerts', function (req, res) {
 router.post('/alert', (req, res) => {
     const body = req.body;
     console.log(body)
-  
+
     if (body.clearAlert) {
-      sql = `UPDATE Alert SET active=false WHERE id = ${body.clearAlert}`;
-      db.query(sql, function (err, dates) {
-        if (err) {
-          console.log(err);
-          res.sendStatus(500)
-        } else {
-          res.sendStatus(200)
-        }
-      });
+        db.clearAlert(body.clearAlert)
+            .then(() => {
+                res.sendStatus(200);
+            })
+            .catch((err) => {
+                console.log(err);
+                res.sendStatus(500)
+            })
     }
-    
-  });
+});
 
 module.exports = router;

@@ -188,7 +188,7 @@ const mapSessionToAccount = function (sessionId, accountId) {
  * @return {Promise} Returns a promise newly create session id
  */
 const createSession = function (tableId, accountId) {
-    return new Promise( async (resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         var con;
         try {
             con = await poolawait.getConnection();
@@ -241,6 +241,8 @@ const createOrder = function (accountId, sessionId, productId, amount, orderNote
                     for (var i = 0; i < options.length; i++) {
                         await con.execute("INSERT INTO Zutat_Bestellung VALUES (0,?,?)", [options[i], result[0][0].id])
                     }
+                } else {
+                    throw new Error("No last insert id found!");
                 }
             }
             await con.commit()
@@ -265,14 +267,14 @@ const getActiveSessionFromTable = function (tableId) {
         try {
             result = await poolawait.query(`SELECT id FROM Sitzung WHERE end IS NULL AND id_tisch = ?`, [tableId])
         } catch (e) {
-            return reject("db/getActiveSessionsFromTable: Failed to query"+e)
+            return reject("db/getActiveSessionsFromTable: Failed to query" + e)
         }
         if (result[0].length == 0) {
             return resolve(-1);
         } else {
             return resolve(result[0][0].id);
         }
-        
+
     });
 };
 
@@ -284,17 +286,436 @@ const getActiveSessionFromTable = function (tableId) {
  * @param  {Number} accountId The account where the change happens
  * @return {Promise} Returns a promise
  */
- const updateAccountPW = function (hash, accountId) {
+const updateAccountPW = function (hash, accountId) {
     return new Promise(async (resolve, reject) => {
         try {
             await poolawait.query(`UPDATE account SET pw = ? WHERE id = ?`, [hash, accountId])
         } catch (e) {
-            return reject("db/updateAccountPW: Failed to query"+e)
+            return reject("db/updateAccountPW: Failed to query" + e)
         }
         return resolve
     });
 };
 
+/**
+ * Closes a open session
+ * @param  {Number} accountId The account which closes the session
+ * @param  {Number} sessionId The session to be closed
+ * @return {Promise} Returns a promise
+ */
+const closeSession = function (sessionId, accountId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('UPDATE sitzung SET end=NOW(), id_abrechner = ? WHERE id = ?', [accountId, sessionId])
+        } catch (e) {
+            return reject("db/closeSession: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Update session status sent
+ * @param  {Number} sessionId The session to be updated
+ * @return {Promise} Returns a promise
+ */
+const setOrderStatusSent = function (sessionId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('UPDATE bestellung SET bestellung.erledigt = NOW() WHERE bestellung.id = ?', [sessionId])
+        } catch (e) {
+            return reject("db/setSessionStatusSent: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Update session status in production (processing)
+ * @param  {Number} sessionId The session to be updated
+ * @return {Promise} Returns a promise
+ */
+const setOrderStatusProcessing = function (sessionId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('UPDATE bestellung SET bestellung.in_zubereitung = true WHERE bestellung.id = ?', [sessionId])
+        } catch (e) {
+            return reject("db/setSessionStatusProcessing: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Update session status canceled
+ * @param  {Number} sessionId The session to be updated
+ * @return {Promise} Returns a promise
+ */
+const setOrderStatusCancled = function (sessionId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('UPDATE bestellung SET bestellung.stoniert = true WHERE bestellung.id = ?', [sessionId])
+        } catch (e) {
+            return reject("db/setSessionStatusCanceled: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Creates a new alert
+ * @param  {Number} alerttypeId The type of alert made
+ * @param  {Number} stationId The station which made the alert
+ * @return {Promise} Returns a promise
+ */
+const createAlert = function (alertTypeId, stationId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('INSERT INTO Alert VALUES (0,?,?,true,NOW())', [alertTypeId, stationId])
+        } catch (e) {
+            return reject("db/createAlert: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+
+
+/**
+ * Clear a new alert; Deactivates the alert
+ * @param  {Number} alerttypeId The type of alert made
+ * @param  {Number} stationId The station which made the alert
+ * @return {Promise} Returns a promise
+ */
+const clearAlert = function (alertId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('UPDATE Alert SET active=false WHERE id = ?', [alertId])
+        } catch (e) {
+            return reject("db/clearAlert: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+
+/**
+ * Creates a new alert type
+ * @param  {String} alertTypeName
+ * @return {Promise} Returns a promise
+ */
+ const createAlertType = function (alertTypeName) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('INSERT INTO AlertType VALUES (0,?)', [alertTypeName])
+        } catch (e) {
+            return reject("db/createAlertType: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Remove a alert type
+ * @param  {Number} alertTypeId
+ * @return {Promise} Returns a promise
+ */
+ const removeAlertType = function (alertTypeId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('DELETE FROM AlertType WHERE id = ?', [alertTypeId])
+        } catch (e) {
+            return reject("db/removeAlertType: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+
+
+/**
+ * Returns all active orders for a specifc station
+ * @param  {Number} stationId The station for which the orders are searched
+ * @return {Promise} Returns a promise with a list of all orders;
+ * b_id, wartezeit
+ */
+const getActiveOrdersForStation = function (stationId) {
+    return new Promise(async (resolve, reject) => {
+        var sql = `SELECT bestellung.id AS b_id, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,NOW()) AS wartezeit\
+        FROM bestellung\
+        INNER JOIN gericht\
+        ON gericht.id = bestellung.id_gericht\
+        INNER JOIN stand\
+        ON stand.id = gericht.id_stand\
+        WHERE stand.id = ? AND bestellung.erledigt IS NULL AND bestellung.stoniert = false
+        ORDER BY wartezeit DESC`;
+        var result;
+        try {
+            result = await poolawait.query(sql, [stationId])
+        } catch (e) {
+            return reject("db/getActiveOrdersForStation: Failed to query" + e)
+        }
+
+        return resolve(result[0])
+    });
+};
+
+/**
+ * Returns all past orders for a specifc station
+ * @param  {Number} stationId The station for which the orders are searched
+ * @return {Promise} Returns a promise with a list of all orders;
+ * b_id, g_name, bestellung.stoniert, b AS b_anz, dauer, lieferzeit, t_nr, bestellung.notiz,erstellt
+ */
+const getPastOrdersForStation = function (stationId) {
+    return new Promise(async (resolve, reject) => {
+        var sql = `SELECT bestellung.id AS b_id, gericht.name AS g_name, bestellung.stoniert, bestellung.anzahl AS b_anz, TIMESTAMPDIFF(MINUTE,bestellung.erstellt,bestellung.erledigt) AS dauer, TIME_FORMAT(bestellung.erledigt, '%H:%i') as lieferzeit, tisch.nummer AS t_nr, bestellung.notiz, TIME_FORMAT(bestellung.erstellt, '%H:%i') as erstellt\
+        FROM bestellung\
+        INNER JOIN gericht\
+        ON gericht.id = bestellung.id_gericht\
+        INNER JOIN stand\
+        ON stand.id = gericht.id_stand\
+        INNER JOIN sitzung\
+        ON sitzung.id = bestellung.id_sitzung\
+        INNER JOIN tisch\
+        ON tisch.id = sitzung.id_tisch\
+        WHERE stand.id = ? AND (bestellung.erledigt IS NOT NULL OR bestellung.stoniert = true) AND DATEDIFF(DATE(bestellung.erstellt),NOW())=0\
+        ORDER BY lieferzeit DESC`;
+        var result;
+        try {
+            result = await poolawait.query(sql, [stationId])
+        } catch (e) {
+            return reject("db/getPastOrdersForStation: Failed to query" + e)
+        }
+
+        return resolve(result[0])
+    });
+};
+
+/**
+ * Clears all dynamic data from the database and registered personal exept admins and station users. 
+ * Includes: Orders, Sessions and mappings. Resets all autoincrements to 1;
+ * @return {Promise} Returns a promise 
+ */
+const clearDynamicData = function () {
+    return new Promise(async (resolve, reject) => {
+        var con;
+        try {
+            con = await poolawait.getConnection();
+        } catch (e) {
+            return reject("db/clearDynamicData: Creating connection failed" + err);
+        }
+        try {
+            await con.execute("DELETE FROM Zutat_Bestellung WHERE id <> -1");
+            await con.execute("DELETE FROM Bestellung WHERE id <> -1");
+            await con.execute("DELETE FROM Account_Sitzung WHERE id <> -1");
+            await con.execute("DELETE FROM Sitzung WHERE id <> -1");
+            await con.execute("DELETE FROM Account WHERE id_type == 3 ");
+            await con.execute("DELETE FROM Alert WHERE id <> -1 ");
+            await con.execute("ALTER TABLE Zutat_Bestellung AUTO_INCREMENT = 1");
+            await con.execute("ALTER TABLE Bestellung AUTO_INCREMENT = 1");
+            await con.execute("ALTER TABLE Account_Sitzung AUTO_INCREMENT = 1");
+            await con.execute("ALTER TABLE Sitzung AUTO_INCREMENT = 1");
+            await con.execute("ALTER TABLE Alert AUTO_INCREMENT = 1");
+            await con.commit()
+        } catch (e) {
+            await con.rollback()
+            return reject("db/clearDynamicData: Create order failed" + e);
+        } finally {
+            await con.release();
+        }
+        return resolve();
+    });
+};
+
+/**
+ * Create new table group
+ * @param  {String} groupName New table group name
+ * @return {Promise} Returns a promise
+ */
+const createTableGroup = function (groupName) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('INSERT INTO Tisch_Gruppe VALUES (0,?)', [groupName])
+        } catch (e) {
+            return reject("db/createTableGroup: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Create new table 
+ * @param  {String} tableName New table name
+ * @param  {Number} tableGroupId Table Group of the new table
+ * @return {Promise} Returns a promise
+ */
+const createTable = function (tableName, tableGroupId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('INSERT INTO Tisch VALUES (0,?,?)', [tableName, tableGroupId])
+        } catch (e) {
+            return reject("db/createTable: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Create new station
+ * @param  {String} stationName New station name
+ * @return {Promise} Returns a promise
+ */
+const createStation = function (stationName) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('INSERT INTO stand VALUES (0,?,NULL)', [stationName])
+        } catch (e) {
+            return reject("db/createStation: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Create new option
+ * @param  {String} optionName New option name
+ * @return {Promise} Returns a promise
+ */
+const createOption = function (optionName) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('INSERT INTO Zutat VALUES (0,?)', [optionName])
+        } catch (e) {
+            return reject("db/createOption: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+/**
+ * Creates a new Product
+ * @param  {Number} stationId The station where this product is made
+ * @param  {String} productName The name of the product
+ * @param  {Boolean} deliverable If the product gets delivered or need to be gathered
+ * @param  {Number} cost Cost of a unit of product
+ * @param  {List} A list of option ids which available for this product
+ * @param  {List} A list of option ids which are default for this product
+ * @return {Promise} Returns a promise 
+ */
+const createProduct = function (stationId, productName, deliverable, cost, options, defaults) {
+    return new Promise(async (resolve, reject) => {
+        var con;
+        try {
+            con = await poolawait.getConnection();
+        } catch (e) {
+            return reject("db/createProduct: Creating connection failed" + err);
+        }
+        try {
+            await con.execute("INSERT INTO Gericht VALUES (0,?,?,?,?)", [stationId, productName, cost, deliverable]);
+            // CHeck if options need to be linked
+            if (options.length > 0) {
+                var result = await con.query("SELECT LAST_INSERT_ID() AS id")
+                // Check if select has delivered an id
+                if (result[0].length > 0) {
+                    var id = result[0][0].id;
+                    // Link all options
+                    for (var i = 0; i < options.length; i++) {
+                        var optional = defaults.includes(options[i]);
+                        await con.execute("INSERT INTO Gericht_Zutaten VALUES (0,?,?,1,?)", [id, options[i], optional])
+                    }
+                } else {
+                    throw new Error("No last insert id found!");
+                }
+            }
+            await con.commit()
+        } catch (e) {
+            await con.rollback()
+            return reject("db/createProduct: Create order failed" + e);
+        } finally {
+            await con.release();
+        }
+        return resolve();
+    });
+};
+
+/**
+ * Removes a Product
+ * @param  {Number} productId The product to be removed
+ * @return {Promise} Returns a promise 
+ */
+const removeProduct = function (productId) {
+    return new Promise(async (resolve, reject) => {
+        var con;
+        try {
+            con = await poolawait.getConnection();
+        } catch (e) {
+            return reject("db/createProduct: Creating connection failed" + err);
+        }
+        try {
+            // Gericht_Zutaten entfernen
+            await pool.execute("DELETE FROM Gericht_Zutaten WHERE id_gericht = ?", [productId]);
+            // Gericht entfernen
+            await pool.execute("DELETE FROM Gericht WHERE id =  ?", [productId]);
+            await con.commit()
+        } catch (e) {
+            await con.rollback()
+            return reject("db/removeProduct: Create order failed" + e);
+        } finally {
+            await con.release();
+        }
+        return resolve();
+    });
+};
+
+
+
+ /**
+ * Remove Table
+ * @param  {Number} tableId Removes this table
+ * @return {Promise} Returns a promise
+ */
+const removeTable = function (tableId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await poolawait.query('DELETE FROM Tisch WHERE id = ?', [tableId])
+        } catch (e) {
+            return reject("db/removeTable: Failed to query" + e)
+        }
+        return resolve
+    });
+};
+
+
+
+          
+/**
+ * Removes a Table Group
+ * @param  {Number} tableGroupId
+ * @return {Promise} Returns a promise 
+ */
+ const removeTableGroup = function (tableGroupId) {
+    return new Promise(async (resolve, reject) => {
+        var con;
+        try {
+            con = await poolawait.getConnection();
+        } catch (e) {
+            return reject("db/removeTableGroup: Creating connection failed" + err);
+        }
+        try {
+            // Gericht_Zutaten entfernen
+            await pool.execute("DELETE FROM Tisch WHERE id_tischgruppe = ?", [tableGroupId]);
+            // Gericht entfernen
+            await pool.execute("DELETE FROM Tisch_Gruppe WHERE id = ?", [tableGroupId]);
+            await con.commit()
+        } catch (e) {
+            await con.rollback()
+            return reject("db/removeTableGroup: Create order failed" + e);
+        } finally {
+            await con.release();
+        }
+        return resolve();
+    });
+};
 
 const query = function (sql, callback) {
     pool.query(sql, callback);
@@ -311,5 +732,10 @@ module.exports = {
     createSession,
     getOrderentry,
     getSelectedOptions,
-    createOrder,getActiveSessionFromTable,updateAccountPW
+    createOrder, getActiveSessionFromTable, updateAccountPW,
+    closeSession, setOrderStatusSent, setOrderStatusProcessing,
+    setOrderStatusCancled, createAlert, getActiveOrdersForStation,
+    getPastOrdersForStation, clearAlert, clearDynamicData,
+    createTableGroup, createTable, createStation, createOption, createProduct, removeProduct, removeTable, removeTableGroup,
+    createAlertType, removeAlertType
 };

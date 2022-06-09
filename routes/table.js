@@ -194,16 +194,14 @@ router.post('/bill', function (req, res) {
     } else if (body.closeSession) {
       // Close session
       console.log("closing session: " + req.session.session_overview)
-      var sql = `UPDATE sitzung SET end=NOW(), id_abrechner=${req.session.personal_id} WHERE id = ${req.session.session_overview}`;
-      db.query(sql, function (err, result) {
-        if (err) {
+      db.closeSession(req.session.session_overview, req.session.personal_id)
+        .then(() => {
+          res.redirect("/personal/overview");
+        })
+        .catch((err) => {
           console.log(err)
           res.redirect("/table/bill");
-        } else {
-          res.redirect("/personal/overview");
-        }
-      });
-
+        })
     } else {
       res.redirect("/table/bill");
     }

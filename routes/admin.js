@@ -107,13 +107,12 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
   /* Export database to sql file*/
   if (req.body.resetDynamic) {
     console.log("Resetting Dynamic Data")
-    clearDBDynamic((err) => {
-      if (err) {
+    db.clearDynamicData()
+      .catch((err) => {
         console.log(err)
-      } else {
+      }).finally(() => {
         res.redirect("/admin");
-      }
-    });
+      })
     return;
   }
 
@@ -215,7 +214,7 @@ router.get('/configuration', function (req, res) {
             console.log(err);
           }
 
-          res.render("admin/admin_configuration", {options: opts, products: prod, table_groups: groups, tables: table });
+          res.render("admin/admin_configuration", { options: opts, products: prod, table_groups: groups, tables: table });
         });
       });
 
@@ -236,51 +235,46 @@ router.post('/configuration', function (req, res) {
 
   // Neue Tisch Gruppe anlegen
   if (body.new_table_group) {
-    sql = `INSERT INTO Tisch_Gruppe VALUES (0,"${body.new_table_group}")`;
-    db.query(sql, function (err, result) {
-      if (err) {
+    db.createTableGroup(body.new_table_group)
+      .catch((err) => {
         console.log(err)
-      } else {
+      })
+      .then(() => {
         console.log('admin/config: table group record inserted');
-      }
-    });
+      })
   }
 
   // Neuen Tisch anlegen
-  if (body.new_table) {
-    sql = `INSERT INTO Tisch VALUES (0,"${body.new_table}",${body.table_group_id})`;
-    db.query(sql, function (err, result) {
-      if (err) {
+  if (body.new_table && body.table_group_id) {
+    db.createTable(body.new_table, body.table_group_id)
+      .catch((err) => {
         console.log(err)
-      } else {
+      })
+      .then(() => {
         console.log('admin/config: table record inserted');
-      }
-    });
+      })
   }
-
 
   // Neue Station anlegen
   if (body.new_station) {
-    sql = `INSERT INTO stand VALUES (0,"${body.new_station}",NULL)`;
-    db.query(sql, function (err, result) {
-      if (err) {
+    db.createStation(body.new_station)
+      .catch((err) => {
         console.log(err)
-      } else {
+      })
+      .then(() => {
         console.log('admin/config: station record inserted');
-      }
-    });
+      })
   }
 
   // Neue Zutat anlegen
   if (body.new_option) {
-    sql = `INSERT INTO Zutat VALUES (0,"${body.new_option}")`;
-    db.query(sql, function (err, result) {
-      if (err) {
+    db.createOption(body.new_option)
+      .catch((err) => {
         console.log(err)
-      } else {
+      })
+      .then(() => {
         console.log('admin/config: option record inserted');
-      }
-    });
+      })
   }
 
   // Neues Produkt anlegen
@@ -292,113 +286,55 @@ router.post('/configuration', function (req, res) {
     var deliverable = (body.product_deliverable == "on");
     var cost = body.product_cost;
 
-    // Produkt eintrag anlegen
-    sql = `INSERT INTO Gericht VALUES (0,${station},"${name}",${cost},${deliverable})`;
-    db.query(sql, function (err, result) {
-      if (err) throw err;
-      // Get Gericht ID!
-      if (options) {
-        var sql = `SELECT id FROM Gericht WHERE id_stand=${station} AND name = "${name}" AND preis = ${cost} and lieferbar = ${deliverable}`;
-        db.query(sql, function (err, result) {
-          if (err) throw err;
-          // Optionen speichern
-          for (var i = 0; i < options.length; i++) {
-            var optional = defaults.includes(options[i]);
-            var sql = `INSERT INTO Gericht_Zutaten VALUES (0,${result[0].id},${options[i]},1,${optional})`;
-            db.query(sql, function (err, result) {
-              if (err) {
-                console.log(err)
-              }
-            });
-            console.log(sql);
-          }
-        });
-      }
-    });
-    console.log(sql);
+    db.createProduct(station, name, deliverable, cost, options, defaults)
+      .catch((err) => {
+        console.log(err)
+      });
   }
 
   // Remove Produkt
   if (body.remove_product) {
-    // Gericht_Zutaten entfernen
-    sql = `DELETE FROM Gericht_Zutaten WHERE id_gericht = ${body.remove_product}`;
-    db.query(sql, function (err, result) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log('admin/config: product option removed');
-      }
-    });
-    // Gericht entfernen
-    sql = `DELETE FROM Gericht WHERE id = ${body.remove_product}`;
-    db.query(sql, function (err, result) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log('admin/config: product removed');
-      }
-    });
+    db.removeProduct(body.remove_product)
+      .catch((err) => {
+      console.log(err)
+    })
   }
 
   // Remove Tisch
   if (body.remove_table) {
-    sql = `DELETE FROM Tisch WHERE id = ${body.remove_table}`;
-    db.query(sql, function (err, result) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log('admin/config: table removed');
-      }
-    });
+    db.removeTable(remove_table)
+      .catch((err) => {
+      console.log(err)
+    })
   }
 
   // Remove Tisch Gruppe
   if (body.remove_table_group) {
     // Tische entfernen
-    sql = `DELETE FROM Tisch WHERE id_tischgruppe = ${body.remove_table_group}`;
-    db.query(sql, function (err, result) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log('admin/config: tables from group removed');
-        var sql = `DELETE FROM Tisch_Gruppe WHERE id = ${body.remove_table_group}`;
-        db.query(sql, function (err, result) {
-          if (err) {
-            console.log(err)
-          } else {
-            console.log('admin/config: table group removed');
-          }
-        });
-      }
-    });
+    db.removeTableGroup(body, remove_table_group)
+      .catch((err) => {
+      console.log(err)
+    })
   }
 
   // New alert type
   if (body.newAlertType) {
-    sql = `INSERT INTO AlertType VALUES (0,"${body.newAlertType}")`;
-    db.query(sql, function (err, result) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log('admin/config: alerttype record inserted');
-      }
-    });
+    db.createAlertType(body.newAlertType)
+      .catch((err) => {
+      console.log(err)
+    })
   }
 
   // New alert type
   if (body.deleteAlertType) {
-    sql = `DELETE FROM AlertType WHERE id = "${body.deleteAlertType}"`;
-    db.query(sql, function (err, result) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log('admin/config: alerttype ' + body.deleteAlertType + ' record deleted');
-      }
-    });
+    db.removeAlertType(body.deleteAlertType)
+      .catch((err) => {
+      console.log(err)
+    })
   }
 
 
-  res.redirect("/admin/configuration#v-pills-organization");
+  res.redirect("/admin/configuration");
 
 });
 
@@ -467,27 +403,6 @@ router.post('/login', (req, res) => {
 });
 
 /*
-Remove all dynamiclly generated data and registered personal exept admins and station users. 
-Includes: Orders, Sessions and mappings. Resets all autoincrements to 1;
-*/
-function clearDBDynamic(callback) {
-  var sql = `BEGIN; \
-  DELETE FROM Zutat_Bestellung WHERE id <> -1; \
-  DELETE FROM Bestellung WHERE id <> -1; \
-  DELETE FROM Account_Sitzung WHERE id <> -1; \
-  DELETE FROM Sitzung WHERE id <> -1; \
-  DELETE FROM Account WHERE id_type == 3 \
-  ALTER TABLE Zutat_Bestellung AUTO_INCREMENT = 1; \
-  ALTER TABLE Bestellung AUTO_INCREMENT = 1; \
-  ALTER TABLE Account_Sitzung AUTO_INCREMENT = 1; \
-  ALTER TABLE Sitzung AUTO_INCREMENT = 1; \
-  COMMIT;`;
-  db.query(sql, function (err, rows) {
-    callback(err);
-  });
-}
-
-/*
 Remove all staticly defined data
 Includes: Table_Groups, Tables, Accounts, Product, Station, Options and all Mappings . Resets all autoincrements to 1;
 */
@@ -500,6 +415,8 @@ function clearDBStatic(callback) {
   DELETE FROM Gericht_Zutaten WHERE id <> -1; \
   DELETE FROM Zutat WHERE id <> -1; \
   DELETE FROM Stand WHERE id <> -1; \
+  DELETE FROM Alert WHERE id <> -1 \
+  DELETE FROM AlertType WHERE id <> -1 \
   ALTER TABLE Gericht AUTO_INCREMENT = 1; \
   ALTER TABLE Account AUTO_INCREMENT = 1; \
   ALTER TABLE Tisch_Sitzung AUTO_INCREMENT = 1; \
@@ -507,6 +424,8 @@ function clearDBStatic(callback) {
   ALTER TABLE Gericht_Zutaten AUTO_INCREMENT = 1; \
   ALTER TABLE Zutat AUTO_INCREMENT = 1; \
   ALTER TABLE Stand AUTO_INCREMENT = 1; \
+  ALTER TABLE Alert AUTO_INCREMENT = 1; \
+  ALTER TABLE AlertType AUTO_INCREMENT = 1; \
   COMMIT;`;
   db.query(sql, function (err, rows) {
     callback(err);

@@ -49,7 +49,6 @@
                         <input type="number" id="uebrig_<%=orders[i].id%>" value="<%=orders[i].uebrig%>"
                             style="display: none;"></input>
 
-
                         <input type="number" id="anz_<%=orders[i].id%>" name="<%=orders[i].id%>"
                             style="display: inline; width: 40px; border: none" value="0"></input>
 
@@ -57,11 +56,12 @@
                         <p style="display: inline;">
                             <%=orders[i].uebrig%>
                         </p>
-                        <%=orders[i].name%>
+                        <span><%=orders[i].name%></span>
                         <div class="float-right">
+                            <span class="pr-3"><%=orders[i].preis%>€</span>
                             <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-3"
                                 value="<%=orders[i].id%>" onclick="increment('<%=orders[i].id%>')">+</button>
-                            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-3"
+                            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-3 mr-1"
                                 value="<%=orders[i].id%>" onclick="decrement('<%=orders[i].id%>')">-</button>
                         </div>
                     </div>
@@ -94,11 +94,18 @@
 
         <div class="card-body text-center">
             <% if(orders.length==0){%>
-            <form action="#" method="POST" style="display:inline;" id="cash">
-                <button class="btn btn-success btn-block" type="submit" name="closeSession" value="true">
-                    Sitzung beenden
-                </button>
-            </form>
+                <% if(closeable) { %>
+                    <form action="#" method="POST" style="display:inline;" id="cash">
+                        <button class="btn btn-success btn-block" type="submit" name="closeSession" value="true">
+                            Sitzung beenden
+                        </button>
+                    </form>
+                <% } else { %>
+                    <span class="alert alert-danger">
+                        Offene Bestellungen
+                    </span>
+                <% } %>
+            
             <% }else{ %>
             <button class="btn btn-info btn-block" form="cash" name="payOrder" value="true">
                 Zahlen

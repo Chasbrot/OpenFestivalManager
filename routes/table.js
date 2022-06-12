@@ -153,15 +153,15 @@ router.post('/move/:sid', function (req, res) {
 router.get('/bill', function (req, res) {
   if (req.session.personal_id) {
     // Load orders
-    console.log(req.session.session_overview)
     db.getBillableOrders(req.session.session_overview).then(result => {
-      if (result.length == 0) {
-        console.log("payment session " + req.params.sid + " no orders found")
-      }
-      res.render("table/table_bill", {
-        session_id: req.session.session_overview,
-        orders: result
-      });
+      db.getOutstandingOrders(req.session.session_overview)
+        .then((r) => {
+          res.render("table/table_bill", {
+            session_id: req.session.session_overview,
+            orders: result,
+            closeable: !r.length
+          });
+        });
     }).catch(err => {
       console.log("table/bill: Can't get orders \n" + err)
       res.redirect("/table/" + req.params.sid);
@@ -180,6 +180,7 @@ router.post('/bill', function (req, res) {
     if (body.payOrder) {
       // Get all keys from the request
       var keys = Object.keys(body);
+      var promises = [];
       keys.forEach(element => {
         var x = parseInt(element);
         // Check if it is a product payment request
@@ -187,10 +188,19 @@ router.post('/bill', function (req, res) {
           var pid = x;
           var anz = body[x];
           // Pay orders with requested product amount
-          payOrder(anz, pid, req.session.session_overview)
+          //payOrder(anz, pid, req.session.session_overview)
+          promises.push(db.payProduct(req.session.session_overview, pid, anz));
         }
       });
-      res.redirect("/table/bill");
+      // Wait for all promises
+      Promise.all(promises)
+        .then(() => {
+          res.redirect("/table/bill");
+        })
+        .catch((err) => {
+          console.log(err)
+          res.redirect("/table/bill");
+        })
     } else if (body.closeSession) {
       // Close session
       console.log("closing session: " + req.session.session_overview)
@@ -268,42 +278,41 @@ router.get('/:sid', function (req, res) {
 
 router.post('/:sid', function (req, res) {
   console.log(req.body)
-  const body = req.body;
-  var sql;
-  if (req.session.personal_id) {
-    var sid = req.params.sid;
-
-    if (req.body.cancelOrder) {
-      // Cancel order
-      sql = `UPDATE bestellung  SET stoniert=true WHERE id=${req.body.cancelOrder}`;
-      db.query(sql, function (err, orders) {
-        if (err) {
-          console.log(err)
-        } else {
-          console.log("order " + req.body.cancelOrder + " canceled")
-          res.redirect("/table/" + sid);
-        }
-      });
-    } else if (body.productid) {
-      if (body.product_anzahl != 0) {
-        db.createOrder(req.session.personal_id, req.session.session_overview, body.productid, body.product_anzahl, body.notiz, body.option)
-          .catch(err => {
-            console.log(err)
-          });
-      }
-      res.redirect("/table/" + sid);
-    } else if (body.finishOrder) {
-      console.log("finish order" + body.finishOrder)
-      sql = `UPDATE bestellung SET erledigt = NOW() WHERE id = ${body.finishOrder}`;
-      db.query(sql, function (err, result) {
-        if (err) {
-          console.log(err)
-        }
-        res.redirect("/table/" + sid);
-      });
-    }
-  } else {
+  if (!req.session.personal_id) {
     res.redirect("/personal/overview");
+    return;
+  }
+
+  const body = req.body;
+  var sid = req.params.sid;
+
+  if (body.cancelOrder) {
+    // Cancel order
+    db.setOrderStatusCancled(body.cancelOrder)
+      .then(() => {
+        res.redirect("/table/" + sid);
+      })
+      .catch(err => {
+        console.log(err)
+      });
+  } else if (body.productid) {
+    if (body.product_anzahl != 0) {
+      db.createOrder(req.session.personal_id, req.session.session_overview, body.productid, body.product_anzahl, body.notiz, body.option)
+        .then(() => {
+          res.redirect("/table/" + sid);
+        })
+        .catch(err => {
+          console.log(err)
+        });
+    }
+  } else if (body.finishOrder) {
+    db.setOrderStatusSent(body.finishOrder)
+      .then(() => {
+        res.redirect("/table/" + sid);
+      })
+      .catch(err => {
+        console.log(err)
+      });
   }
 });
 

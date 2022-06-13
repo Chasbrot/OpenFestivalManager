@@ -116,7 +116,7 @@ const server = dns2.createServer({
         type: Packet.TYPE.A,
         class: Packet.CLASS.IN,
         ttl: 300,
-        address: ip.address()
+        address: ip.address(),
       });
     }
     send(response);

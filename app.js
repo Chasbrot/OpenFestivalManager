@@ -18,6 +18,8 @@ var app = express();
 // Session state?
 var session;
 
+console.log("Starting Express Server ...");
+
 // view engine setup (express js)
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -86,5 +88,65 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', { error: err});
 });
+
+
+app.listen(80, function () {
+  console.log('Listening on port 80')
+})
+
+
+// Start local authorative dns server
+// Resolves fom.lan -> localip
+console.log("Starting DNS Server ...");
+
+const dns2 = require('dns2');
+var ip = require('ip');
+
+const { Packet } = dns2;
+
+const server = dns2.createServer({
+  udp: true,
+  handle: (request, send, rinfo) => {
+    const response = Packet.createResponseFromRequest(request);
+    const [ question ] = request.questions;
+    const { name } = question;
+    if (name == "fom.lan") {
+      response.answers.push({
+        name,
+        type: Packet.TYPE.A,
+        class: Packet.CLASS.IN,
+        ttl: 300,
+        address: ip.address()
+      });
+    }
+    send(response);
+  }
+});
+
+/*
+server.on('request', (request, response, rinfo) => {
+  console.log("DNS Request: "+request.header.id, request.questions[0]);
+});*/
+
+server.on('requestError', (error) => {
+  console.log('Client sent an invalid request', error);
+});
+
+server.listen({
+  // Optionally specify port, address and/or the family of socket() for udp server:
+  udp: { 
+    port: 53,
+    address: ip.address(),
+    type: "udp4",  // IPv4 or IPv6 (Must be either "udp4" or "udp6")
+  },
+  
+  // Optionally specify port and/or address for tcp server:
+  tcp: { 
+    port: 53,
+    address: ip.address(),
+  },
+});
+
+
 
 module.exports = app;

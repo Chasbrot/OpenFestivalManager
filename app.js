@@ -110,7 +110,7 @@ const server = dns2.createServer({
     const response = Packet.createResponseFromRequest(request);
     const [ question ] = request.questions;
     const { name } = question;
-    if (name == "fom.lan") {
+    if (name == "festl.net") {
       response.answers.push({
         name,
         type: Packet.TYPE.A,
@@ -123,14 +123,16 @@ const server = dns2.createServer({
   }
 });
 
-/*
+
 server.on('request', (request, response, rinfo) => {
   console.log("DNS Request: "+request.header.id, request.questions[0]);
-});*/
+});
 
 server.on('requestError', (error) => {
   console.log('Client sent an invalid request', error);
 });
+
+console.log("DNS Server IP: " + ip.address());
 
 server.listen({
   // Optionally specify port, address and/or the family of socket() for udp server:

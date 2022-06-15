@@ -167,7 +167,7 @@
                             Organisation
                         </div>
                         <div class="card-body">
-                            <form action="#" method="POST" enctype="multipart/form-data">
+                            <form action="#" method="POST">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Neue Station:</span>
@@ -244,17 +244,19 @@
                         </div>
                         <div class="card-body">
 
-                            <form action="configuration" method="POST">
+                            <form action="#" method="POST">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Neues Produkt:</span>
                                     </div>
                                     <select class="custom-select" id="product_station" name="product_station"
                                         required></select>
-                                    <input type="text" class="form-control" id="new_option" name="new_option"
+                                    <input type="text" class="form-control" id="product_name" name="product_name"
                                         placeholder="Name des Produkts" required>
                                     <input type="number" class="form-control" id="product_cost" name="product_cost"
                                         placeholder="Preis" min="0" required>
+                                    <input type="number" class="form-control" id="product_priortity" name="product_priority"
+                                        placeholder="Priorität" min="0" required>
                                 </div>
                                 <br>
                                 <span>Wird geliefert? </span>
@@ -422,9 +424,8 @@
                             element.id + '">X</button></form><div>'
 
                         document.getElementById("new_product_options").innerHTML +=
-                            '<div class="list-group-item"><input type="checkbox" value="' + element
-                            .id +
-                            '" id="product_option_' + element.id + '" name="' + element.name + '"' +
+                            '<div class="list-group-item"><input type="checkbox" value="' + element.id +
+                            '" id="product_option_' + element.id + '" name="product_option"' +
                             'onclick="setCheckbox(\'product_option_standard_' + element.id +
                             '\', !this.checked)"> ' +
                             element.name +

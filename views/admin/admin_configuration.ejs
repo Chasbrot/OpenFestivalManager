@@ -3,11 +3,7 @@
 
 <head>
     <title>Admin Konsole</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="/javascripts/jquery-3.1.1.min.js"></script>
-    <script src="/javascripts/bootstrap/bootstrap.bundle.js"></script>
-    <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+    <%- include('../header_common') %>
 
     <script>
         function setCheckbox(id, state) {
@@ -167,7 +163,7 @@
                             Organisation
                         </div>
                         <div class="card-body">
-                            <form action="#" method="POST" enctype="multipart/form-data">
+                            <form action="#" method="POST">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Neue Station:</span>
@@ -251,7 +247,7 @@
                                     </div>
                                     <select class="custom-select" id="product_station" name="product_station"
                                         required></select>
-                                    <input type="text" class="form-control" id="new_option" name="new_option"
+                                    <input type="text" class="form-control" id="product_name" name="product_name"
                                         placeholder="Name des Produkts" required>
                                     <input type="number" class="form-control" id="product_cost" name="product_cost"
                                         placeholder="Preis" min="0" required>

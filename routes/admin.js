@@ -92,10 +92,7 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
         password: 'Pa..w0rd',
         database: 'festivalmanager',
       },
-      dumpToFile: './dump.sql',
-      dump: {
-        tables: ["account", "zutat", "tisch", "tisch_Gruppe", "stand", "gericht", "gericht_Zutaten", "sitzung", "account_sitzung", "bestellung", "zutat_bestellung"],
-      }
+      dumpToFile: './dump.sql'
     }).then(async () => {
       res.download("./dump.sql");
     }, () => { }).catch(err => {
@@ -135,27 +132,14 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
     var tmp_path = req.file.path;
     console.log(tmp_path)
 
-    /* Clear DB 
-    clearDBStatic((err) => {
-      if (err) {
+    db.resetDBToSQLDump(req.file.path)
+      .then((r) => {
+        res.redirect("/admin");
+      })
+      .catch((err) => {
         console.log(err)
-      } else {
-        clearDBStatic((err) => {
-          if (err) {
-            console.log(err)
-          } else {
-            console.log("import data")
-          }
-        });
-      }
-    });*/
-
-
-
-
-
-
-
+      });
+    return;
   }
 
   /* Change Password */
@@ -379,6 +363,8 @@ router.post('/login', (req, res) => {
           req.session.admin_id = 0;
           req.session.admin_name = "admin";
           res.redirect("/admin");
+        } else {
+          res.render("admin/login_admin", { err: true });
         }
       } else {
         if (result[0]) {

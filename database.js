@@ -1,21 +1,34 @@
+// Database Connector
 var mysql = require('mysql2');
-
 var mysqlawait = require("mysql2/promise")
 
+// For file importing
+const fs = require('fs');
+const readline = require('readline');
+const events = require('events');
+require('iconv-lite').encodingExists('utf-8')
+
+
+// Legacy db pool
 const pool = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
     password: 'Pa..w0rd',
     database: 'festivalmanager'
+    //database: 'fmtest',
+    //charset: "utf8_general_ci"
 });
 
+// New db pool
 const poolawait = mysqlawait.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
     password: 'Pa..w0rd',
     database: 'festivalmanager'
+    //database: 'fmtest',
+    //charset: "utf8_general_ci"
 });
 
 
@@ -708,7 +721,7 @@ const removeTable = function (tableId) {
 * @param  {Number} optionId
 * @return {Promise} Returns a promise
 */
-const removeOption = function (tableId) {
+const removeOption = function (optionId) {
     return new Promise(async (resolve, reject) => {
         try {
             await poolawait.query('DELETE FROM Zutat WHERE id = ?', [optionId])
@@ -857,6 +870,80 @@ const payProduct = function (sessionId, productId, amount) {
 };
 
 
+/**
+* Wipe Database and import a sql backup file
+* @param  {Number} sqlFilePath Path to the sql file for importing
+* @return {Promise} Returns a promise
+*/
+const resetDBToSQLDump = function (sqlFilePath) {
+    return new Promise(async (resolve, reject) => {
+        var con;
+        try {
+            con = await poolawait.getConnection();
+        } catch (e) {
+            return reject("db/resetDBToSQLDump: Creating connection failed" + err);
+        }
+
+        try {
+
+            // DROP ALL TABLES, YEEEEEE HAWWWWWWWWWW! 
+            await con.execute("DROP TABLE IF EXISTS Alert");
+            await con.execute("DROP TABLE IF EXISTS AlertType");
+            await con.execute("DROP TABLE IF EXISTS Zutat_Bestellung");
+            await con.execute("DROP TABLE IF EXISTS Gericht_Zutaten");
+            await con.execute("DROP TABLE IF EXISTS Zutat");
+            await con.execute("DROP TABLE IF EXISTS Account_Sitzung");
+            await con.execute("DROP TABLE IF EXISTS Bestellung");
+            await con.execute("DROP TABLE IF EXISTS Sitzung");
+            await con.execute("DROP TABLE IF EXISTS Tisch");
+            await con.execute("DROP TABLE IF EXISTS Tisch_Gruppe");
+            await con.execute("DROP TABLE IF EXISTS Gericht");
+            await con.execute("DROP TABLE IF EXISTS Stand");
+            await con.execute("DROP TABLE IF EXISTS Account");
+            await con.execute("DROP TABLE IF EXISTS AccountType");
+
+            await con.beginTransaction();
+            // Read in all lines
+            /*const rl = readline.createInterface({
+                input: fs.createReadStream(sqlFilePath),
+                crlfDelay: Infinity,
+                encoding: 'utf8',
+                fd: null 
+            });
+
+            rl.on('line', (line) => {
+                console.log(line)
+                con.execute(line);
+            });*/
+            /*
+            const allFileContents = fs.readFileSync(sqlFilePath, 'utf-8');
+            allFileContents.split(/\r?\n/).forEach(line => {
+                console.log(line);
+                con.execute(line);
+            });*/
+
+            console.log("reading finished -> closing file")
+            //await events.once(rl, 'close');
+            console.log("commit")
+            await con.commit();
+            console.log("commit finished");
+        } catch (e) {
+            try {
+                await con.rollback();
+            } catch (err) {
+                console.log("db/resetDBToSQLDump: ROLLBACK FAILED");
+            }
+            return reject("db/resetDBToSQLDump: reset failed" + e);
+        } finally {
+            await con.release();
+        }
+        return resolve();
+    });
+};
+
+
+
+
 const query = function (sql, callback) {
     pool.query(sql, callback);
 }
@@ -877,5 +964,5 @@ module.exports = {
     setOrderStatusCancled, createAlert, getActiveOrdersForStation,
     getPastOrdersForStation, clearAlert, clearDynamicData,
     createTableGroup, createTable, createStation, createOption, createProduct, removeProduct, removeTable, removeTableGroup,
-    createAlertType, removeAlertType, removeOption, getProduct, getProductsByStation, payProduct, getOutstandingOrders
+    createAlertType, removeAlertType, removeOption, getProduct, getProductsByStation, payProduct, getOutstandingOrders, resetDBToSQLDump
 };

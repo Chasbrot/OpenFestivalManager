@@ -588,7 +588,7 @@ const createStation = function (stationName) {
         } catch (e) {
             return reject("db/createStation: Failed to query" + e)
         }
-        return resolve()
+        return resolve();
     });
 };
 
@@ -614,11 +614,12 @@ const createOption = function (optionName) {
  * @param  {String} productName The name of the product
  * @param  {Boolean} deliverable If the product gets delivered or need to be gathered
  * @param  {Number} cost Cost of a unit of product
+ * @param  {Number} priority Priority of the order in the list
  * @param  {List} A list of option ids which available for this product
  * @param  {List} A list of option ids which are default for this product
  * @return {Promise} Returns a promise 
  */
-const createProduct = function (stationId, productName, deliverable, cost, options, defaults) {
+const createProduct = function (stationId, productName, deliverable, cost,priority, options, defaults) {
     return new Promise(async (resolve, reject) => {
         var con;
         try {
@@ -627,9 +628,10 @@ const createProduct = function (stationId, productName, deliverable, cost, optio
             return reject("db/createProduct: Creating connection failed" + err);
         }
         try {
-            await con.execute("INSERT INTO Gericht VALUES (0,?,?,?,?)", [stationId, productName, cost, deliverable]);
+            await con.beginTransaction();
+            await con.execute("INSERT INTO Gericht VALUES (0,?,?,?,?,?)", [stationId, productName, cost, deliverable, priority]);
             // CHeck if options need to be linked
-            if (options.length > 0) {
+            if (options && options.length > 0) {
                 var result = await con.query("SELECT LAST_INSERT_ID() AS id")
                 // Check if select has delivered an id
                 if (result[0].length > 0) {

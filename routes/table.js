@@ -373,7 +373,7 @@ function payOrder(remaining, productid, sessionid) {
 
 router.get('/productlist/:sid', function (req, res) {
   // Lade Gerichte
-  var sql = `SELECT * FROM Gericht WHERE id_stand=${req.params.sid}`;
+  var sql = `SELECT * FROM Gericht WHERE id_stand=${req.params.sid} ORDER BY list_priority DESC`;
   db.query(sql, function (err, prods) {
     if (err) {
       console.log(err);

@@ -93,9 +93,6 @@ router.post('/', upload.single("dbfile"), function (req, res, next) {
         database: 'festivalmanager',
       },
       dumpToFile: './dump.sql',
-      dump: {
-        tables: ["account", "zutat", "tisch", "tisch_Gruppe", "stand", "gericht", "gericht_Zutaten", "sitzung", "account_sitzung", "bestellung", "zutat_bestellung"],
-      }
     }).then(async () => {
       res.download("./dump.sql");
     }, () => { }).catch(err => {
@@ -265,17 +262,20 @@ router.post('/configuration', function (req, res) {
 
   // Neues Produkt anlegen
   if (body.product_name) {
+    console.log(req.body)
     var station = body.product_station;
     var name = body.product_name;
     var options = body.product_option;
     var defaults = body.product_option_standard;
     var deliverable = (body.product_deliverable == "on");
     var cost = body.product_cost;
+    var priority = body.product_priority;
 
-    db.createProduct(station, name, deliverable, cost, options, defaults)
+    db.createProduct(station, name, deliverable, cost, priority, options, defaults)
       .catch((err) => {
         console.log(err)
       });
+     
   }
 
   // Remove Produkt

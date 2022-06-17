@@ -8,8 +8,8 @@
     <!--<link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">-->
     <script src="/javascripts/jquery-3.1.1.min.js"></script>
     <!--<script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>-->
-    <script src="/javascripts/bootstrap5.0.2.bundle.min.js"></script>
-    <link href="/javascripts/bootstrap5.0.2.min.css" rel="stylesheet">
+    <script src="/javascripts/bs5/bootstrap.bundle.min.js"></script>
+    <link href="/javascripts/bs5/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Chrome, Safari, Edge, Opera */
         input::-webkit-outer-spin-button,
@@ -103,14 +103,14 @@
                     <% for(var i=0; i< stations.length; i++) {%>
                     <li class="nav-item" role="presentation">
                         <% if(i==0){ %>
-                        <button class="nav-link active px-2" id="nav-home-tab" type="button" role="tab"
-                            aria-controls="home" aria-selected="true" role="presentation"
+                        <button class="nav-link active px-2" id="tab-<%= stations[i].id%>" type="button" role="tab"
+                            aria-controls="nav-<%= stations[i].id%>" aria-selected="true" role="presentation"
                             onclick="loadProducts('<%= stations[i].id%>')" data-bs-toggle="tab"
                             data-bs-target="#nav-<%= stations[i].id%>">
                             <%= stations[i].name%>
                         </button>
                         <% } else {%>
-                        <button class="nav-link px-2" id="nav-contact-tab" type="button" role="tab" aria-controls="home"
+                        <button class="nav-link px-2" id="tab-<%= stations[i].id%>" type="button" role="tab" aria-controls="nav-<%= stations[i].id%>"
                             aria-selected="false" role="presentation" onclick="loadProducts('<%= stations[i].id%>')"
                             data-bs-toggle="tab" data-bs-target="#nav-<%= stations[i].id%>">
                             <%= stations[i].name%>
@@ -123,19 +123,18 @@
 
                 </ul>
                 <div class="tab-content" id="station_products">
-                    <% if(stations.length){%>
-                    <% for(var i=0; i< stations.length; i++) {%>
+                    <% if(stations.length){ %>
+                    <% for(var i=0; i< stations.length; i++) { %>
                     <% if(i==0){ %>
-                    <div class="tab-pane fade show active" id="nav-<%= stations[i].id%>" role="tabpanel"
-                        aria-labelledby="nav-home-tab">Test <%= stations[i].id%>
+                    <div class="tab-pane active" id="nav-<%= stations[i].id%>" role="tabpanel"
+                        aria-labelledby="tab-<%= stations[i].id%>">Test <%= stations[i].id%>
                     </div>
-                    <% } else {%>
-                    <div class="tab-pane fade" id="nav-<%= stations[i].id%>" role="tabpanel"
-                        aria-labelledby="nav-contact-tab">Test <%= stations[i].id%>
+                    <% } else { %>
+                    <div class="tab-pane" id="nav-<%= stations[i].id%>" role="tabpanel"
+                        aria-labelledby="tab-<%= stations[i].id%>">Test <%= stations[i].id%>
                     </div>
-                    <%}%>
-
-                                    <% } %>
+                    <% } %>
+                    <% } %>
                     <% } %>
 
                 </div>
@@ -146,7 +145,17 @@
         <script>
             // Load first station entries
             $(document).ready(function () {
-                loadProducts('<%= stations[0].id%>');
+                // Open last opened tab
+                if (sessionStorage.getItem("lastOpenTab") !== null  && sessionStorage.getItem("lastOpenPage") !== null && window.location.href === sessionStorage.getItem("lastOpenPage")) {
+                    const lastOpenTab = sessionStorage.getItem("lastOpenTab");
+                    const lastOpenPage = sessionStorage.getItem("lastOpenPage");
+                    console.log(lastOpenPage)
+                    console.log(lastOpenTab)
+                    $("#tab-"+lastOpenTab).trigger("click");
+                } else{
+                    loadProducts('<%= stations[0].id%>');
+                }
+                
             });
         </script>
         <%}%>
@@ -160,6 +169,11 @@
             console.log("loading products for station" + station_id)
             $("#nav-" + station_id).html('');
             $("#nav-" + station_id).load("/table/productlist/" + station_id);
+
+            // Save tab id
+            sessionStorage.setItem("lastOpenTab", station_id);
+            sessionStorage.setItem("lastOpenPage",window.location.href)
+
         };
 
         function increment(num) {

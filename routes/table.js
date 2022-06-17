@@ -296,8 +296,16 @@ router.post('/:sid', function (req, res) {
         console.log(err)
       });
   } else if (body.productid) {
-    if (body.product_anzahl != 0) {
+    if (body.product_anzahl) {
       db.createOrder(req.session.personal_id, req.session.session_overview, body.productid, body.product_anzahl, body.notiz, body.option)
+        .then(() => {
+          res.redirect("/table/" + sid);
+        })
+        .catch(err => {
+          console.log(err)
+        });
+    } else {
+      db.createOrder(req.session.personal_id, req.session.session_overview, body.productid, 1, "", [])
         .then(() => {
           res.redirect("/table/" + sid);
         })
@@ -373,7 +381,15 @@ function payOrder(remaining, productid, sessionid) {
 
 router.get('/productlist/:sid', function (req, res) {
   // Lade Gerichte
-  var sql = `SELECT * FROM Gericht WHERE id_stand=${req.params.sid} ORDER BY list_priority DESC`;
+  var sql = `SELECT gericht.id, gericht.name FROM Gericht\
+  WHERE id_stand=${req.params.sid} AND gericht.id IN \
+    (\
+      SELECT gericht_zutaten.id_gericht \
+      FROM gericht_zutaten \
+      GROUP BY id_gericht\
+      HAVING COUNT(*) > 0\
+      )\
+  ORDER BY list_priority DESC`;
   db.query(sql, function (err, prods) {
     if (err) {
       console.log(err);
@@ -409,11 +425,19 @@ router.get('/productlist/:sid', function (req, res) {
           if (isNaN(d)) {
             d = 0;
           }
+          db.getProductsByStationWithoutOptions(req.params.sid)
+            .then((simple) => {
+              res.render("table/productlist_new", {
+                products: prods,
+                currentWaitTime: d.toFixed(0),
+                simpleProducts: simple
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+          })
 
-          res.render("table/productlist", {
-            products: prods,
-            currentWaitTime: d.toFixed(0)
-          });
+          
         });
       }
 

@@ -285,6 +285,7 @@ router.get('/alerttypes', function (req, res) {
                 console.log(err)
                 res.sendStatus(500)
             } else {
+                res.set('Cache-control', `max-age=300`)
                 res.json({
                     data: rows
                 });

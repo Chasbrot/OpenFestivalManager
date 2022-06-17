@@ -44,7 +44,7 @@
                 <div class="list-group py-2 px-2" id="orders">
                     <% if(pre_orders.length){ %>
                     <% for(var i=0; i < pre_orders.length; i++) { %>
-                    <div class="list-group-item" id="list_<%=pre_orders[i].b_id%>">
+                    <div class="list-group-item" id="pastlist_<%=pre_orders[i].b_id%>">
                     </div>
                     <% } %>
                     <% } else { %>
@@ -72,7 +72,7 @@
                 <div class="list-group pt-2 px-2">
                     <% if(act_orders.length){ %>
                     <% for(var i=0; i < act_orders.length; i++) { %>
-                    <div class="list-group-item pr-2 pl-1" id="list_<%=act_orders[i].b_id%>">
+                    <div class="list-group-item pr-2 pl-1" id="activelist_<%=act_orders[i].b_id%>">
                     </div>
                     <% } %>
                     <% } else { %>
@@ -107,30 +107,59 @@
             </div>
         </div>
     </div>
+    
 
     <script>
         // Load first station entries
         $(document).ready(function () {
-            const o = document.querySelectorAll(`[id^="list_"]`);
+            // Load data for past orders 
+            var o = document.querySelectorAll(`[id^="pastlist_"]`);
             o.forEach((element) => {
-                console.log(element.id.split("_")[1])
+                //console.log(element.id.split("_")[1])
                 const i = element.id.split("_")[1];
-                $("#list_" + i).load("/station/orderentry/" + i);
+                $("#pastlist_" + i).load("/station/orderentry/" + i);
             });
+            // Load data for current orders
+            o = document.querySelectorAll(`[id^="activelist_"]`);
+            o.forEach((element) => {
+                //console.log(element.id.split("_")[1])
+                const i = element.id.split("_")[1];
+                $("#activelist_" + i).load("/station/orderentry/" + i);
+            });
+            console.log("Order list length: " + o.length)
+            // Play a sound when a new order arrived via auto reload
+            // Save number of orders to sessionStorage
+            if (sessionStorage.getItem("autoReload") == "true" && sessionStorage.getItem("activeOrders")) {
+                var pastActiveOrders = sessionStorage.getItem("activeOrders");
+                console.log(pastActiveOrders)
 
-            $.ajax({
-            url: "/data/alerttypes",
-            success: (result) => {
-                if (result.data.length > 0) {
-                    result.data.forEach((element) => {
-                        document.getElementById("alerttypes").innerHTML += '<option value="'+element.id+'">'+element.name +'</option>'
-                    });
-                } else {
-                    document.getElementById("alerttypes").innerHTML +=
-                        '<option selected> Keine Alarmtypen gefunden </option>'
+                // Check if orderlength changed
+                if (pastActiveOrders < o.length) {
+                    // Play sound
+                    console.log("Playing sound")
+                    const audio = new Audio("images/notification.mp3");
+                    audio.play();
                 }
             }
-        });
+            sessionStorage.removeItem('autoReload');
+            sessionStorage.setItem('activeOrders', o.length);
+
+
+            $.ajax({
+                url: "/data/alerttypes",
+                success: (result) => {
+                    if (result.data.length > 0) {
+                        result.data.forEach((element) => {
+                            document.getElementById("alerttypes").innerHTML +=
+                                '<option value="' + element.id + '">' + element.name +
+                                '</option>'
+                        });
+                    } else {
+                        document.getElementById("alerttypes").innerHTML +=
+                            '<option selected> Keine Alarmtypen gefunden </option>'
+                    }
+                }
+            });
         });
 
         // Automatically reload orders if no actions are made
@@ -148,8 +177,10 @@
         function reloadPage() {
             clearTimeout(idleTime);
             idleTime = setTimeout(function () {
+                // Save autoreloading to sessionStorage
+                sessionStorage.setItem('autoReload', 'true');
                 location.reload();
-            }, 60000);
+            }, 20000);
         }
 
         // Change caret up/down

@@ -112,6 +112,10 @@ router.get('/orderentry/:oid', function (req, res) {
   db.getOrderentry(req.params.oid).then(order => {
     // Get all options from the product of the order and if it was ordered
     db.getSelectedOptions(req.params.oid).then(options => {
+      // If order is finished cache the entry
+      if (order[0].erledigt || order[0].stoniert) {
+        res.set('Cache-control', `max-age=300`)
+      }
       res.render("station/orderentry", { options: options, order: order[0], special: (options.length > 0 || order[0].notiz) });
     }).catch(err => {
       console.log(err)
@@ -126,5 +130,6 @@ router.get('/orderentry/:oid', function (req, res) {
     });
   });
 });
+
 
 module.exports = router;

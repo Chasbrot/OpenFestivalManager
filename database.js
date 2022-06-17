@@ -476,7 +476,7 @@ const getActiveOrdersForStation = function (stationId) {
         ON gericht.id = bestellung.id_gericht\
         INNER JOIN stand\
         ON stand.id = gericht.id_stand\
-        WHERE stand.id = ? AND bestellung.erledigt IS NULL AND bestellung.stoniert = false
+        WHERE stand.id = ? AND bestellung.erledigt IS NULL AND bestellung.stoniert = false AND gericht.lieferbar = true
         ORDER BY wartezeit DESC`;
         var result;
         try {
@@ -507,7 +507,8 @@ const getPastOrdersForStation = function (stationId) {
         ON sitzung.id = bestellung.id_sitzung\
         INNER JOIN tisch\
         ON tisch.id = sitzung.id_tisch\
-        WHERE stand.id = ? AND (bestellung.erledigt IS NOT NULL OR bestellung.stoniert = true) AND DATEDIFF(DATE(bestellung.erstellt),NOW())=0\
+        WHERE stand.id = ? AND (bestellung.erledigt IS NOT NULL OR bestellung.stoniert = true) AND gericht.lieferbar = true \
+        AND DATEDIFF(DATE(bestellung.erstellt),NOW())=0 AND TIMESTAMPDIFF(MINUTE,bestellung.erledigt,NOW()) <= 60 \
         ORDER BY lieferzeit DESC`;
         var result;
         try {
@@ -787,6 +788,71 @@ const getProductsByStation = function (stationId) {
 };
 
 /**
+* Get only products from a station without a option
+* @param  {Number} optionId
+* @return {Promise} Returns a promise
+*/
+const getProductsByStationWithoutOptions = function (stationId) {
+    return new Promise(async (resolve, reject) => {
+        var result;
+        try {
+            var sql ="SELECT gericht.id, gericht.name FROM Gericht\
+            WHERE id_stand= ? AND gericht.id NOT IN \
+                (\
+                SELECT gericht_zutaten.id_gericht \
+                FROM gericht_zutaten \
+                GROUP BY id_gericht\
+                HAVING COUNT(*) > 0\
+                )\
+            ORDER BY list_priority DESC";
+            result = await poolawait.query(sql, [stationId])
+        } catch (e) {
+            return reject("db/getProductsByStationWithoutOptions: Failed to query" + e)
+        }
+        if (result[0].length == 0) {
+            return resolve([]);
+        } else {
+            return resolve(result[0]);
+        }
+
+    });
+};
+
+/**
+* Get only products from a station with a option
+* @param  {Number} optionId
+* @return {Promise} Returns a promise
+*/
+const getProductsByStationWithOptions = function (stationId) {
+    return new Promise(async (resolve, reject) => {
+        var result;
+        try {
+            var sql ="SELECT gericht.id, gericht.name FROM Gericht\
+            WHERE id_stand= ? AND gericht.id IN \
+                (\
+                SELECT gericht_zutaten.id_gericht \
+                FROM gericht_zutaten \
+                GROUP BY id_gericht\
+                HAVING COUNT(*) > 0\
+                )\
+            ORDER BY list_priority DESC";
+            result = await poolawait.query(sql, [stationId])
+        } catch (e) {
+            return reject("db/getProductsByStationWithOptions: Failed to query" + e)
+        }
+        if (result[0].length == 0) {
+            return resolve([]);
+        } else {
+            return resolve(result[0]);
+        }
+
+    });
+};
+
+
+
+
+/**
 * Get a product
 * @param  {Number} productId
 * @return {Promise} Returns a promise
@@ -964,5 +1030,6 @@ module.exports = {
     setOrderStatusCancled, createAlert, getActiveOrdersForStation,
     getPastOrdersForStation, clearAlert, clearDynamicData,
     createTableGroup, createTable, createStation, createOption, createProduct, removeProduct, removeTable, removeTableGroup,
-    createAlertType, removeAlertType, removeOption, getProduct, getProductsByStation, payProduct, getOutstandingOrders, resetDBToSQLDump
+    createAlertType, removeAlertType, removeOption, getProduct, getProductsByStation, payProduct, getOutstandingOrders, resetDBToSQLDump,
+    getProductsByStationWithOptions, getProductsByStationWithoutOptions
 };

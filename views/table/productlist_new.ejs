@@ -1,9 +1,33 @@
-<% if(products.length){%>
+<% if(products.length || simpleProducts.length ){ %>
 <div class="card py-0">
     <div class="card-header py-0">
         Aktuelle Wartezeit: <%=currentWaitTime%>m
     </div>
 </div>
+
+<!-- Products without any options -->
+<form action="#" method="POST">
+    <div class="container mx-0 py-1 px-0">
+        <!-- Products -->
+        <% for(var i=0; i< simpleProducts.length; i+=2) { %>
+        <div class="row m-0 ms-1 py-1" style="width: 98vw">
+            <div class="col-6 ps-0">
+                <button class="btn btn-secondary w-100" name="productid" value="<%=simpleProducts[i].id %>"><%=simpleProducts[i].name %></button>
+            </div>
+            <% if(simpleProducts[i+1]) { %>
+            <div class="col-6 px-0">
+                <button class="btn btn-secondary w-100" name="productid" value="<%=simpleProducts[i+1].id %>"><%=simpleProducts[i+1].name %></button>
+            </div>
+            <% } else { %>
+            <div class="col">
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+</form>
+
+<!-- Products with options -->
 <div class="accordion py-1" id="accordionExample">
     <% for(var i=0; i< products.length; i++) { %>
     <!-- Accordion Header -->
@@ -16,15 +40,15 @@
             </button>
             <!-- Bestellsteuerung -->
             <div class="float-end">
-                <div type="button" class="btn btn-secondary" style="width:40px;"
-                    onclick="decrement('p_anz<%=products[i].id%>')">-</div>
-                <input type="number" name="product_anzahl" id="p_anz<%=products[i].id%>"
-                    class="form-control text-center" value=1 style="width:45px; display: inline;"
+                <!--<div type="button" class="btn btn-secondary" style="width:40px;"
+                    onclick="decrement('p_anz<%=products[i].id%>')">-</div> -->
+                <input type="number" name="product_anzahl" id="p_anz<%=products[i].id%>" 
+                    class="form-control text-center" value=1 style="width:45px; display: none;"
                     form="order<%=products[i].id%>">
-                <div type="button" class="btn btn-secondary" style="width:40px;"
-                    onclick="increment('p_anz<%=products[i].id%>')">+</div>
+                <!--<div type="button" class="btn btn-secondary" style="width:40px;"
+                    onclick="increment('p_anz<%=products[i].id%>')">+</div>-->
                 <button class="btn btn-secondary ms-1" type="submit" name="productid" value="<%=products[i].id%>"
-                    form="order<%=products[i].id%>" style="width: 60px">
+                    form="order<%=products[i].id%>" style="width: 160px">
                     <img src="/images/sent.png" style="height: 15px">
                 </button>
             </div>
@@ -37,7 +61,7 @@
                 <div class="container mx-0 py-1 px-0">
                     <!-- Optionen -->
                     <% for(var z=0; z< products[i].zutaten.length; z+=2) {%>
-                    <div class="row m-0 ms-1 py-1" style="width: 96vw">
+                    <div class="row m-0 ms-1 py-1" style="width: 98vw">
                         <div class="col-6 ps-0">
                             <% if(products[i].zutaten[z].optional){%>
                             <input type="checkbox" class="btn-check" value="<%=products[i].zutaten[z].id%>"

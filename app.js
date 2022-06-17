@@ -38,6 +38,8 @@ let setCache = function (req, res, next) {
   // Only cache images, js and css files
   if (req.method == 'GET' && (req.url.includes("stylesheets") || req.url.includes("images") || req.url.includes("javascripts"))) {
     res.set('Cache-control', `max-age=${period}`)
+  } else if (req.method == "GET" && (req.url.includes("productlist"))) {
+    res.set('Cache-control', `max-age=300`)
   } else {
     // for the other requests set strict no caching parameters
     res.set('Cache-control', `no-store`)

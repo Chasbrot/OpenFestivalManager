@@ -3,7 +3,7 @@
         <!-- Collapse button -->
         <% if  (special) { %>
         <a class=" btn-light card-header pl-3" data-toggle="collapse"
-            style="background-color: rgba(0,0,0,0)!important;border-bottom: 0!important; padding-right: 28%"
+            style="background-color: rgba(0,0,0,0)!important;border-bottom: 0!important; padding-right: 12%"
             href="#options_order<%= order.b_id%>" onclick='changeCaret("caret<%= order.b_id%>", "options_order<%= order.b_id%>")' id="order<%= order.b_id%>">
 
             <!-- Extras or Note detected -->
@@ -102,7 +102,7 @@
     <!-- Options -->
     <!-- Extras or Note detected -->
     <% if(special) { %>
-    <div class="collapse pt-1" data-parent="#orders" id="options_order<%= order.b_id%>">
+    <div class="collapse show pt-1" data-parent="#orders" id="options_order<%= order.b_id%>">
         <div class="card card-body p-2" id="div_options_order<%= order.b_id%>" style="min-height: 60px">
             <% if(options.length) { %>
             <div class="container pb-2">

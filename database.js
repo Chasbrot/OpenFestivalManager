@@ -734,6 +734,33 @@ const removeOption = function (optionId) {
 };
 
 
+/**
+* Get all sold products by station and date
+* @param  {Number} stationId
+* @param  {String} date
+* @return {Promise} Returns a promise
+*/
+const getSoldProducts = function (stationId, date) {
+    return new Promise(async (resolve, reject) => {
+        var result;
+        try {
+            var sql = "SELECT Gericht.name, Count(Bestellung.id) AS amount  FROM bestellung\
+            INNER JOIN Gericht ON bestellung.id_gericht = Gericht.id\
+            INNER JOIN Stand ON Stand.id = Gericht.id_stand\
+            WHERE DATEDIFF(bestellung.erstellt,?)=0 AND Stand.id = ? AND bestellung.erledigt IS NOT NULL\
+            GROUP BY Gericht.name, Stand.name\
+            ORDER BY amount DESC";
+            result = await poolawait.query(sql, [date,stationId])
+        } catch (e) {
+            return reject("db/getSoldProducts: Failed to query" + e)
+        }
+        if(result[0].length==0){
+            return resolve([]);
+        }
+        return resolve(result[0]);
+    });
+};
+
 
 
 /**
@@ -1031,5 +1058,5 @@ module.exports = {
     getPastOrdersForStation, clearAlert, clearDynamicData,
     createTableGroup, createTable, createStation, createOption, createProduct, removeProduct, removeTable, removeTableGroup,
     createAlertType, removeAlertType, removeOption, getProduct, getProductsByStation, payProduct, getOutstandingOrders, resetDBToSQLDump,
-    getProductsByStationWithOptions, getProductsByStationWithoutOptions
+    getProductsByStationWithOptions, getProductsByStationWithoutOptions,getSoldProducts
 };

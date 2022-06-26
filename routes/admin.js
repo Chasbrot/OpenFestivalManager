@@ -386,6 +386,9 @@ router.post('/login', (req, res) => {
 
 });
 
+
+
+
 /*
 Remove all staticly defined data
 Includes: Table_Groups, Tables, Accounts, Product, Station, Options and all Mappings . Resets all autoincrements to 1;

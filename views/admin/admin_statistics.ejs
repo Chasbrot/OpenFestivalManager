@@ -80,6 +80,53 @@
                 <canvas id="lineChart"></canvas>
             </div>
         </div>
+        <br>
+        <div class="card">
+            <div class="card-header">
+                Verkaufszahlen
+            </div>
+            <div class="card-body">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Datum:</span>
+                    </div>
+                    <select class="custom-select" id="sold_date">
+                        <% if(dates.length){%>
+                        <option value="" selected>Choose ...</option>
+                        <% for(var i=0; i< dates.length; i++) {%>
+                        <option value="<%= dates[i].date_machine%>">
+                            <%= dates[i].date%>
+                        </option>
+                        <% } }else{ %>
+                        <option value="-1" selected>Keine Daten</option>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Station:</span>
+                    </div>
+                    <select class="custom-select" id="sold_station" onchange="loadSellingData()">
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="container">
+                <table class="table" style="min-height: 200px">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Verkauft</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sold_table">
+    
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
 
     </div>
 
@@ -92,9 +139,59 @@
         loadCurrentLoad();
         setInterval(function () {
             loadCurrentLoad()
-        }, 30000)
-
+        }, 60000)
+        loadStations();
     });
+
+    function loadStations() {
+        $.ajax({
+            type: "GET",
+            url: "/data/getAllStations",
+            success: (data) => {
+                var s = "";
+                if (!data.stations.length) {
+                    s = '<option value=""> Keine Stationen gefunden </option>';
+                } else {
+                    s = '<option value=""> Choose ... </option>';
+                    data.stations.forEach((element) => {
+                        s += '<option value="' + element.id + '">' + element.name + '</option>';
+                    })
+                }
+                document.getElementById("sold_station").innerHTML=s;
+            }
+        });
+    }
+
+    function loadSellingData(){
+        var date = document.getElementById("sold_date").value;
+        var station = document.getElementById("sold_station").value;
+
+        if(date =="" || station==""){
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/data/getSoldProducts",
+            data: {
+                date: date,
+                stationId: station
+            },
+            success: (data) => {
+                var s ="";
+                if(data.data.length==0){
+                    s='<tr> Keine Daten gefunden </tr>';
+                } else{
+                    for(var i=0; i<data.data.length; i++){
+                        s+='<tr><th scope="row">'+(i+1)+'</th>'
+                        s+="<td>"+data.data[i].name+"</td>";
+                        s+="<td>"+data.data[i].amount+"</td></tr>";
+                    }
+                }
+                document.getElementById("sold_table").innerHTML=s;
+            }
+        });
+    }
 
     function clearAlert(alert_id) {
         $.ajax({
@@ -142,7 +239,7 @@
         $.ajax({
             url: "/data/alerts",
             success: (result) => {
-                document.getElementById("alerts").innerHTML="";
+                document.getElementById("alerts").innerHTML = "";
                 if (result.data.length > 0) {
                     result.data.forEach((element) => {
                         document.getElementById("alerts").innerHTML +=
@@ -178,7 +275,18 @@
             dataType: 'json',
             success: function (result) {
                 var pdatasets = [];
+                var globalcolors=[]; // Prevent the same color twice
                 for (var i = 0; i < result.stations.length; i++) {
+                    var color, loop=0; // Generate random color
+                    do{
+                        color = getRandColor();
+                        globalcolors.push(color);
+                        loop++;
+                    }while(!globalcolors.includes(color) && loop < 10);
+                    if(loop == 10){
+                        console.log("Max tries at color generation")
+                    }
+                    console.log(globalcolors +" "+color);
                     // Load data for station
                     var station = result.stations[i];
                     $.ajax({
@@ -195,7 +303,7 @@
                                 label: station.name,
                                 data: parseLoad(result.load),
                                 borderColor: [
-                                    getRandColor(),
+                                    color,
                                 ],
                             })
                         }
@@ -247,7 +355,37 @@
     }
 
     function getRandColor() {
-        return "#" + Math.floor(Math.random() * 16777215).toString(16);
+        var col=[0,0,0];
+        var ff = Math.floor(Math.random()*3);
+        var oo = Math.floor(Math.random()*3);
+        var color = Math.floor(Math.random() * 6)*51;
+        col[ff]=255;
+        if(ff==oo){
+            col[++oo%3]=0;
+            oo= ++oo%3;
+        }else{
+            col[oo]=0
+        }
+        var t = [0,1,2];
+        t.forEach((x)=>{
+            if(x!= oo && x!= ff){
+                col[x]=color;
+            }
+        });
+        var hex = "#";
+        col.forEach((x)=>{
+            if(x==0){
+                hex+="00";
+            }else{
+                hex += x.toString(16);
+            }
+           
+        })
+        if(hex.length != 7){
+            console.log(ff + " "+ oo + " "+ color);
+            console.log(col);
+        }
+        return hex;
     }
 </script>
 

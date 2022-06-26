@@ -196,6 +196,21 @@ router.get('/getAllStations', function (req, res) {
         });
 });
 
+router.post('/getSoldProducts', (req, res) => {
+    // check username
+    const body = req.body;
+    db.getSoldProducts(body.stationId, body.date)
+    .then((result)=> {
+        res.json({
+            data: result
+        })
+    })
+    .catch((err)=>{
+        console.log(err)
+        res.sendStatus(500);
+    })
+  });
+
 router.get('/getActiveOrdersCount', function (req, res) {
     var sql = 'SELECT COUNT(id) AS c FROM bestellung\
     WHERE bestellung.erledigt IS NULL AND bestellung.stoniert = false';

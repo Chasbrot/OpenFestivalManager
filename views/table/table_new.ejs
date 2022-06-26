@@ -20,16 +20,16 @@
         <form action="#" method="POST" id="new">
             <h4>Gruppe</h4>
             <% if(table_groups.length){%>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons" style="display: inline-table;">
                 <% for(var i=0; i< table_groups.length; i++) {%>
                 <% if (i==0) { %>
-                <label class="btn btn-primary btn-lg px-2" style="min-width: 40px;" >
+                <label class="btn btn-primary btn-lg px-3" style="min-width: 50px;" >
                     <input type="radio" name="table_group" id="option<%= table_groups[i].id%>"
                         value="<%= table_groups[i].id%>" autocomplete="off" onclick='loadTables("<%= table_groups[i].id%>")' checked>
                     <%= table_groups[i].groupname%>
                 </label>
                 <% } else { %>
-                <label class="btn btn-primary btn-lg px-2" style="min-width: 40px;">
+                <label class="btn btn-primary btn-lg px-3" style="min-width: 50px;">
                     <input type="radio" name="table_group" id="option<%= table_groups[i].id%>"
                         value="<%= table_groups[i].id%>" autocomplete="off" onclick='loadTables("<%= table_groups[i].id%>")'>
                     <%= table_groups[i].groupname%>

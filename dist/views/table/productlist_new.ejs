@@ -1,0 +1,146 @@
+<% if(products.length || simpleProducts.length ){ %>
+<div class="card py-0">
+    <div class="card-header py-0">
+        Aktuelle Wartezeit: <%=currentWaitTime%>m
+    </div>
+</div>
+
+<!-- Simple Products without any options or variations -->
+<div class="my-1 ms-1">
+    <form action="#" method="POST">
+        <!-- Products -->
+        <% products.forEach((p) => { if(p.ingredients.length == 0 && p.variations.length == 0){%>
+        <button class="btn btn-secondary py-2 px-3 my-1" name="productid" value="<%=p.id %>"><%=p.name %></button>
+        <% }});%>
+    </form>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <!-- Products with variations -->
+    <div class="my-1">
+        <form action="#" method="POST">
+            <!-- Products -->
+            <% products.forEach((p) => { if(p.ingredients.length == 0 && p.variations.length != 0){%>
+            <!-- Accordion Item -->
+            <div class="accordion-item">
+                <!-- Accordion Header -->
+                <div class="accordion-header card-header ps-0 pe-1 py-1" id="heading<%=p.id%>">
+                    <button class="btn text-start" type="button" style="width: 98%;" data-bs-toggle="collapse"
+                        data-bs-target="#collapse<%=p.id%>" aria-expanded="true" aria-controls="collapse<%=p.id%>">
+                        <%=p.name%>
+                    </button>
+                </div>
+                <!-- Accordion Content -->
+                <div id="collapse<%=p.id%>" class="accordion-collapse collapse" aria-labelledby="heading<%=p.id%>"
+                    data-bs-parent="#accordionExample">
+                    <div class="accordion-body py-1">
+
+                        <% p.variations.forEach((v) => {%>
+                        <form action="#" method="POST" autocomplete="off" id="order<%=p.id%>_v<%=v.id %>"
+                            style="display: inline;">
+                            <button class="btn btn-secondary py-2 px-3 my-1" name="variationid"
+                                value="<%=v.id %>"><%=v.attrname %></button>
+                            <input type="number" hidden name="productid" value="<%=p.id%>"></input>
+                        </form>
+                        <% });%>
+
+                    </div>
+                </div>
+            </div>
+            <% }});%>
+        </form>
+    </div>
+
+    <!-- Complex Products with  options-->
+    <div class="my-1">
+        <!-- Products -->
+        <% products.forEach((p) => { if(p.ingredients.length != 0 && p.variations.length == 0){%>
+        <form action="#" method="POST">
+            <!-- Accordion Header -->
+            <div class="accordion-item">
+                <div class="accordion-header card-header ps-0 pe-1" id="heading<%=p.id%>">
+                    <div class="row">
+                        <button class="btn text-start col-9 ps-3" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse<%=p.id%>" aria-expanded="true" aria-controls="collapse<%=p.id%>">
+                            <%=p.name%>
+                        </button>
+                        <!-- Bestellsteuerung -->
+                        <div class="col-3">
+                            <button class="btn btn-secondary ms-1 float-end" type="submit" name="productid"
+                                value="<%=p.id%>" style="width:100%">
+                                <img src="/images/sent.png" style="height: 15px">
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+                <!-- Accordion Content -->
+                <div id="collapse<%=p.id%>" class="accordion-collapse collapse" aria-labelledby="heading<%=p.id%>"
+                    data-bs-parent="#accordionExample">
+                    <form action="#" method="POST" autocomplete="off" id="order<%=p.id%>">
+                        <div class="container mx-0 py-1 px-0">
+                            <!-- Optionen -->
+                            <% for(var z=0; z< p.ingredients.length; z+=2) {%>
+                            <div class="row m-0 ms-1 py-1" style="width: 98vw">
+                                <div class="col-6 ps-0">
+                                    <% if(p.ingredients[z].optional){%>
+                                    <input type="checkbox" class="btn-check" value="<%=p.ingredients[z].ingredient.id%>"
+                                        name="option" id="<%=p.id%>_option<%=p.ingredients[z].ingredient.id%>" checked>
+                                    <% } else { %>
+                                    <input type="checkbox" class="btn-check" value="<%=p.ingredients[z].ingredient.id%>"
+                                        name="option" id="<%=p.id%>_option<%=p.ingredients[z].ingredient.id%>">
+                                    <% } %>
+                                    <label class="btn btn-outline-primary py-1" style="width:100%"
+                                        for="<%=p.id%>_option<%=p.ingredients[z].ingredient.id%>">
+                                        <%=p.ingredients[z].ingredient.name%>
+                                    </label>
+                                </div>
+                                <% if(p.ingredients[z+1]) { %>
+                                <div class="col-6 px-0">
+                                    <% if(p.ingredients[z+1].optional){%>
+                                    <input type="checkbox" class="btn-check"
+                                        value="<%=p.ingredients[z+1].ingredient.id%>" name="option"
+                                        id="<%=p.id%>_option<%=p.ingredients[z+1].ingredient.id%>" checked>
+                                    <% } else { %>
+                                    <input type="checkbox" class="btn-check"
+                                        value="<%=p.ingredients[z+1].ingredient.id%>" name="option"
+                                        id="<%=p.id%>_option<%=p.ingredients[z+1].ingredient.id%>">
+                                    <% } %>
+                                    <label class="btn btn-outline-primary py-1" style="width:100%"
+                                        for="<%=p.id%>_option<%=p.ingredients[z+1].ingredient.id%>">
+                                        <%=p.ingredients[z+1].ingredient.name%>
+                                    </label>
+                                </div>
+                                <% } else { %>
+                                <div class="col">
+                                </div>
+                                <% } %>
+                            </div>
+                            <% } %>
+                        </div>
+                        <input type="text" class="form-control list-group-item" placeholder="Notiz" name="note"
+                            autocomplete="off">
+                    </form>
+                </div>
+            </div>
+        </form>
+        <% }});%>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+<% } else { %>
+<div class="card">
+    <div class="card-header">
+        Keine Produkte verfügbar!
+    </div>
+</div>
+<% } %>

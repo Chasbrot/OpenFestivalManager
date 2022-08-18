@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Tisch</title>
+    <%- include('../header_common') %>
+    <style>
+        .card-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .card-body {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Nav bar -->
+    <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/personal/overview">Übersicht</a>
+            <div class="navbar-brand float-right">
+                <%= t.name%>
+            </div>
+            <% if(closed) { %>
+            <a class="btn btn-primary float-right btn-md py-0" href="/table/<%=sid%>/bills">Rechnungen</a>
+            <% } else { %>
+            <a class="btn btn-danger float-right btn-md py-0" href="/table/<%=sid%>/bill">Kassieren</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- Bestellungen -->
+    <div class="card" style="max-height: 25vh">
+
+        <div class="card-body overflow-auto pt-0 px-1">
+            <div class="accordion" id="gOaccordion">
+                <div class="list-group pt-0">
+                    <!-- Single entry in the map , no grouping-->
+                    <% singleOrders.forEach((o)=>{ %>
+                    <div class="list-group-item py-0 ps-0">
+                        <form action="#" method="POST" style="display:inline;">
+                            <div class="row">
+                                <div class="col-8 d-grid pe-0">
+                                    <a class="btn btn-light text-start py-1 " href="orderdetails/<%= o.id%>"
+                                        style="background-color:white">
+                                        <!-- Status icons -->
+                                        <% switch (o.getCurrentState().statetype) {
+                                                case 0 : %>
+                                        <img src="/images/order.png" style="width:15px">
+                                        <% break;
+                                            case 1 : %>
+                                        <img src="/images/loading.gif" style="width:15px">
+                                        <% break;
+                                            case 2 : %>
+                                        <img src="/images/outbox.png" style="width:15px">
+                                        <% break;
+                                                case 3 : %>
+                                        <img src="/images/check.png" style="width:15px">
+                                        <% break;
+                                                case 4 : %>
+                                        <img src="/images/canceled.png" style="width:15px">
+                                        <% break;
+                                            } %>
+
+                                        <!-- Order Data -->
+                                        <% if(o.variation != null) { %>
+                                        <span><%= o.product.name%>, <%= o.variation.attrname%></span>
+                                        <% } else { %>
+                                        <span><%= o.product.name%></span>
+                                        <% } %>
+                                    </a>
+                                </div>
+                                <!-- Buttons -->
+                                <div class="col-2 d-grid px-0 py-0">
+                                    <% if(o.getCurrentState().statetype == 0 && !o.product.deliverable) { %>
+                                    <button class="btn btn-success py-0" type="submit" name="finishOrder"
+                                        value="<%= o.id%>">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                                            fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                                            <path
+                                                d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                                        </svg>
+                                    </button>
+                                    <% } %>
+                                </div>
+                                <div class="col-2 d-grid px-0">
+                                    <% if(o.getCurrentState().statetype != 4 && o.getCurrentState().statetype != 3 ) { %>
+                                    <button class="btn btn-danger py-0" type="submit" name="cancelOrder"
+                                        value="<%=o.id%>">x
+                                    </button>
+
+                                    <% } %>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <% }) %>
+                    <!-- Multiple entries in the map, group-->
+                    <% groupedOrders.forEach((v,o)=>{ %>
+
+                    <div class="list-group-item py-0 px-0">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="gOheading<%= o[0].id%>">
+                                <button class="accordion-button collapsed py-1 ps-2" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#gOcollapse<%= o[0].id%>" aria-expanded="false"
+                                    aria-controls="gOcollapse<%= o[0].id%>">
+                                    <!-- Status icons -->
+                                    <% switch (o[0].getCurrentState().statetype) {
+                                               case 3 : %>
+                                    <img src="/images/check.png" style="width:15px">
+                                    <% break;
+                                                case 4 : %>
+                                    <img src="/images/canceled.png" style="width:15px">
+                                    <% break;
+                                            } %>
+                                    <!-- Order Data -->
+                                    <span class="ps-1">
+                                        <%= v%> x
+                                        <% if(o[0].variation != null) { %>
+                                        <%= o[0].product.name%>, <%= o[0].variation.attrname%>
+                                        <% } else {%>
+                                        <%= o[0].product.name%>
+                                        <% } %>
+                                    </span>
+                                </button>
+                            </h2>
+                            <div id="gOcollapse<%= o[0].id%>" class="accordion-collapse collapse"
+                                aria-labelledby="gOheading<%= o[0].id%>" data-bs-parent="#gOaccordion">
+                                
+                                    <div class0="list-group">
+                                        <% o.forEach((oe)=>{ %>
+                                        <div class="list-group-item p-0">
+                                            <a class="btn btn-light text-start py-1 ps-4 w-100 " href="orderdetails/<%= oe.id%>"
+                                                style="background-color:white">
+                                                <span>•</span>
+                                                <!-- Status icons -->
+                                                <% switch (oe.getCurrentState().statetype) {
+                                            case 0 : %>
+                                                <img src="/images/order.png" style="width:15px">
+                                                <% break;
+                                            case 1 : %>
+                                                <img src="/images/loading.gif" style="width:15px">
+                                                <% break;
+                                            case 2 : %>
+                                                <img src="/images/outbox.png" style="width:15px">
+                                                <% break;
+                                            case 3 : %>
+                                                <img src="/images/check.png" style="width:15px">
+                                                <% break; 
+                                            case 4 : %>
+                                                <img src="/images/canceled.png" style="width:15px">
+                                                <% break;
+                                            } %>
+                                                <!-- Order Data -->
+                                                <% if(oe.variation != null) { %>
+                                                <span><%= oe.product.name%>, <%= oe.variation.attrname%></span>
+                                                <% } else { %>
+                                                <span><%= oe.product.name%></span>
+                                                <% } %>
+                                            </a>
+                                        </div>
+                                        <% }) %>
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                    <% if(!singleOrders.length && !groupedOrders.size) { %>
+                    <div class="list-group-item py-0">
+                        Keine Bestellungen
+                    </div>
+                    <% } %>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Neu Bestellen -->
+    <% if(!closed) { %>
+    <div class="card">
+        <div class="card-header py-0">
+            Bestellen
+        </div>
+        <div class="card-body px-0 py-0">
+            <ul class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
+
+                <% if(stations.length){%>
+                <% for(var i=0; i< stations.length; i++) {%>
+                <li class="nav-item" role="presentation">
+                    <% if(i==0){ %>
+                    <button class="nav-link active px-2" id="tab-<%= stations[i].id%>" type="button" role="tab"
+                        aria-controls="nav-<%= stations[i].id%>" aria-selected="true" role="presentation"
+                        onclick="loadProducts('<%= stations[i].id%>')" data-bs-toggle="tab"
+                        data-bs-target="#nav-<%= stations[i].id%>">
+                        <%= stations[i].name%>
+                    </button>
+                    <% } else {%>
+                    <button class="nav-link px-2" id="tab-<%= stations[i].id%>" type="button" role="tab"
+                        aria-controls="nav-<%= stations[i].id%>" aria-selected="false" role="presentation"
+                        onclick="loadProducts('<%= stations[i].id%>')" data-bs-toggle="tab"
+                        data-bs-target="#nav-<%= stations[i].id%>">
+                        <%= stations[i].name%>
+                    </button>
+                    <%}%>
+                    </li>
+
+                    <% } %>
+                    <% } %>
+
+            </ul>
+            <div class="tab-content" id="station_products">
+                <% if(stations.length){ %>
+                <% for(var i=0; i< stations.length; i++) { %>
+                <% if(i==0){ %>
+                <div class="tab-pane active" id="nav-<%= stations[i].id%>" role="tabpanel"
+                    aria-labelledby="tab-<%= stations[i].id%>">Test <%= stations[i].id%>
+                </div>
+                <% } else { %>
+                <div class="tab-pane" id="nav-<%= stations[i].id%>" role="tabpanel"
+                    aria-labelledby="tab-<%= stations[i].id%>">Test <%= stations[i].id%>
+                </div>
+                <% } %>
+                <% } %>
+                <% } %>
+
+            </div>
+        </div>
+    </div>
+
+    <% } %>
+
+
+    <% if (stations.length && !closed) {%>
+    <script>
+        // Load first station entries
+        $(document).ready(function () {
+            // Open last opened tab
+            if (sessionStorage.getItem("lastOpenTab") !== null && sessionStorage.getItem("lastOpenPage") !==
+                null && window.location.href === sessionStorage.getItem("lastOpenPage")) {
+                const lastOpenTab = sessionStorage.getItem("lastOpenTab");
+                const lastOpenPage = sessionStorage.getItem("lastOpenPage");
+                console.log(lastOpenPage)
+                console.log(lastOpenTab)
+                $("#tab-" + lastOpenTab).trigger("click");
+            } else {
+                loadProducts('<%= stations[0].id%>');
+            }
+
+        });
+    </script>
+    <%}%>
+
+    <script>
+        // Load products for a station
+        function loadProducts(station_id) {
+            if (!station_id) {
+                return;
+            }
+            console.log("loading products for category" + station_id)
+            $("#nav-" + station_id).html('');
+            $("#nav-" + station_id).load("/table/productlist/category/" + station_id);
+
+            // Save tab id
+            sessionStorage.setItem("lastOpenTab", station_id);
+            sessionStorage.setItem("lastOpenPage",window.location.href)
+
+        };
+
+        function increment(num) {
+            document.getElementById(num).value = parseInt(document.getElementById(num).value) + 1;
+        };
+        function decrement(num) {
+            if (document.getElementById(num).value > 1) {
+                document.getElementById(num).value = parseInt(document.getElementById(num).value) - 1;
+            }
+        };
+
+
+    </script>
+
+
+</body>
+
+</html>

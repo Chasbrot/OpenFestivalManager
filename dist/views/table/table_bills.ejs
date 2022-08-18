@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Tisch</title>
+    <%- include('../header_common') %>
+</head>
+
+<body>
+
+    <!-- Nav bar -->
+    <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="javascript:history.back()">Zurück</a>
+            <div class="navbar-brand float-end">Rechnungen</div>
+        </div>
+    </nav>
+
+    <!-- Bestellungen -->
+    <div class="card">
+        <div class="card-header py-0">Rechnungen</div>
+        <div class="card-body overflow-auto pt-0 px-1">
+            <div class="accordion" id="accordionExample">
+                <div class="list-group">
+                    <% if(bills.length){%>
+                    <% bills.forEach((bill)=> { %>
+                    <div class="list-group-item py-0 px-1">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headeing<%=bill.id%>">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapse<%=bill.id%>" aria-expanded="false"
+                                    aria-controls="collapse<%=bill.id%>">
+                                    <span><%=bill.getValue()%>€</span>
+
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapse<%=bill.id%>" class="accordion-collapse collapse" aria-labelledby="heading<%=bill.id%>" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <div class="list-group">
+                                    <% bill.orders.forEach((o)=>{ %>
+                                        <div class="list-group-item">
+                                            <% if(o.variation != null) { %>
+                                                <span><%=o.product.name%>, <%=o.variation.attrname%></span>
+                                                <div class="float-end">
+                                                    <span><%=o.variation.price%></span>
+                                                </div>
+                                            <% } else { %>
+                                                <span><%=o.product.name%></span>
+                                                <div class="float-end">
+                                                    <span><%=o.product.price%></span>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    
+
+                                    <% }) %>
+                                </div>
+                              
+                            </div>
+                          </div>
+                    </div>
+                </div>
+                <% })%>
+                <% }else{ %>
+                <h4 class="text-center">Keine Rechnugen gefunden</h4>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    </div>
+
+</body>
+
+</html>

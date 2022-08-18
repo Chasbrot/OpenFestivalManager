@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Konsole</title>
+    <%- include('../header_common') %>
+
+    <script>
+        function setCheckbox(id, state) {
+            document.getElementById(id).disabled = state;
+            if (state) {
+                document.getElementById(id).checked = false;
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+
+    <%- include('admin_navbar')  %>
+    <br>
+
+    <div class="row px-2 d-flex align-items-start">
+        <div class="col-2">
+            <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <button class="nav-link active" id="v-pills-tables-tab" data-bs-toggle="pill"
+                    data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
+                    aria-selected="true">Tische</button>
+                <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
+                    data-bs-target="#v-pills-organization" type="button" role="tab" aria-controls="v-pills-organization"
+                    aria-selected="true">Organisation</button>
+                <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
+                    data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
+                    aria-selected="true">Produkte</button>
+            </div>
+        </div>
+        <div class="col-10">
+            <div class="tab-content" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-tables" role="tabpanel"
+                    aria-labelledby="v-pills-tables-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            Tischgruppen
+                        </div>
+                        <div class="card-body">
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Tischgruppe:</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="new_table_group"
+                                        placeholder="Name der Gruppe" name="new_table_group" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            <p>Tischgruppen:</p>
+                            <div class="list-group overflow-auto" style="max-height: 150px">
+                                <% if(table_groups.length){ for(var i=0; i< table_groups.length; i++) {%>
+                                <div class="list-group-item">
+                                    <td>
+                                        <%= table_groups[i].name%>
+                                        <div class="float-end">
+                                            <form action="configuration" method="POST">
+                                                <button class="btn btn-danger btn-sm" id="remove_table_group"
+                                                    name="remove_table_group" value="<%= table_groups[i].id%>"
+                                                    onclick="this.form.submit()">
+                                                    X
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </div>
+                                <% } }else{ %>
+                                <div class="list-group-item">
+                                    Keine Tisch Gruppen definiert
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            Tische
+                        </div>
+                        <div class="card-body">
+                            <form action="configuration" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neuer Tisch:</span>
+                                    </div>
+                                    <select class="form-control" id="table_group_id" name="table_group_id" required onchange="loadTablesFromTableGroup(this,'tables_tablegroup')">
+                                        <option disabled selected>Auswählen ...</option>
+                                        <% if(table_groups.length){ for(var i=0; i< table_groups.length; i++) {%>
+                                        <option value="<%= table_groups[i].id%>">
+                                            <%= table_groups[i].name%>
+                                        </option>
+                                        <% } }else{ %>
+                                        <option value="-1" selected>Leer</option>
+                                        <% } %>
+                                    </select>
+                                    <input type="text" class="form-control" id="new_table" name="new_table"
+                                        placeholder="Nummer des Tisches" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            Tische:
+                            <div class="list-group overflow-auto" id="tables_tablegroup" style="max-height: 150px">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-organization" role="tabpanel"
+                    aria-labelledby="v-pills-organization-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            Organisation
+                        </div>
+                        <div class="card-body">
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Station:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="new_station"
+                                        placeholder="Name der neuen Station" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <br>
+                            <p>Stationen:</p>
+                            <div class="list-group overflow-auto" style="max-height: 150px" id="stations">
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            Alarm Typen
+                        </div>
+                        <div class="card-body">
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neuer Alarmtyp:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="newAlertType"
+                                        placeholder="Name des Alarm Typen" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <br>
+                            <p>Alarm Typen:</p>
+                            <div class="list-group overflow-auto" id="alerttypes" style="max-height: 200px">
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            Produktkategorien
+                        </div>
+                        <div class="card-body">
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Kategorie:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="newCategory"
+                                        placeholder="Name der Kategorie" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <br>
+                            <p>Kategorien:</p>
+                            <div class="list-group overflow-auto" id="categories" style="max-height: 200px">
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            Bezahloptionen
+                        </div>
+                        <div class="card-body">
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Option:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="newPaymentMethod"
+                                        placeholder="Name der Bezahloption" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <br>
+                            <p>Kategorien:</p>
+                            <div class="list-group overflow-auto" id="paymentmethods" style="max-height: 200px">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-products" role="tabpanel" aria-labelledby="v-pills-products-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            Optionen
+                        </div>
+                        <div class="card-body">
+                            <form action="configuration" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Zutat:</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="new_option" name="new_option"
+                                        placeholder="Name der Zutat" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            Optionen:
+                            <div class="list-group overflow-auto" style="max-height: 150px" id="options">
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="card">
+                        <div class="card-header">
+                            Produkte
+                        </div>
+                        <div class="card-body">
+
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Basic:</span>
+                                    </div>
+                                    <select class="form-control" id="product_station" name="product_station"
+                                        required></select>
+                                    <input type="text" class="form-control" id="product_name" name="product_name"
+                                        placeholder="Name" required>
+                                    <input type="number" class="form-control" id="product_cost" name="product_cost"
+                                        placeholder="Preis" min="0" step="0.01" required>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Erweitert:</span>
+                                    </div>
+                                    <input type="number" class="form-control" id="product_priortity"
+                                        name="product_priority" placeholder="Priorität" min="0" required>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Kategorie:</span>
+                                    </div>
+                                    <select class="form-control" id="product_category" name="product_category" required>
+                                    </select>
+                                </div>
+
+                                <small class="form-text text-muted">Sonderzeichen: ⅛ , ¼ , ⅓ , ½</small>
+                                <br>
+                                <span>Wird geliefert? </span>
+                                <input type="checkbox" id="product_deliverable" name="product_deliverable" required>
+                                <br>
+                                <br>
+                                Optionen
+                                <div class="list-group overflow-auto" style="max-height: 150px"
+                                    id="new_product_options">
+                                </div>
+                                <br>
+                                <button class="btn btn-primary" onclick="this.form.submit()"> Speichern</button>
+                            </form>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            Produktdetails
+                        </div>
+                        <div class="card-body">
+                            <p>Suche nach:</p>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Produkt ID:</span>
+                                </div>
+                                <input type="number" class="form-control" id="productdetails_id" min="0"
+                                    placeholder="ID" required>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="button"
+                                        onclick="loadProduct()">Anfragen</button>
+                                </div>
+                            </div>
+                            <br>
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Station:</span>
+                                    </div>
+                                    <select class="form-control" id="productdetails_station" required></select>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="button"
+                                            onclick="loadProductsByStation()">Anfragen</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            Produkte:
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Stand</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Preis</th>
+                                        <th scope="col">Lieferbar?</th>
+                                        <th scope="col">Entfernen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="producttable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            Variation
+                        </div>
+                        <div class="card-body">
+                            <p>Produkt auswählen:</p>
+                            <form action="#" method="POST">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Kategorie:</span>
+                                    </div>
+                                    <select class="form-control" id="variation_station" required
+                                        onchange='loadProductsByStationSelect(this,"variation_products")'>
+                                        <option selected disabled>Auswählen ...</option>
+                                    </select>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Product:</span>
+                                    </div>
+                                    <select class="form-control" id="variation_products" name="new_variation_product"
+                                        onchange='loadVariationsByProduct(this,"variationtable")' required>
+                                        <option selected disabled>Auswählen ...</option>
+                                    </select>
+                                </div>
+                                <br>
+                                <p>Variation erstellen:</p>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Attribut:</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="new_variation_name"
+                                        name="new_variation_name" placeholder="Attribut" required>
+                                    <input type="number" step="0.01" class="form-control" id="new_variation_price"
+                                        name="new_variation_price" placeholder="Preis" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">Anlegen</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <br>
+                            <table class="table" style="min-height: 100px">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Variation</th>
+                                        <th scope="col">Preis</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variationtable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    $(document).ready(function () {
+        loadConfigurationData();
+    });
+
+
+
+    function loadProduct() {
+        var value = document.getElementById("productdetails_id").value;
+        document.getElementById("producttable").innerHTML = "";
+        $.ajax({
+            url: "/rest/product/" + value,
+            success: (result) => {
+                console.log(result)
+                if (result.length > 0) {
+                    result.forEach((element) => {
+                        var content =
+                            '<tr><th scope="row">' + element.id +
+                            '</th><td>' + element.producer.name +
+                            '</td> <td>' + element.name +
+                            '</td> <td>' + element.price + '</td><td>';
+                        if (element.deliverable == 1) {
+                            content += '<img src="/images/check.png" style="width:20px">'
+                        } else {
+                            content += '<img src="/images/canceled.png" style="width:20px">'
+                        }
+                        content +=
+                            '</td><td><form action="configuration" method="POST"><button class="btn btn-danger btn-sm" id="remove_product"' +
+                            'name="remove_product" value="' + element.id +
+                            '" onclick="this.form.submit()">X</button></form></td></tr>';
+                        document.getElementById("producttable").innerHTML += content;
+                    });
+                }
+            }
+        });
+    }
+
+    function loadProductsByStation() {
+        var value = document.getElementById("productdetails_station").value;
+        document.getElementById("producttable").innerHTML = "";
+        $.ajax({
+            url: "/rest/station/" + value+"/products",
+            success: (result) => {
+                console.log(result)
+                if (result.length > 0) {
+                    result.forEach((element) => {
+                        var content = 
+                            '<tr><th scope="row">' + element.id +
+                            '</th><td>' + element.producer.name +
+                            '</td> <td>' + element.name +
+                            '</td> <td>' + element.price + '</td><td>';
+                        if (element.deliverable == 1) {
+                            content += '<img src="/images/check.png" style="width:20px">'
+                        } else {
+                            content += '<img src="/images/canceled.png" style="width:20px">'
+                        }
+                        content +=
+                            '</td><td><form action="configuration" method="POST"><button class="btn btn-danger btn-sm" id="remove_product"' +
+                            'name="remove_product" value="' + element.id +
+                            '" onclick="this.form.submit()">X</button></form></td></tr>';
+                        document.getElementById("producttable").innerHTML += content;
+                    });
+                }
+            }
+        });
+    }
+
+    function loadProductsByStationSelect(source, targetId) {
+        var value = source.value;
+        document.getElementById(targetId).innerHTML = "";
+        $.ajax({
+            url: "/rest/station/" + value + "/products",
+            success: (result) => {
+                console.log(result)
+                document.getElementById(targetId).innerHTML += listToSelectHTML(result);
+            }
+        });
+    }
+
+    function loadVariationsByProduct(source, targetId) {
+        var value = source.value;
+        document.getElementById(targetId).innerHTML = "";
+        $.ajax({
+            url: "/rest/product/" + value + "/variations",
+            success: (result) => {
+                console.log(result)
+                document.getElementById(targetId).innerHTML += listToTableContent(result, ["attrname",
+                    "price"
+                ]);
+            }
+        });
+    }
+
+    function loadConfigurationData() {
+        $.ajax({
+            url: "/rest/alerttypes",
+            success: (result) => {
+                if (result.length > 0) {
+                    result.forEach((element) => {
+                        document.getElementById("alerttypes").innerHTML +=
+                            '<div class="list-group-item">' + element.name +
+                            '<div class="float-end"><form action="#" method="POST" style="display: inline;"><button class="btn btn-danger btn-sm" name="deleteAlertType" value="' +
+                            element.id + '">X</button></form></div></div>'
+                    });
+                } else {
+                    document.getElementById("alerttypes").innerHTML +=
+                        '<div class="list-group-item"> Keine Alarmtypen gefunden <div>'
+                }
+            }
+        });
+
+        $.ajax({
+            url: "/rest/options",
+            success: (result) => {
+                if (result.length > 0) {
+                    result.forEach((element) => {
+                        document.getElementById("options").innerHTML +=
+                            '<div class="list-group-item">' + element.name +
+                            '<div class="float-end"><form action="#" method="POST" style="display: inline;"><button class="btn btn-danger btn-sm" name="remove_option" value="' +
+                            element.id + '">X</button></form></div></div>'
+
+                        document.getElementById("new_product_options").innerHTML +=
+                            '<div class="list-group-item"><input type="checkbox" value="' + element
+                            .id +
+                            '" id="product_option_' + element.id + '" name="product_option"' +
+                            'onclick="setCheckbox(\'product_option_standard_' + element.id +
+                            '\', !this.checked)"> ' +
+                            element.name +
+                            ' <input type="checkbox" value="' + element.id + '"' +
+                            ' id="product_option_standard_' + element.id + '"' +
+                            'name="product_option_standard" disabled>' + "Standard?"
+                        '<div>'
+                    });
+                } else {
+                    document.getElementById("options").innerHTML +=
+                        '<div class="list-group-item">Keine Optionen gefunden<div>'
+                }
+            }
+        });
+
+        $.ajax({
+            url: "/rest/station",
+            success: (result) => {
+                console.log(result)
+                if (result.length > 0) {
+                    document.getElementById("variation_station").innerHTML += listToSelectHTML(result);
+                    result.forEach((element) => {
+                        document.getElementById("stations").innerHTML +=
+                            '<div class="list-group-item">' + element.id + " " + element.name +
+                            '<div>'
+                        document.getElementById("product_station").innerHTML += '<option value="' +
+                            element.id + '">' + element.name + '</option>'
+                        document.getElementById("productdetails_station").innerHTML +=
+                            '<option value="' +
+                            element.id + '">' + element.name + '</option>'
+
+                    });
+                } else {
+                    document.getElementById("stations").innerHTML +=
+                        '<div class="list-group-item"> Keine Stationen gefunden <div>'
+                    document.getElementById("product_station").innerHTML += '<option value="">Leer</option>'
+                    document.getElementById("productdetails_station").innerHTML +=
+                        '<option value="">Leer</option>'
+                }
+            }
+        });
+
+        $.ajax({
+            url: "/rest/categories",
+            success: (result) => {
+                if (result.length > 0) {
+                    document.getElementById("product_category").innerHTML += '<option value=""></option>'
+                    result.forEach((element) => {
+                        document.getElementById("product_category").innerHTML += '<option value="' +
+                            element.id + '">' + element.name + '</option>'
+                        document.getElementById("categories").innerHTML +=
+                            '<div class="list-group-item">' + element.name +
+                            '<div class="float-end"><form action="#" method="POST" style="display: inline;"><button class="btn btn-danger btn-sm" name="deleteCategory" value="' +
+                            element.id + '">X</button></form></div></div>'
+                    });
+                } else {
+                    document.getElementById("product_category").innerHTML +=
+                        '<option value="">Leer</option>'
+                }
+            }
+        });
+
+        $.ajax({
+            url: "/rest/paymentmethod",
+            success: (result) => {
+                document.getElementById("paymentmethods").innerHTML=listToSimpleListItems(result);
+            }
+        });
+
+    }
+</script>
+
+</html>

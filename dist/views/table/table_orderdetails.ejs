@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Tisch</title>
+    <%- include('../header_common') %>
+</head>
+
+<body>
+
+    <!-- Nav bar -->
+    <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="javascript:history.back()">Übersicht</a>
+            <ul class="navbar-nav mr-auto">
+            </ul>
+            <span class="navbar-brand ">Bestelldetails</span>
+        </div>
+    </nav>
+    <div class="card">
+        <div class="card-header">
+            <h5>Bestellung</h5>
+        </div>
+        <div class="card-body">
+            ID: <%=o.id%>
+            <br>
+            Notiz: <%=o.note%>
+            <br>
+            Bestellt durch: <%=o.orderedBy.name%>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h5>Produkt</h5>
+        </div>
+        <div class="card-body">
+            Name: <%=o.product.name%>
+            <% if(o.variation != null){ %>
+            <br>
+            Variation: <%=o.variation.attrname%>
+            <% } %>
+            <br>
+            Preis: <%=o.product.price%> €
+            <br>
+            <% if(o.product.deliverable){ %>
+            Wird geliefert durch: <%=o.product.producer.name%>
+            <% }else{ %>
+            Abzuholen bei: <%=o.product.producer.name%>
+            <% } %>
+        </div>
+    </div>
+    <% if(o.orderedIngredients.length !=0) { %>
+    <div class="card">
+        <div class="card-header">
+            <h5>Optionen</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <% o.orderedIngredients.forEach((i)=>{ %>
+                <div class="list-group-item">
+                    <%= i.name%>
+                </div>
+                <% })%>
+            </div>
+        </div>
+    </div>
+    <% } %>
+    <% if(o.bill != null) { %>
+    <div class="card">
+        <div class="card-header">
+            <h5>Rechnung</h5>
+        </div>
+        <div class="card-body">
+            RNr: <%=o.bill.id%>
+            <br>
+            Abgerechnet durch: <%=o.bill.cashier.name%>
+            <br>
+            Zeitpunkt: <%=o.bill.paymentTime%>
+            <br>
+            Bezahlt mit: <%=o.bill.method.name%>
+        </div>
+    </div>
+    <% } %>
+    <div class="card">
+        <div class="card-header">
+            <h5>Historie</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <% o.states.forEach((s)=>{ %>
+                <div class="list-group-item">
+                    <% switch (s.statetype) {
+                            case 0 : %>
+                    Erstellt
+                    <% break;
+                        case 1 : %>
+                    Bearbeitung
+                    <% break;
+                        case 2 : %>
+                    Ausgesendet
+                    <% break;
+                            case 3 : %>
+                    Fertiggestellt
+                    <% break;
+                            case 4 : %>
+                    Stoniert
+                    <% break;
+                        } %>
+                    <span>durch</span>
+                    <span><%=s.triggerer.name%></span>
+                    <span>um</span>
+                    <span>
+                        <%=s.created.getHours() %>:<%=s.created.getMinutes() %>
+                        am
+                        <%=s.created.getDate() %>.<%=s.created.getMonth() %>
+                    </span>
+                </div>
+
+                <% }) %>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+</body>
+
+</html>

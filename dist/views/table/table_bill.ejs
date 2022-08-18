@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Tisch</title>
+    <%- include('../header_common') %>
+    <style>
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Nav bar -->
+    <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/table/<%=session_id%>">Zurück</a>
+            <div class="navbar-brand float-end">A12</div>
+            <a class="btn btn-primary float-right btn-md py-0" href="/table/<%=session_id%>/bills">Rechnungen</a>
+        </div>
+    </nav>
+
+    <!-- Bestellungen -->
+    <div class="card">
+        <div class="card-header py-0">Unbezahlte Bestellungen</div>
+        <div class="card-body overflow-auto pt-0 px-1">
+            <form action="#" method="POST" style="display:inline;" id="cash">
+                <div class="list-group form-group pt-1 id=" orders">
+                    <% if(groupedOrders.size){%>
+                    <% groupedOrders.forEach((value,key)=> { %>
+                    <div class="list-group-item py-0 px-1" id="order_<%=key.id%>">
+                        <input type="number" id="preis_<%=key.id%>" style="display: none;"
+                            value="<%=key.product.price%>" />
+                        <input type="number" id="uebrig_<%=key.id%>" value="<%=value%>" style="display: none;" />
+
+                        <input type="number" id="anz_<%=key.id%>" name="<%=key.id%>"
+                            style="display: inline; width: 25px; border: none" value="0"></input>
+                        /
+                        <span><%=value%></span>
+                        <% if(key.variation != null){ %>
+                        <span><%=key.product.name%>, <%=key.variation.attrname%></span>
+                        <% } else {%>
+                        <span><%=key.product.name%></span>
+                        <% } %>
+                        <div class="float-end">
+                            <span class="pe-3"><%=key.product.price%>€</span>
+                            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-3"
+                                value="<%=key.id%>" onclick="increment('<%=key.id%>')">+</button>
+                            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-3 mr-1"
+                                value="<%=key.id%>" onclick="decrement('<%=key.id%>')">-</button>
+                        </div>
+                    </div>
+                    <% })%>
+                    <% }else{ %>
+                    <h4 class="text-center">Alles bezahlt</h4>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Rechnung -->
+    <div class="card fixed-bottom">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-8">
+                    <select class="form-control" id="paymentmethods" name="methodId" form="cash"></select>
+                </div>
+                <div class="col-4">
+                        <div class="d-grid gap-2">
+                        <button class="btn btn-warning" type="button" onclick="selectAll()">
+                            Alles
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="card-body text-center">
+            <h3 style="display: inline;">Betrag: </h3>
+            <h3 id="orderSum" style="display: inline;">0</h3>
+            <h3 style="display: inline;">€</h3>
+        </div>
+
+        <div class="card-body text-center">
+            <% if(!groupedOrders.size){%>
+            <% if(closeable) { %>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success btn-block" type="submit" form="cash" name="closeSession" value="true">
+                        Sitzung beenden
+                    </button>
+                </div>
+            <% } else { %>
+            <span class="alert alert-danger">
+                Offene Bestellungen
+            </span>
+            <% } %>
+            <% }else{ %>
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-lg btn-block" form="cash" name="payOrder" value="true">
+                    Zahlen
+                </button>
+            </div>
+            <%}%>
+        </div>
+    </div>
+
+    <script>
+
+            $(document).ready(function () {
+                loadPaymentMethods();
+            }); 
+
+        function increment(num) {
+            if (parseInt(document.getElementById("anz_" + num).value) < parseInt(document.getElementById("uebrig_" + num).value)) {
+                document.getElementById("anz_" + num).value = parseInt(document.getElementById("anz_" + num).value) + 1;
+                calcCost();
+            }
+        };
+        function decrement(num) {
+            if (parseInt(document.getElementById("anz_" + num).value) > 0) {
+                document.getElementById("anz_" + num).value = parseInt(document.getElementById("anz_" + num).value) - 1;
+                calcCost();
+            }
+        };
+
+        function selectAll() {
+            $("[id^=order_]").each(function (index) {
+                // Get id
+                var i = this.id.split("_")[1];
+                document.getElementById("anz_" + i).value = document.getElementById("uebrig_" + i).value;
+            });
+            calcCost();
+        }
+
+        function calcCost() {
+            var sum = 0;
+            $("[id^=order_]").each(function (index) {
+                // Get id
+                var i = this.id.split("_")[1];
+                var anz = document.getElementById("anz_" + i).value;
+                var preis = document.getElementById("preis_" + i).value;
+                sum += (anz * preis)
+            });
+            $("#orderSum").text(sum.toFixed(2));
+        };
+    
+        function loadPaymentMethods(){
+            $.ajax({
+                    url: "/rest/paymentmethod",
+                    success: (result) => {
+                var s = "";
+    if (result.length == 0) {
+        return '<option disabled selected>' + "Keine Daten vorhanden" + '</option>'
+    }
+    result.forEach((e) => {
+        s += '<option value="' + e.id + '">' + e.name + '</option>'
+    })
+    document.getElementById("paymentmethods").innerHTML=s;
+
+            }
+        });
+        }
+    
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Konsole</title>
+    <%- include('../header_common') %>
+</head>
+
+<body>
+
+    <%- include('admin_navbar') %>
+    <br>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                Sitzung suchen
+            </div>
+            <div class="card-body">
+
+                Tisch Gruppe
+                <select class="form-control" id="sessionsTableGroup" onchange="loadTables(this)">
+                    <% if(table_groups.length){%>
+                    <option value="" selected></option>
+                    <% for(var i=0; i< table_groups.length; i++) {%>
+                    <option value="<%= table_groups[i].id%>">
+                        <%= table_groups[i].name%>
+                    </option>
+                    <% } }else{ %>
+                    <option value="-1" selected>Leer</option>
+                    <% } %>
+                </select>
+                <br>
+                Tisch
+                <select class="form-control" id="sessionsTable" onchange="loadSessions(this)">
+                </select>
+                <br>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Sitzungs ID</th>
+                            <th scope="col">Start</th>
+                            <th scope="col">Ende</th>
+                            <th scope="col">Kellner</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessions">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+
+        <div class="card">
+            <div class="card-header">
+                Bestellung suchen
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="sessionid">Sitzungs ID:</label>
+                    <input type="number" class="form-control" id="sessionid">
+                </div>
+                <button class="btn btn-primary form-control" onclick="loadOrders()">Suche</button>
+            </div>
+
+            <div class="card-body">
+                Bestellungen der Sitzung:
+                <div class="card" style="max-height: 200px">
+                    <div class="card-body overflow-auto pt-0 px-1">
+                        <div class="list-group pt-0" id="ordersFromSession">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            function loadSessions(dropdown) {
+                var table_id = dropdown.value;
+                if (!table_id) {
+                    $("#sessions").html('');
+                    return;
+                }
+                console.log("change " + table_id)
+                $("#sessions").html('');
+                $.ajax({
+                    url: "/rest/table/"+table_id+"/sessions",
+                    success: function (result) {
+                        console.log(result)
+                        //$("#sessions").append(
+                    }
+                });
+            };
+
+            function loadTables(dropdown) {
+                var group_id = dropdown.value;
+                if (!group_id) {
+                    $("#sessionsTable").html('');
+                    $("#sessions").html('');
+                    return;
+                }
+                $("#sessionsTable").html('');
+                $("#sessions").html('');
+                $.ajax({
+                    url: "/rest/tablegroup/"+group_id+"/tables",
+                    success: function (result) {
+                        $("#sessionsTable").append(listToSelectHTML(result))
+                    }
+                });
+            };
+
+            function loadOrders() {
+                console.log("loadOrders")
+                var session_id = document.getElementById("sessionid").value;
+                console.log(session_id)
+                if (!session_id) {
+                    $("#ordersFromSession").html('');
+                    return;
+                }
+                console.log("load orders from session " + session_id)
+                $("#ordersFromSession").html('');
+                $.ajax({
+                    url: "/data/getOrdersFromSession",
+                    type: "POST",
+                    data: {
+                        name: 'orders',
+                        session_id: session_id,
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        console.log(result)
+                        if (result.orders.length != 0) {
+                            $.each(result.orders, function (key, value) {
+                                var s = "";
+                                s += '<div class="list-group-item py-0">';
+                                if (value.stoniert) {
+                                    s += '<img src="/images/canceled.png" style="width:15px">';
+                                } else if (value.erledigt) {
+                                    s += '<img src="/images/check.png" style="width:15px">';
+                                } else if (value.in_zubereitung) {
+                                    s += '<img src="/images/loading.gif" style="width:15px">';
+                                } else {
+                                    s += '<img src="/images/order.png" style="width:15px">';
+                                }
+                                s += (value.anzahl + "x " + value.name);
+                                s += '</div>';
+                                $("#ordersFromSession").append(s);
+                            });
+                        } else {
+                            $("#ordersFromSession").append('<div class="list-group-item py-0">Leer</div>');
+                        }
+                    }
+                });
+            };
+        </script>
+</body>
+
+</html>

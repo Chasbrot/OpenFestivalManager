@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Station</title>
+    <%- include('../header_common') %>
+</head>
+
+<body>
+    <!-- Nav bar -->
+    <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Übersicht</a>
+            <div class="navbar-brand">
+                <%= station.name%>
+            </div>
+            <div class="float-end">
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal"
+                    data-bs-target="#alertModal">
+                    Hilfe
+                </button>
+                <form action="#" method="POST" style="display: inline;">
+                    <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout" value="true">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Orders -->
+    <div class="accordion" id="accordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    <span id="num_pastorders">0</span>
+                <span class="ps-1">Abgeschlossene Bestellungen</span>
+                </button>
+            </h2>
+        </div>
+        <div id="collapseOne" class="accordion-collapse collapse" data-parent="#accordion">
+            <div class="list-group py-2 px-2"  id="pastlist">
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                aria-expanded="true" aria-controls="collapseTwo">
+                <span id="num_activeorders">0</span>
+                <span class="ps-1">Aktive Bestellungen</span>
+            </button>
+        </h2>
+    </div>
+    <div id="collapseTwo" class="accordion-collapse collapse show" data-parent="#accordion">
+        <div class="list-group pt-2 px-2" id="activelist">
+        </div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="alertModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Unterstützung anfordern</h5>
+                </div>
+                <div class="modal-body">
+                    <form action="#" method="POST" id="alertform">
+                        <select class="form-control" id="alerttypes" name="makeAlert">
+                        </select>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                    <button type="submit" class="btn btn-primary" form="alertform">Anfordern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Load first station entries
+        $(document).ready(function () {
+
+            loadOrders("active");
+            loadOrders("past");
+
+            // Play a sound when a new order arrived via auto reload
+            // Save number of orders to sessionStorage
+            let activeOrders = document.getElementById("num_activeorders").innerHTML;
+            if (sessionStorage.getItem("autoReload") == "true" && sessionStorage.getItem("activeOrders")) {
+                var pastActiveOrders = sessionStorage.getItem("activeOrders");
+                console.log(pastActiveOrders)
+
+                // Check if orderlength changed
+                if (pastActiveOrders < activeOrders) {
+                    // Play sound
+                    console.log("Playing sound")
+                    const audio = new Audio("images/notification.mp3");
+                    audio.play();
+                }
+            }
+            sessionStorage.removeItem('autoReload');
+            sessionStorage.setItem('activeOrders', activeOrders);
+
+
+            $.ajax({
+                url: "/rest/alerttypes",
+                success: (result) => {
+                    document.getElementById("alerttypes").innerHTML = listToSelectHTML(result)
+                }
+            });
+        });
+
+        // Automatically reload orders if no actions are made
+        var idleTime;
+        $(document).ready(function () {
+            reloadPage();
+            $('html').bind(
+                'mousemove click mouseup mousedown keydown keypress keyup submit change mouseenter scroll resize dblclick',
+                function () {
+                    clearTimeout(idleTime);
+                    reloadPage();
+                });
+        });
+
+        function reloadPage() {
+            clearTimeout(idleTime);
+            idleTime = setTimeout(function () {
+                // Save autoreloading to sessionStorage
+                sessionStorage.setItem('autoReload', 'true');
+                //location.reload();
+                loadOrders("active");
+                loadOrders("past");
+            }, 60000);
+        }
+
+        function updateOrderState(id, stateChange){
+            console.log(id);
+            console.log(stateChange);
+            $.ajax({
+                url: "#",
+                data:{
+                    oid: id,
+                    change: stateChange
+                },
+                type: "post",
+                success: ()=>{
+                    loadOrders("active");
+                    loadOrders("past");
+                },
+                error: (error)=>{
+                    alert(error);
+                }
+            })
+        }
+
+        function loadOrders(type) {
+            // Load data for current orders
+            $.ajax({
+                url: "/rest/station/<%= station.id%>/"+type+"orders",
+                success: (result) => {
+                    document.getElementById(type+"list").innerHTML="";
+                    if (result.length) {
+                        result.forEach((r) => {
+                            $.ajax({
+                                url: "/station/orderentry/" + r.id,
+                                success: (order) => {
+                                    $("#"+type+"list").append(order)
+                                }
+                            })
+                        })
+                    } else {
+                        $("#"+type+"list").append("Keine Bestellungen")
+                    }
+                    document.getElementById("num_"+type+"orders").innerHTML = result.length
+                    console.log(type+" Order list length: " + result.length)
+                    
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

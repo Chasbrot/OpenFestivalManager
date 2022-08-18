@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Übersicht</title>
+    <%- include('header_common') %>
+    <meta name="mobile-web-app-capable" content="yes">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Home</a>
+        </div>
+    </nav>
+    <br>
+
+    <div class="container">
+        <div>
+            <h2>Ich bin ...</h2>
+        </div>
+        <br>
+        <div class="d-grid gap-1">
+            <a class="btn btn-primary py-4" href="personal/login">
+                <h2>Kellner/In</h2>
+            </a>
+            <br>
+            <a class="btn btn-primary py-4" href="station/login">
+                <h2>Station</h2>
+            </a>
+            <br>
+            <% if(registrationActive) { %>
+            <a class="btn btn-warning py-4" href="personal/registrierung">
+                <h2>Neu hier!</h2>
+            </a>
+            <% } %>
+        </div>
+    </div>
+    <nav class="navbar bg-light navbar-light fixed-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="admin/login">Administrator</a>
+            <a class="navbar-item ml-auto" href="dev" style="color:black;">by Michael Selinger 2022</a>
+        </div>
+    </nav>
+
+    </div>
+
+</body>
+
+</html>

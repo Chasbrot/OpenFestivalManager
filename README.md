@@ -6,7 +6,24 @@ Clone repository
 Open repository with MSV code
 Open terminal
 
-npm install
+npm install 
+    express
+    express-session
+    express-validator
+    typeorm
+    body-parser
+    cookie-parser
+    dotenv
+    ejs
+    multer
+    mysqldump
+    pg
+    rand-token
+    reflect-metadata
+    @types/cookie-parser
+    @types/ejs
+    @types/express-session
+    @types/multer
 
 npm run devstart
 
@@ -84,9 +101,10 @@ Access WebUI
 
 ## Authors 
 Michael Selinger<br>
+Julian Springer<br>
 ~~Saul Ptrondl~~
 ## Contributors
-Thanks Jojo and Hannah for their knowledge and expertise during development.
+Thanks Hannah and Jojo for their knowledge and expertise during development.
 
 ## Project status
 early development

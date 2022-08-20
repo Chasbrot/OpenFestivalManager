@@ -27,18 +27,22 @@ router.use(function (req, res, next) {
     next();
   } else{
     console.log("rest/auth: No vaild session detected");
-    res.redirect("/");
+    res.sendStatus(403);
   }
 });
 
 
-// Routers for extra rest files
+// Routers for extra rest files, load file
 const restStationRouter = require('./rest/rest_station');
 const restTableGroupRouter = require('./rest/rest_tablegroup');
+const restTableRouter = require('./rest/rest_table');
+const restSessionRouter = require('./rest/rest_session');
 
-// Send for rest station to file
+// Send for rest station to file, assign file
 router.use('/station', restStationRouter);
 router.use('/tablegroup', restTableGroupRouter);
+router.use('/table', restTableRouter);
+router.use('/session', restSessionRouter);
 
 
 /* GET list accounttypes */
@@ -197,68 +201,6 @@ router.get(
 );
 
 
-/* GET sessions from table */
-router.get(
-  "/table/:tid/sessions",
-  param("tid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    AppDataSource.getRepository(Session)
-      .find({
-        relations: {
-          table: true,
-          states: true
-        },
-        where: {
-          table: {
-            id: Number(req.params.tid),
-          },
-        },
-      })
-      .then((result) => {
-        res.json(result);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
-
-/* GET orders from session */
-router.get(
-  "/session/:sid/orders",
-  param("sid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    AppDataSource.getRepository(Session)
-      .findOne({
-        relations: {
-          orders: true,
-        },
-        where: {
-          id: Number(req.params.sid),
-        },
-      })
-      .then((result) => {
-        if (result == null) {
-          res.sendStatus(404);
-        } else {
-          res.json(result.orders);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
 
 /* GET order */
 router.get(
@@ -295,7 +237,7 @@ router.get(
   }
 );
 
-/* GET order */
+/* GET paymentmethods */
 router.get(
   "/paymentmethod",
   (req: Request, res: Response) => {

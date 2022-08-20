@@ -16,7 +16,6 @@ const process_1 = __importDefault(require("process"));
 const Category_1 = require("../entity/Category");
 const AlertType_1 = require("../entity/AlertType");
 const Variation_1 = require("../entity/Variation");
-const Session_1 = require("../entity/Session");
 const Order_1 = require("../entity/Order");
 const accountRepository = data_source_1.AppDataSource.getRepository(Account_1.Account);
 /* Check if request has a valid session*/
@@ -26,15 +25,19 @@ router.use(function (req, res, next) {
     }
     else {
         console.log("rest/auth: No vaild session detected");
-        res.redirect("/");
+        res.sendStatus(403);
     }
 });
-// Routers for extra rest files
+// Routers for extra rest files, load file
 const restStationRouter = require('./rest/rest_station');
 const restTableGroupRouter = require('./rest/rest_tablegroup');
-// Send for rest station to file
+const restTableRouter = require('./rest/rest_table');
+const restSessionRouter = require('./rest/rest_session');
+// Send for rest station to file, assign file
 router.use('/station', restStationRouter);
 router.use('/tablegroup', restTableGroupRouter);
+router.use('/table', restTableRouter);
+router.use('/session', restSessionRouter);
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req, res) => {
     res.json(Account_1.AccountType);
@@ -165,60 +168,6 @@ router.get("/product/:pid", (0, express_validator_1.param)("pid").isInt(), (req,
         res.sendStatus(500);
     });
 });
-/* GET sessions from table */
-router.get("/table/:tid/sessions", (0, express_validator_1.param)("tid").isInt(), (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
-        return;
-    }
-    data_source_1.AppDataSource.getRepository(Session_1.Session)
-        .find({
-        relations: {
-            table: true,
-            states: true
-        },
-        where: {
-            table: {
-                id: Number(req.params.tid),
-            },
-        },
-    })
-        .then((result) => {
-        res.json(result);
-    })
-        .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-    });
-});
-/* GET orders from session */
-router.get("/session/:sid/orders", (0, express_validator_1.param)("sid").isInt(), (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
-        return;
-    }
-    data_source_1.AppDataSource.getRepository(Session_1.Session)
-        .findOne({
-        relations: {
-            orders: true,
-        },
-        where: {
-            id: Number(req.params.sid),
-        },
-    })
-        .then((result) => {
-        if (result == null) {
-            res.sendStatus(404);
-        }
-        else {
-            res.json(result.orders);
-        }
-    })
-        .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-    });
-});
 /* GET order */
 router.get("/order/:oid", (0, express_validator_1.param)("oid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -250,7 +199,7 @@ router.get("/order/:oid", (0, express_validator_1.param)("oid").isInt(), (req, r
         res.sendStatus(500);
     });
 });
-/* GET order */
+/* GET paymentmethods */
 router.get("/paymentmethod", (req, res) => {
     data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod)
         .find()

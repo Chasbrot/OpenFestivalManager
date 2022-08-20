@@ -4,10 +4,10 @@
 <head>
     <title>Tisch</title>
     <%- include('../header_common') %>
+
 </head>
 
-<body>
-
+<body id="app">
     <!-- Nav bar -->
     <nav class="navbar navbar-expand-ti navbar-dark bg-dark">
         <div class="container-fluid">
@@ -19,55 +19,84 @@
     </nav>
     <br>
     <div class="container">
-        <form action="#" method="POST" id="new">
-            <h4>Gruppe</h4>
-            <% if(table_groups.length){%>
-                <% for(var i=0; i< table_groups.length; i++) {%>
-                <% if (i==0) { %>
-                    <input type="radio" class="btn-check " name="table_group" id="option<%= table_groups[i].id%>" value="<%= table_groups[i].id%>" autocomplete="off" onclick='loadTables("<%= table_groups[i].id%>")' checked>
-                    <label class="btn btn-primary" for="option<%= table_groups[i].id%>" style="min-width: 50px;"><%= table_groups[i].name%></label>
-                <% } else { %>
-                    <input type="radio" class="btn-check " name="table_group" id="option<%= table_groups[i].id%>" value="<%= table_groups[i].id%>" autocomplete="off" onclick='loadTables("<%= table_groups[i].id%>")'>
-                    <label class="btn btn-primary" for="option<%= table_groups[i].id%>" style="min-width: 50px;"><%= table_groups[i].name%></label>
-                <% } %>
-
-                <% } %>
-            <% }else{ %>
-            <p>Keine Tisch Gruppen definiert</p>
-            <% } %>
-            <br>
-            <h4 class="pt-3">Tisch</h4>
-            <select class="form-select" id="table" name="table"></select>
-        </form>
+        <h4>Gruppe</h4>
+        <template v-for="tg in tableGroups">
+            <input type="radio" class="btn-check " name="table_group" :id="tg.id" :value="tg.id" autocomplete="off"
+                v-model="currentTG">
+            <label class="btn btn-primary mt-2 me-2" :for="tg.id" style="min-width: 50px;">{{tg.name}}</label>
+        </template>
+        <p v-if="!tableGroups.length">Keine Tischgruppen definiert!</p>
+        <br>
+        <h4 class="pt-3">Tisch</h4>
+        <select v-model="currentTable" class="form-select">
+            <template v-for="(t, index) in tables">
+                <option v-if="{index}==0" :value="t.id" selected>{{t.name}}{{index}}</option>
+                <option v-else :value="t.id" selected>{{t.name}}{{index}}</option>
+            </template>
+        </select>
     </div>
 
     <!-- Neuer Tisch -->
-    <div class="fixed-bottom text-center mb-2">
-        <button class="btn btn-primary btn-lg btn-block" type="submit" form="new" name="new_session"
-            value="true">Start</button>
+    <div class="fixed-bottom text-center mb-2 d-grid gap-2">
+        <button class="btn btn-primary btn-lg mx-2" @click="createSession()">Start</button>
     </div>
 
+    <!-- Vue Js -->
     <script>
+        const {
+            createApp
+        } = Vue
 
-            $(document).ready(function () {
-                loadTables("<%= table_groups[0].id%>");
-            }); 
+        createApp({
+            data: () => ({
+                tableGroups: [],
+                tables: [],
+                currentTable: null,
+                currentTG: null,
+            }),
 
-        function loadTables(group_id) {
-            console.log(group_id);
-            if (!group_id) {
-                $("#table").html('');
-                return;
-            }
-            console.log("change tablegoup " + group_id)
-            $("#table").html('');
-            $.ajax({
-                url: "/rest/tablegroup/"+group_id+"/tables",
-                success: function (result) {
-                    $("#table").append(listToSelectHTML(result));
+            created() {
+                // fetch on init
+                this.fetchTGs()
+
+            },
+
+            watch: {
+                // re-fetch whenever currentBranch changes
+                currentTG: 'fetchTables',
+            },
+
+            methods: {
+                async fetchTGs() {
+                    const url = `/rest/tablegroup`
+                    this.tableGroups = await (await fetch(url)).json()
+                    this.currentTG = this.tableGroups[0].id
+                    this.fetchTables()
+                },
+                async fetchTables() {
+                    const url = `/rest/tablegroup/${this.currentTG}/tables`
+                    this.tables = await (await fetch(url)).json()
+                },
+                async createSession() {
+                    if (this.currentTable && this.currentTG) {
+                        const requestOptions = {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                tid: this.currentTable
+                            })
+                        };
+                        const response = await fetch("/rest/session",
+                            requestOptions);
+                        const data = await response.json();
+                        window.location.href="/table/"+data.sid;
+                    }
+
                 }
-            });
-        };
+            }
+        }).mount('#app')
     </script>
 
 </body>

@@ -20,24 +20,19 @@ import { MoreThan, Not } from "typeorm";
 
 /* Check session and accounttype*/
 router.use(function (req, res, next) {
-  if (req.url.includes("login")) {
-    next();
-  } else {
     if (
       req.session.account!.accounttype == AccountType.ADMIN ||
         req.session.account!.accounttype == AccountType.STATION
     ) {
       next();
     } else {
-      console.log("rest/station/auth: unauthorized, redirecting to login");
-      res.redirect("/station/login");
-      return;
+      console.log("rest/station/auth: unauthorized");
+      res.sendStatus(403);
     }
-  }
 });
 
 /* GET stations */
-router.get("/", (_req: Request, res: Response) => {
+router.put("/", (_req: Request, res: Response) => {
   AppDataSource.getRepository(Station)
     .find()
     .then((result) => {
@@ -48,69 +43,30 @@ router.get("/", (_req: Request, res: Response) => {
       res.sendStatus(500);
     });
 });
-
-/* GET products by station */
+/* GET orders from session */
 router.get(
-  "/:sid/products",
+  "/:sid/orders",
   param("sid").isInt(),
   (req: Request, res: Response) => {
     if (!validationResult(req).isEmpty()) {
       res.sendStatus(400);
       return;
     }
-    AppDataSource.getRepository(Product)
-      .find({
+    AppDataSource.getRepository(Session)
+      .findOne({
         relations: {
-          producer: true,
+          orders: true,
         },
         where: {
-          producer: {
-            id: Number(req.params.sid),
-          },
+          id: Number(req.params.sid),
         },
       })
       .then((result) => {
-        res.json(result);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
-
-/* GET active orders from station */
-router.get(
-  "/:sid/activeorders",
-  param("sid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    db.getActiveOrdersForStation(Number(req.params.sid))
-      .then((result) => {
-        res.json(result);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
-
-/* GET past orders from station */
-router.get(
-  "/:sid/pastorders",
-  param("sid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    db.getPastOrdersForStation(Number(req.params.sid))
-      .then((result) => {
-        res.json(result);
+        if (result == null) {
+          res.sendStatus(404);
+        } else {
+          res.json(result.orders);
+        }
       })
       .catch((err) => {
         console.log(err);

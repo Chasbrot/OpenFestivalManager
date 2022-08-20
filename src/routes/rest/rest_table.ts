@@ -17,42 +17,25 @@ import { Session } from "../../entity/Session";
 import { Order } from "../../entity/Order";
 import { StateType } from "../../entity/State";
 import { MoreThan, Not } from "typeorm";
-import { TableGroup } from "../../entity/TableGroup";
 
-
-/* GET all tablegroups */
+/* GET sessions from table */
 router.get(
-    "/",
-    (_req: Request, res: Response) => {
-      AppDataSource.getRepository(TableGroup)
-        .find()
-        .then((result) => {
-          res.json(result);
-        })
-        .catch((err) => {
-          console.log(err);
-          res.sendStatus(500);
-        });
-    }
-  );
-
-/* GET tables from tablegroup */
-router.get(
-    "/:tgid/tables",
-    param("tgid").isInt(),
+    "/:tid/sessions",
+    param("tid").isInt(),
     (req: Request, res: Response) => {
       if (!validationResult(req).isEmpty()) {
         res.sendStatus(400);
         return;
       }
-      AppDataSource.getRepository(Table)
+      AppDataSource.getRepository(Session)
         .find({
           relations: {
-            tablegroup: true,
+            table: true,
+            states: true
           },
           where: {
-            tablegroup: {
-              id: Number(req.params.tgid),
+            table: {
+              id: Number(req.params.tid),
             },
           },
         })

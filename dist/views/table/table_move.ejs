@@ -26,10 +26,10 @@
                 <% for(var i=0; i< table_groups.length; i++) {%>
                 <% if (i==0) { %>
                     <input type="radio" class="btn-check " name="table_group" id="option<%= table_groups[i].id%>" value="<%= table_groups[i].id%>" autocomplete="off" onclick='loadTables("<%= table_groups[i].id%>")' checked>
-                    <label class="btn btn-primary" for="option<%= table_groups[i].id%>" style="min-width: 50px;"><%= table_groups[i].name%></label>
+                    <label class="btn btn-primary mt-2" for="option<%= table_groups[i].id%>" style="min-width: 50px;"><%= table_groups[i].name%></label>
                 <% } else { %>
                     <input type="radio" class="btn-check " name="table_group" id="option<%= table_groups[i].id%>" value="<%= table_groups[i].id%>" autocomplete="off" onclick='loadTables("<%= table_groups[i].id%>")'>
-                    <label class="btn btn-primary" for="option<%= table_groups[i].id%>" style="min-width: 50px;"><%= table_groups[i].name%></label>
+                    <label class="btn btn-primary mt-2" for="option<%= table_groups[i].id%>" style="min-width: 50px;"><%= table_groups[i].name%></label>
                 <% } %>
 
                 <% } %>
@@ -43,8 +43,8 @@
     </div>
 
     <!-- Sitzung bewegen -->
-    <div class="fixed-bottom text-center mb-2">
-        <button class="btn btn-primary btn-lg btn-block" type="submit" form="move" name="move_session"
+    <div class="fixed-bottom text-center mb-2 d-grid gap-2">
+        <button class="btn btn-primary btn-lg btn-block mx-2" type="submit" form="move" name="move_session"
             value="true">Bewegen</button>
     </div>
 

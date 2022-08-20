@@ -101,6 +101,7 @@ router.post("/overview", function (req, res) {
   res.redirect("/personal/overview");
 });
 
+/* Personal Registration */
 router.get("/registrierung", function (_req, res) {
   if (global.registrationActive) {
     res.render("personal/registrierung_personal", { err: false });

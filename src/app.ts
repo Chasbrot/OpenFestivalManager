@@ -16,12 +16,15 @@ declare module 'express-session' {
   }
 }
 
+// Load data from .env config file
 dotenv.config();
 
-
+// Create express app
 const app: Express = express();
+// Set port
 const port = process.env.PORT;
 
+// Development enviroment variable
 if (process.env.DEVELOPMENT == "true") {
   console.log("Starting Server in Development Mode!!");
 }
@@ -35,10 +38,27 @@ app.use(express.urlencoded({ extended: true }));
 // Parse incoming cookies
 app.use(cookieParser());
 
+// Cache Control Header function
+let setCache = function (req: Request, res: Response, next:any) {
+  // Cache for 24h
+  const period = 60 * 60 * 24 
+
+  // Only cache images, js and css files
+  if (req.method == 'GET' && (req.url.includes("stylesheets") || req.url.includes("images") || req.url.includes("js") || req.url.includes("bs5"))) {
+    res.set('Cache-control', `max-age=${period}`)
+  } else {
+    // for the other requests set strict no caching parameters
+    res.set('Cache-control', `no-store`)
+  }
+
+  // remember to call next() to pass on the request
+  next()
+}
+// Apply cache control header
+app.use(setCache);
+
 // Use public directory as root for web files
 app.use(express.static(path.join(__dirname, 'public')));
-
-
 
 // Session valid for 24h
 const oneDay = 1000 * 60 * 60 * 24;
@@ -71,7 +91,7 @@ app.use('/rest', restRouter);
 
 
 
-
+// Start express server
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
 });

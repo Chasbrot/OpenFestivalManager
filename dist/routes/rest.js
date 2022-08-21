@@ -200,7 +200,7 @@ router.get("/order/:oid", (0, express_validator_1.param)("oid").isInt(), (req, r
     });
 });
 /* GET paymentmethods */
-router.get("/paymentmethod", (req, res) => {
+router.get("/paymentmethod", (_req, res) => {
     data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod)
         .find()
         .then((result) => {

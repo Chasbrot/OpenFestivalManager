@@ -240,7 +240,7 @@ router.get(
 /* GET paymentmethods */
 router.get(
   "/paymentmethod",
-  (req: Request, res: Response) => {
+  (_req: Request, res: Response) => {
     AppDataSource.getRepository(PaymentMethod)
       .find()
       .then((result) => {

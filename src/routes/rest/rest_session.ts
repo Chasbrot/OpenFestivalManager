@@ -98,36 +98,6 @@ router.put(
         });
     });
 
-/* GET sessions from table */
-router.get(
-    "/:tid/sessions",
-    param("tid").isInt(),
-    (req: Request, res: Response) => {
-      if (!validationResult(req).isEmpty()) {
-        res.sendStatus(400);
-        return;
-      }
-      AppDataSource.getRepository(Session)
-        .find({
-          relations: {
-            table: true,
-            states: true
-          },
-          where: {
-            table: {
-              id: Number(req.params.tid),
-            },
-          },
-        })
-        .then((result) => {
-          res.json(result);
-        })
-        .catch((err) => {
-          console.log(err);
-          res.sendStatus(500);
-        });
-    }
-  );
 
 
 module.exports = router;

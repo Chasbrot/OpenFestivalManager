@@ -32,7 +32,7 @@ router.use(function (req, res, next) {
 });
 
 /* GET stations */
-router.put("/", (_req: Request, res: Response) => {
+router.get("/", (_req: Request, res: Response) => {
   AppDataSource.getRepository(Station)
     .find()
     .then((result) => {
@@ -43,30 +43,69 @@ router.put("/", (_req: Request, res: Response) => {
       res.sendStatus(500);
     });
 });
-/* GET orders from session */
+
+/* GET active orders from station */
 router.get(
-  "/:sid/orders",
+  "/:sid/activeorders",
   param("sid").isInt(),
   (req: Request, res: Response) => {
     if (!validationResult(req).isEmpty()) {
       res.sendStatus(400);
       return;
     }
-    AppDataSource.getRepository(Session)
-      .findOne({
+    db.getActiveOrdersForStation(Number(req.params.sid))
+      .then((result) => {
+        res.json(result);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+      });
+  }
+);
+
+/* GET past orders from station */
+router.get(
+  "/:sid/pastorders",
+  param("sid").isInt(),
+  (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    db.getPastOrdersForStation(Number(req.params.sid))
+      .then((result) => {
+        res.json(result);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+      });
+  }
+);
+
+/* GET products by station */
+router.get(
+  "/:sid/products",
+  param("sid").isInt(),
+  (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    AppDataSource.getRepository(Product)
+      .find({
         relations: {
-          orders: true,
+          producer: true,
         },
         where: {
-          id: Number(req.params.sid),
+          producer: {
+            id: Number(req.params.sid),
+          },
         },
       })
       .then((result) => {
-        if (result == null) {
-          res.sendStatus(404);
-        } else {
-          res.json(result.orders);
-        }
+        res.json(result);
       })
       .catch((err) => {
         console.log(err);

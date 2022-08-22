@@ -50,6 +50,29 @@ Access WebUI under localhost:3000 or IP-Address:3000
 ## Usage
 Access WebUI
 
+## Finished UI Pages
+Move all UI to client-side rendering with REST-based communication to the service.
+- :x: Index
+- :x: Personal
+  - :x: Login
+  - :x: Overview
+- :x: Session
+  - :heavy_check_mark: New
+  - :x: Move
+  - :x: Overview (Ordering Page)
+  - :x: Bill (Billing Page)
+  - :x: Bills (Overview of all Bills)
+  - :x: Order details
+- :x: Station
+  - :x: Login
+  - :x: Overview (Main Page)
+- :x: Admin
+  - :x: Login
+  - :x: Overview (Dashboard)
+  - :x: Statistics
+  - :x: Data Insight
+  - :x: Data Source
+
 ## ToDo Improvements
 
 ### General Improvements / Fixes
@@ -75,7 +98,7 @@ Access WebUI
   - :x: Personal UI
   - :x: Station UI
   - :x: Table UI
-- :arrows_counterclockwise: Session Management improvement
+- :heavy_check_mark: Session Management improvement
 
 ### Admin UI
 - :x: Show state of the modules (DHCP, DNS, DB)

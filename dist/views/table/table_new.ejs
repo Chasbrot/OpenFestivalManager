@@ -28,13 +28,19 @@
         <p v-if="!tableGroups.length">Keine Tischgruppen definiert!</p>
         <br>
         <h4 class="pt-3">Tisch</h4>
-        <select v-model="currentTable" class="form-select">
+        <select v-if="tables.length" v-model="currentTable" class="form-select">
+            <option selected disabled :value="">Auswählen ...</option>
             <template v-for="(t, index) in tables">
-                <option v-if="{index}==0" :value="t.id" selected>{{t.name}}{{index}}</option>
-                <option v-else :value="t.id" selected>{{t.name}}{{index}}</option>
+                <option :value="t.id">{{t.name}}</option>
             </template>
         </select>
+        <p v-if="!tables.length">Keine Tische vorhanden!</p>
+        <br>
+        <div v-if="error" class=" alert alert-danger">
+            Sitzung konnte nicht erstellt werden.
+        </div>
     </div>
+
 
     <!-- Neuer Tisch -->
     <div class="fixed-bottom text-center mb-2 d-grid gap-2">
@@ -51,8 +57,9 @@
             data: () => ({
                 tableGroups: [],
                 tables: [],
-                currentTable: null,
+                currentTable: "",
                 currentTG: null,
+                error: null,
             }),
 
             created() {
@@ -90,8 +97,12 @@
                         };
                         const response = await fetch("/rest/session",
                             requestOptions);
-                        const data = await response.json();
-                        window.location.href="/table/"+data.sid;
+                        if (response.status != 200) {
+                            this.error = true;
+                        } else {
+                            const data = await response.json();
+                            window.location.href = "/table/" + data.sid;
+                        }
                     }
 
                 }

@@ -29,15 +29,15 @@ router.use(function (req, res, next) {
     }
 });
 // Routers for extra rest files, load file
-const restStationRouter = require('./rest/rest_station');
-const restTableGroupRouter = require('./rest/rest_tablegroup');
-const restTableRouter = require('./rest/rest_table');
-const restSessionRouter = require('./rest/rest_session');
+const restStationRouter = require("./rest/rest_station");
+const restTableGroupRouter = require("./rest/rest_tablegroup");
+const restTableRouter = require("./rest/rest_table");
+const restSessionRouter = require("./rest/rest_session");
 // Send for rest station to file, assign file
-router.use('/station', restStationRouter);
-router.use('/tablegroup', restTableGroupRouter);
-router.use('/table', restTableRouter);
-router.use('/session', restSessionRouter);
+router.use("/station", restStationRouter);
+router.use("/tablegroup", restTableGroupRouter);
+router.use("/table", restTableRouter);
+router.use("/session", restSessionRouter);
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req, res) => {
     res.json(Account_1.AccountType);
@@ -209,6 +209,12 @@ router.get("/paymentmethod", (_req, res) => {
         .catch((err) => {
         console.log(err);
         res.sendStatus(500);
+    });
+});
+/* GET registration active*/
+router.get("/registrationactive", (_req, res) => {
+    res.json({
+        registrationactive: global.registrationActive,
     });
 });
 module.exports = router;

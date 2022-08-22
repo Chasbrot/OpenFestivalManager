@@ -1,4 +1,4 @@
-import { PaymentMethod } from './../entity/PaymentMethod';
+import { PaymentMethod } from "./../entity/PaymentMethod";
 import { Product } from "./../entity/Product";
 import { Ingredient } from "../entity/Ingredient";
 import { Account, AccountType } from "../entity/Account";
@@ -20,30 +20,27 @@ import { Not } from "typeorm";
 
 const accountRepository = AppDataSource.getRepository(Account);
 
-
 /* Check if request has a valid session*/
 router.use(function (req, res, next) {
   if (req.session.account != null) {
     next();
-  } else{
+  } else {
     console.log("rest/auth: No vaild session detected");
     res.sendStatus(403);
   }
 });
 
-
 // Routers for extra rest files, load file
-const restStationRouter = require('./rest/rest_station');
-const restTableGroupRouter = require('./rest/rest_tablegroup');
-const restTableRouter = require('./rest/rest_table');
-const restSessionRouter = require('./rest/rest_session');
+const restStationRouter = require("./rest/rest_station");
+const restTableGroupRouter = require("./rest/rest_tablegroup");
+const restTableRouter = require("./rest/rest_table");
+const restSessionRouter = require("./rest/rest_session");
 
 // Send for rest station to file, assign file
-router.use('/station', restStationRouter);
-router.use('/tablegroup', restTableGroupRouter);
-router.use('/table', restTableRouter);
-router.use('/session', restSessionRouter);
-
+router.use("/station", restStationRouter);
+router.use("/tablegroup", restTableGroupRouter);
+router.use("/table", restTableRouter);
+router.use("/session", restSessionRouter);
 
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req: Request, res: Response) => {
@@ -200,8 +197,6 @@ router.get(
   }
 );
 
-
-
 /* GET order */
 router.get(
   "/order/:oid",
@@ -238,20 +233,24 @@ router.get(
 );
 
 /* GET paymentmethods */
-router.get(
-  "/paymentmethod",
-  (_req: Request, res: Response) => {
-    AppDataSource.getRepository(PaymentMethod)
-      .find()
-      .then((result) => {
-          res.json(result);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
+router.get("/paymentmethod", (_req: Request, res: Response) => {
+  AppDataSource.getRepository(PaymentMethod)
+    .find()
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(500);
+    });
+});
+
+/* GET registration active*/
+router.get("/registrationactive", (_req: Request, res: Response) => {
+  res.json({
+    registrationactive: global.registrationActive,
+  });
+});
 
 
 

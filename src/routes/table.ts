@@ -449,6 +449,10 @@ router.get("/:sid", param("sid").isInt(), async function (req, res) {
         session: {
           id: s.id,
         },
+        states: {
+          history: false,
+          statetype: Not(StateType.CANCELED)
+        }
       },
       order: {
         states: {
@@ -462,7 +466,7 @@ router.get("/:sid", param("sid").isInt(), async function (req, res) {
     let groupedOrders = new Map<Order[], number>();
     let singleOrders:Order[] = [];
     orders.forEach((o) => {
-      if (o.getCurrentState()!.statetype == StateType.FINISHED || o.getCurrentState()!.statetype == StateType.CANCELED) {
+      if (o.getCurrentState()!.statetype == StateType.FINISHED) {
         // State either canceled or finished
         // Check if map contains similar product/variation combination
         let found = false;

@@ -9,12 +9,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Product = void 0;
+exports.Product = exports.LockType = void 0;
 const typeorm_1 = require("typeorm");
 const Category_1 = require("./Category");
 const Station_1 = require("./Station");
 const Variation_1 = require("./Variation");
 const ProductIngredient_1 = require("./ProductIngredient");
+var LockType;
+(function (LockType) {
+    LockType[LockType["NONE"] = 0] = "NONE";
+    LockType[LockType["TEMPORARY"] = 1] = "TEMPORARY";
+    LockType[LockType["INFINITE"] = 2] = "INFINITE"; // Product is not available for a longer period
+})(LockType = exports.LockType || (exports.LockType = {}));
 let Product = class Product {
     constructor(name, price, deliverable) {
         this.name = name;
@@ -39,9 +45,17 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Product.prototype, "deliverable", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({
+        default: 0
+    }),
     __metadata("design:type", Number)
 ], Product.prototype, "list_priority", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        default: LockType.NONE
+    }),
+    __metadata("design:type", Number)
+], Product.prototype, "orderLock", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Category_1.Category, (category) => category.products),
     __metadata("design:type", Category_1.Category)

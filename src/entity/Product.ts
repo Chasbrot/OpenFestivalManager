@@ -5,6 +5,12 @@ import { Station } from "./Station";
 import { Variation } from "./Variation";
 import { ProductIngredient } from './ProductIngredient';
 
+export enum LockType {
+  NONE=0,       // Product is available for ordering
+  TEMPORARY=1,  // Product is temporarly not available for ordering
+  INFINITE=2    // Product is not available for a longer period
+}
+
 @Entity()
 export class Product {
     @PrimaryGeneratedColumn()
@@ -19,8 +25,15 @@ export class Product {
     @Column()
     deliverable: boolean
 
-    @Column()
+    @Column({
+      default: 0
+    })
     list_priority: number
+  
+    @Column({
+      default: LockType.NONE
+    })
+    orderLock: LockType
 
     @ManyToOne(() => Category, (category) => category.products)
     category: Category
@@ -33,6 +46,7 @@ export class Product {
 
     @OneToMany(()=> ProductIngredient, (ingredient)=> ingredient.product)
     ingredients: ProductIngredient[];
+  
 
     constructor(name: string, price: number, deliverable: boolean) {
         this.name = name;

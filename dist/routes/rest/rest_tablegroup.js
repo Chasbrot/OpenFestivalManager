@@ -7,6 +7,7 @@ const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
 const router = express_1.default.Router();
+const process_1 = __importDefault(require("process"));
 const Table_1 = require("../../entity/Table");
 const TableGroup_1 = require("../../entity/TableGroup");
 /* GET all tablegroups */
@@ -14,6 +15,7 @@ router.get("/", (_req, res) => {
     data_source_1.AppDataSource.getRepository(TableGroup_1.TableGroup)
         .find()
         .then((result) => {
+        res.set('Cache-control', `max-age=${process_1.default.env.REST_CACHE_TIME}`);
         res.json(result);
     })
         .catch((err) => {
@@ -39,6 +41,7 @@ router.get("/:tgid/tables", (0, express_validator_1.param)("tgid").isInt(), (req
         },
     })
         .then((result) => {
+        res.set('Cache-control', `max-age=${process_1.default.env.REST_CACHE_TIME}`);
         res.json(result);
     })
         .catch((err) => {

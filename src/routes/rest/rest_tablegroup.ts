@@ -27,6 +27,7 @@ router.get(
       AppDataSource.getRepository(TableGroup)
         .find()
         .then((result) => {
+          res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
           res.json(result);
         })
         .catch((err) => {
@@ -58,6 +59,7 @@ router.get(
           },
         })
         .then((result) => {
+          res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
           res.json(result);
         })
         .catch((err) => {

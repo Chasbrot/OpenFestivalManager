@@ -1,5 +1,5 @@
 import { PaymentMethod } from "./../entity/PaymentMethod";
-import { Product } from "./../entity/Product";
+import { LockType, Product } from "./../entity/Product";
 import { Ingredient } from "../entity/Ingredient";
 import { Account, AccountType } from "../entity/Account";
 import { AppDataSource } from "../data-source";
@@ -26,7 +26,8 @@ router.use(function (req, res, next) {
     next();
   } else {
     console.log("rest/auth: No vaild session detected");
-    res.sendStatus(403);
+    //res.sendStatus(403);
+    res.redirect("/"); // For DEVELOPMENT 
   }
 });
 
@@ -44,6 +45,7 @@ router.use("/session", restSessionRouter);
 
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req: Request, res: Response) => {
+  res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
   res.json(AccountType);
 });
 
@@ -105,6 +107,7 @@ router.get("/options", (_req: Request, res: Response) => {
   AppDataSource.getRepository(Ingredient)
     .find()
     .then((result) => {
+      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
       res.json(result);
     })
     .catch((err) => {
@@ -118,6 +121,41 @@ router.get("/categories", (_req: Request, res: Response) => {
   AppDataSource.getRepository(Category)
     .find()
     .then((result) => {
+      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+      res.json(result);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(500);
+    });
+});
+
+/* GET products from category */
+router.get("/category/:cid/products",param("cid").isInt(), (req: Request, res: Response) => {
+  if (!validationResult(req).isEmpty()) {
+    res.sendStatus(400);
+    return;
+  }
+  console.log(req.params.cid)
+  AppDataSource.getRepository(Product)
+    .find({
+      relations: {
+        category: true,
+        ingredients: true,
+        variations: true,
+      },
+      where: {
+        category: {
+          id: Number(req.params.cid),
+        },
+        productLock: Not(LockType.HIDDEN)
+      },
+      order: {
+        list_priority: "DESC"
+      }
+    })
+    .then((result) => {
+      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
       res.json(result);
     })
     .catch((err) => {
@@ -131,6 +169,7 @@ router.get("/alerttypes", (_req: Request, res: Response) => {
   AppDataSource.getRepository(AlertType)
     .find()
     .then((result) => {
+      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
       res.json(result);
     })
     .catch((err) => {
@@ -160,6 +199,7 @@ router.get(
         },
       })
       .then((result) => {
+        res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
         res.json(result);
       })
       .catch((err) => {
@@ -188,6 +228,7 @@ router.get(
         },
       })
       .then((result) => {
+        res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
         res.json(result);
       })
       .catch((err) => {
@@ -237,6 +278,7 @@ router.get("/paymentmethod", (_req: Request, res: Response) => {
   AppDataSource.getRepository(PaymentMethod)
     .find()
     .then((result) => {
+      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
       res.json(result);
     })
     .catch((err) => {

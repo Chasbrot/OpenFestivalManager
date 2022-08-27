@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Tisch</title>
+    <%- include('../header_common') %>
+    <style>
+        .card-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .card-body {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
+</head>
+
+<body id="app">
+    <!-- Nav bar -->
+    <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/personal/overview">Übersicht</a>
+            <div class="navbar-brand float-right">
+                <%= t.name%>
+            </div>
+            <% if(closed) { %>
+            <a class="btn btn-primary float-right btn-md py-0" href="/table/<%=sid%>/bills">Rechnungen</a>
+            <% } else { %>
+            <a class="btn btn-danger float-right btn-md py-0" href="/table/<%=sid%>/bill">Kassieren</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- Bestellungen -->
+    <div class="card" style="max-height: 25vh">
+
+        <div class="card-body overflow-auto pt-0 px-1">
+            <div class="accordion" id="gOaccordion">
+                <div class="list-group pt-0">
+                    <!-- Single entry in the map , no grouping-->
+                    <% singleOrders.forEach((o)=>{ %>
+                    <div class="list-group-item py-0 ps-0">
+                        <form action="#" method="POST" style="display:inline;">
+                            <div class="row">
+                                <div class="col-8 d-grid pe-0">
+                                    <a class="btn btn-light text-start py-1 " href="orderdetails/<%= o.id%>"
+                                        style="background-color:white">
+                                        <!-- Status icons -->
+                                        <% switch (o.getCurrentState().statetype) {
+                                                case 0 : %>
+                                        <img src="/images/order.png" style="width:15px">
+                                        <% break;
+                                            case 1 : %>
+                                        <img src="/images/loading.gif" style="width:15px">
+                                        <% break;
+                                            case 2 : %>
+                                        <img src="/images/outbox.png" style="width:15px">
+                                        <% break;
+                                                case 3 : %>
+                                        <img src="/images/check.png" style="width:15px">
+                                        <% break;
+                                                case 4 : %>
+                                        <img src="/images/canceled.png" style="width:15px">
+                                        <% break;
+                                            } %>
+
+                                        <!-- Order Data -->
+                                        <% if(o.variation != null) { %>
+                                        <span><%= o.product.name%>, <%= o.variation.attrname%></span>
+                                        <% } else { %>
+                                        <span><%= o.product.name%></span>
+                                        <% } %>
+                                    </a>
+                                </div>
+                                <!-- Buttons -->
+                                <div class="col-2 d-grid px-0 py-0">
+                                    <% if(o.getCurrentState().statetype == 0 && !o.product.deliverable) { %>
+                                    <button class="btn btn-success py-0" type="submit" name="finishOrder"
+                                        value="<%= o.id%>">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                                            fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                                            <path
+                                                d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                                        </svg>
+                                    </button>
+                                    <% } %>
+                                </div>
+                                <div class="col-2 d-grid px-0">
+                                    <% if(o.getCurrentState().statetype != 4 && o.getCurrentState().statetype != 3 ) { %>
+                                    <button class="btn btn-danger py-0" type="submit" name="cancelOrder"
+                                        value="<%=o.id%>">x
+                                    </button>
+
+                                    <% } %>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <% }) %>
+                    <!-- Multiple entries in the map, group-->
+                    <% groupedOrders.forEach((v,o)=>{ %>
+
+                    <div class="list-group-item py-0 px-0">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="gOheading<%= o[0].id%>">
+                                <button class="accordion-button collapsed py-1 ps-2" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#gOcollapse<%= o[0].id%>"
+                                    aria-expanded="false" aria-controls="gOcollapse<%= o[0].id%>">
+                                    <!-- Status icons -->
+                                    <% switch (o[0].getCurrentState().statetype) {
+                                               case 3 : %>
+                                    <img src="/images/check.png" style="width:15px">
+                                    <% break;
+                                                case 4 : %>
+                                    <img src="/images/canceled.png" style="width:15px">
+                                    <% break;
+                                            } %>
+                                    <!-- Order Data -->
+                                    <span class="ps-1">
+                                        <%= v%> x
+                                        <% if(o[0].variation != null) { %>
+                                        <%= o[0].product.name%>, <%= o[0].variation.attrname%>
+                                        <% } else {%>
+                                        <%= o[0].product.name%>
+                                        <% } %>
+                                    </span>
+                                </button>
+                            </h2>
+                            <div id="gOcollapse<%= o[0].id%>" class="accordion-collapse collapse"
+                                aria-labelledby="gOheading<%= o[0].id%>" data-bs-parent="#gOaccordion">
+
+                                <div class0="list-group">
+                                    <% o.forEach((oe)=>{ %>
+                                    <div class="list-group-item p-0">
+                                        <a class="btn btn-light text-start py-1 ps-4 w-100 "
+                                            href="orderdetails/<%= oe.id%>" style="background-color:white">
+                                            <span>•</span>
+                                            <!-- Status icons -->
+                                            <% switch (oe.getCurrentState().statetype) {
+                                            case 0 : %>
+                                            <img src="/images/order.png" style="width:15px">
+                                            <% break;
+                                            case 1 : %>
+                                            <img src="/images/loading.gif" style="width:15px">
+                                            <% break;
+                                            case 2 : %>
+                                            <img src="/images/outbox.png" style="width:15px">
+                                            <% break;
+                                            case 3 : %>
+                                            <img src="/images/check.png" style="width:15px">
+                                            <% break; 
+                                            case 4 : %>
+                                            <img src="/images/canceled.png" style="width:15px">
+                                            <% break;
+                                            } %>
+                                            <!-- Order Data -->
+                                            <% if(oe.variation != null) { %>
+                                            <span><%= oe.product.name%>, <%= oe.variation.attrname%></span>
+                                            <% } else { %>
+                                            <span><%= oe.product.name%></span>
+                                            <% } %>
+                                        </a>
+                                    </div>
+                                    <% }) %>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+
+                    <div v-if="!orders.length" class="list-group-item py-0">
+                        Keine Bestellungen
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Neu Bestellen -->
+    <% if (!closed) { %>
+    <div class="card">
+        <div class="card-header py-0">
+            Bestellen
+        </div>
+        <div class="card-body px-0 py-0">
+            <ul class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
+                <!-- Generate Tabs for Categories -->
+                <template v-for="c in categories">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-2" :id="'cattab-'+c.id" type="button" role="tab"
+                            :aria-controls="'catnav-'+c.id" aria-selected="false" role="presentation"
+                            data-bs-toggle="tab" :data-bs-target="'#catnav-'+c.id" @click="fetchCategoryProducts(c.id)">
+                            {{c.name}}
+                        </button>
+                    </li>
+                </template>
+                <!-- Generate Tabs for Stations -->
+                <template v-for="s in stations">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-2" :id="'statab-'+s.id" type="button" role="tab"
+                            :aria-controls="'stanav-'+s.id" aria-selected="false" role="presentation"
+                            data-bs-toggle="tab" :data-bs-target="'#stanav-'+s.id" @click="fetchStationProducts(s.id)">
+                            {{s.name}}
+                        </button>
+                    </li>
+                </template>
+            </ul>
+            <div class="tab-content" id="products">
+                <!-- Accordion for complex products and variations -->
+                <div class="accordion" id="accordionExample">
+                    <!-- Generate Content from Productlist -->
+                    <template v-for="p in products">
+                        <!-- Simple Products without any options or variations -->
+                        <button v-if="!p.ingredients.length && !p.variations.length"
+                            class="btn btn-secondary py-2 px-3 mx-1 my-1"
+                            @click="orderProduct(p.id)">{{p.name}}</button>
+                        <!-- Product with variations -->
+                        <template v-if="!p.ingredients.length && p.variations.length">
+                            <div class="my-1">
+                                <div class="accordion-item">
+                                    <!-- Accordion Header -->
+                                    <div class="accordion-header card-header ps-0 pe-1 py-1" :id="'varheading-'+p.id">
+                                        <button class="btn text-start" type="button" style="width: 98%;"
+                                            data-bs-toggle="collapse" :data-bs-target="'#varcollapse-'+p.id"
+                                            aria-expanded="true" :aria-controls="'varcollapse-'+p.id">
+                                            {{p.name}}
+                                        </button>
+                                    </div>
+                                    <!-- Accordion Content -->
+                                    <div :id="'varcollapse-'+p.id" class="accordion-collapse collapse"
+                                        :aria-labelledby="'varheading-'+p.id" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body py-1">
+                                            <template v-for="v in p.variations">
+                                                <button class="btn btn-secondary py-2 px-3 mx-2 my-1"
+                                                    @click="orderVariation(v.id)">{{v.attrname}}</button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </template>
+                        <!-- Complex Products with ingredients -->
+                        <template v-if="p.ingredients.length && !p.variations.length">
+                            <div class="my-1">
+                                <!-- Accordion Header -->
+                                <div class="accordion-item">
+                                    <div class="accordion-header card-header ps-0 pe-1" :id="'compheading-'+p.id">
+                                        <div class="row">
+                                            <button class="btn text-start col-9 ps-3" type="button"
+                                                data-bs-toggle="collapse" :data-bs-target="'#compcollapse-'+p.id"
+                                                aria-expanded="true" aria-controls="'compcollapse-'+p.id">
+                                                {{p.name}}
+                                            </button>
+                                            <!-- Bestellsteuerung -->
+                                            <div class="col-3">
+                                                <button class="btn btn-secondary ms-1 float-end" style="width:100%">
+                                                    <img src="/images/sent.png" style="height: 15px">
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Accordion Content -->
+                                    <div :id="'compcollapse-'+p.id" class="accordion-collapse collapse"
+                                        :aria-labelledby="'compheading-'+p.id" data-bs-parent="#accordionExample">
+                                        <div class="row row-cols-2 mt-1 px-1">
+                                            <!-- Optionen -->
+                                            <template v-for="o in p.ingredients">
+                                                <div class="col mb-1">
+                                                    <input v-if="o.optional" type="checkbox" class="btn-check"
+                                                        :value="o.ingredient.id" name="option"
+                                                        :id="p.id+'-option-'+o.ingredient.id">
+                                                    <input v-else type="checkbox" class="btn-check"
+                                                        :value="o.ingredient.id" name="option"
+                                                        :id="p.id+'-option-'+o.ingredient.id" checked>
+                                                    <label class="btn btn-outline-primary" style="width:100%"
+                                                        :for="p.id+'-option-'+o.ingredient.id">
+                                                        {{o.ingredient.name}}
+                                                    </label>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="Notiz" :id="p.id+'note'" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <p v-if="!products.length">Keine Produke gefunden</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <% } %>
+
+    <!-- Vue Js -->
+    <script>
+        const {
+            createApp
+        } = Vue
+
+        createApp({
+            data: () => ({
+                orders: [],
+                categories: [],
+                stations: [],
+                session: null,
+                products: [],
+                err_products: false,
+                err_orders: false,
+            }),
+
+            created() {
+                // fetch on init
+                this.fetchOrders()
+                this.fetchCategories()
+                this.fetchStations()
+            },
+
+            methods: {
+                async fetchOrders() {
+                    const url = `/rest/session/<%=sid%>/orders`
+                    this.orders = await (await fetch(url)).json()
+                },
+                async fetchStations() {
+                    const url = `/rest/station`
+                    this.stations = await (await fetch(url)).json()
+                },
+                async fetchCategories() {
+                    const url = `/rest/categories`
+                    this.categories = await (await fetch(url)).json()
+                    // First product tab
+                    if (this.categories.length) {
+                        this.fetchCategoryProducts(this.categories[0].id);
+                    }
+                },
+                async fetchStationProducts(cid) {
+                    const url = `/rest/station/${cid}/products`
+                    this.products = await (await fetch(url)).json()
+                },
+                async fetchCategoryProducts(sid) {
+                    const url = `/rest/category/${sid}/products`
+                    this.products = await (await fetch(url)).json()
+                },
+                async orderProduct(pid) {
+                    console.log("ordering product " + pid);
+                },
+                async orderVariation(vid) {
+                    console.log("ordering variation " + vid);
+                },
+            }
+        }).mount('#app')
+    </script>
+
+
+</body>
+
+</html>

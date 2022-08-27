@@ -19,7 +19,8 @@ var LockType;
 (function (LockType) {
     LockType[LockType["NONE"] = 0] = "NONE";
     LockType[LockType["TEMPORARY"] = 1] = "TEMPORARY";
-    LockType[LockType["INFINITE"] = 2] = "INFINITE"; // Product is not available for a longer period
+    LockType[LockType["INFINITE"] = 2] = "INFINITE";
+    LockType[LockType["HIDDEN"] = 3] = "HIDDEN"; // Product is hidden and not available
 })(LockType = exports.LockType || (exports.LockType = {}));
 let Product = class Product {
     constructor(name, price, deliverable) {
@@ -55,7 +56,7 @@ __decorate([
         default: LockType.NONE
     }),
     __metadata("design:type", Number)
-], Product.prototype, "orderLock", void 0);
+], Product.prototype, "productLock", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Category_1.Category, (category) => category.products),
     __metadata("design:type", Category_1.Category)

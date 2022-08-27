@@ -8,7 +8,8 @@ import { ProductIngredient } from './ProductIngredient';
 export enum LockType {
   NONE=0,       // Product is available for ordering
   TEMPORARY=1,  // Product is temporarly not available for ordering
-  INFINITE=2    // Product is not available for a longer period
+  INFINITE=2,   // Product is not available for a longer period
+  HIDDEN=3      // Product is hidden and not available
 }
 
 @Entity()
@@ -33,7 +34,7 @@ export class Product {
     @Column({
       default: LockType.NONE
     })
-    orderLock: LockType
+    productLock: LockType
 
     @ManyToOne(() => Category, (category) => category.products)
     category: Category

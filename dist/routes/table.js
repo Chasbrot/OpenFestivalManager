@@ -482,7 +482,7 @@ router.get("/:sid", (0, express_validator_1.param)("sid").isInt(), async functio
         let catUnknown = new Category_1.Category("?");
         catUnknown.id = -1;
         cats.push(catUnknown);
-        res.render("table/table_overview", {
+        res.render("table/table_overview_vue", {
             t: s.table,
             singleOrders: singleOrders,
             groupedOrders: groupedOrders,

@@ -517,7 +517,7 @@ router.get("/:sid", param("sid").isInt(), async function (req, res) {
 
 
 
-    res.render("table/table_overview", {
+    res.render("table/table_overview_vue", {
       t: s.table,
       singleOrders: singleOrders,
       groupedOrders: groupedOrders,

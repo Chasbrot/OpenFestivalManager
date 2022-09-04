@@ -16,7 +16,6 @@ const process_1 = __importDefault(require("process"));
 const Category_1 = require("../entity/Category");
 const AlertType_1 = require("../entity/AlertType");
 const Variation_1 = require("../entity/Variation");
-const Order_1 = require("../entity/Order");
 const typeorm_1 = require("typeorm");
 const accountRepository = data_source_1.AppDataSource.getRepository(Account_1.Account);
 /* Check if request has a valid session*/
@@ -35,11 +34,13 @@ const restStationRouter = require("./rest/rest_station");
 const restTableGroupRouter = require("./rest/rest_tablegroup");
 const restTableRouter = require("./rest/rest_table");
 const restSessionRouter = require("./rest/rest_session");
+const restOrderRouter = require("./rest/rest_order");
 // Send for rest station to file, assign file
 router.use("/station", restStationRouter);
 router.use("/tablegroup", restTableGroupRouter);
 router.use("/table", restTableRouter);
 router.use("/session", restSessionRouter);
+router.use("/order", restOrderRouter);
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req, res) => {
     res.set('Cache-control', `max-age=${process_1.default.env.REST_CACHE_TIME}`);
@@ -203,37 +204,6 @@ router.get("/product/:pid", (0, express_validator_1.param)("pid").isInt(), (req,
         .then((result) => {
         res.set('Cache-control', `max-age=${process_1.default.env.REST_CACHE_TIME}`);
         res.json(result);
-    })
-        .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-    });
-});
-/* GET order */
-router.get("/order/:oid", (0, express_validator_1.param)("oid").isInt(), (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
-        return;
-    }
-    data_source_1.AppDataSource.getRepository(Order_1.Order)
-        .findOne({
-        relations: {
-            states: true,
-            variation: true,
-            bill: true,
-            product: true,
-        },
-        where: {
-            id: Number(req.params.oid),
-        },
-    })
-        .then((result) => {
-        if (result == null) {
-            res.sendStatus(404);
-        }
-        else {
-            res.json(result);
-        }
     })
         .catch((err) => {
         console.log(err);

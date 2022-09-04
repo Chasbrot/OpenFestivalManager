@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const database_1 = require("./../../database");
 const Account_1 = require("../../entity/Account");
 const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
@@ -146,11 +147,45 @@ router.get("/:sid/orders", (0, express_validator_1.param)("sid").isInt(), (req, 
         },
     })
         .then((result) => {
+        result.forEach((r) => {
+            // Load current states to objects
+            r.getCurrentState();
+        });
         res.json(result);
     })
         .catch((err) => {
         console.log(err);
         res.sendStatus(500);
     });
+});
+/* PUT create order */
+router.put("/:sid", (0, express_validator_1.param)("sid").isInt(), async (req, res) => {
+    // Request must have a product id
+    if (!(0, express_validator_1.validationResult)(req).isEmpty() && !req.body.pid) {
+        res.sendStatus(400);
+        return;
+    }
+    const body = req.body;
+    if (body.vid) {
+        try {
+            // Validate vid
+            Number(body.vid);
+        }
+        catch (e) {
+            console.log("rest/session PUT: " + e);
+            res.sendStatus(403);
+            return;
+        }
+    }
+    try {
+        let order = await database_1.db.createOrder(req.session.account.id, Number(req.params.sid), body.pid, body.note, body.options, body.vid);
+        res.json({
+            oid: order.id
+        });
+    }
+    catch (e) {
+        console.log("rest/session/ PUT: " + e);
+        res.sendStatus(500);
+    }
 });
 module.exports = router;

@@ -35,11 +35,14 @@ export class Order {
     @Column({
         nullable: true
     })
-    note: String
+    note: string
 
     @ManyToMany(() => Ingredient)
     @JoinTable({name: "order_ingredients"})
     orderedIngredients: Ingredient[]
+
+    // Reference for API access
+    currentState: State | null
 
    /**
     * Returns the current state
@@ -52,6 +55,7 @@ export class Order {
             }
             
         });
+        this.currentState = state;
         return state;
     }
 

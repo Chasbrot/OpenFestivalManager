@@ -16,12 +16,12 @@ import { Session } from "./Session";
 import { Order } from "./Order";
 
 export enum StateType {
-  CREATED,        // Order or session was created
-  COOKING,        // Order is being processed by the station
-  DELIVERING,     // Order is currently being delivered
-  FINISHED,       // Order was finished
-  CANCELED,       // Order was canceled
-  CLOSED,         // Session was closed
+  CREATED,        // 0 Order or session was created
+  COOKING,        // 1 Order is being processed by the station
+  DELIVERING,     // 2 Order is currently being delivered
+  FINISHED,       // 3 Order was finished
+  CANCELED,       // 4 Order was canceled
+  CLOSED,         // 5 Session was closed
 }
 
 @Entity()

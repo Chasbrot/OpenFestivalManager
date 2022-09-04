@@ -29,6 +29,7 @@ let Order = class Order {
                 state = s;
             }
         });
+        this.currentState = state;
         return state;
     }
 };

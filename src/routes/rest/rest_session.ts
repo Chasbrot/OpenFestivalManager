@@ -31,8 +31,6 @@ router.use(function (req, res, next) {
   }
 });
 
-
-
 /* PUT create new session on table */
 router.put("/", async (req: Request, res: Response) => {
   const body = req.body;
@@ -98,31 +96,31 @@ router.put("/", async (req: Request, res: Response) => {
 
 /* GET session */
 router.get("/:sid", param("sid").isInt(), (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    AppDataSource.getRepository(Session)
-      .find({
-        relations: {
-          table: true,
-        },
-        where: {
-          id: Number(req.params.sid),
-        },
-      })
-      .then((result) => {
-        if (result == null) {
-          res.sendStatus(404);
-        } else {
-          res.json(result);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  });
+  if (!validationResult(req).isEmpty()) {
+    res.sendStatus(400);
+    return;
+  }
+  AppDataSource.getRepository(Session)
+    .find({
+      relations: {
+        table: true,
+      },
+      where: {
+        id: Number(req.params.sid),
+      },
+    })
+    .then((result) => {
+      if (result == null) {
+        res.sendStatus(404);
+      } else {
+        res.json(result);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(500);
+    });
+});
 
 /* GET orders from session */
 router.get(
@@ -158,6 +156,10 @@ router.get(
         },
       })
       .then((result) => {
+        result.forEach((r) => {
+          // Load current states to objects
+          r.getCurrentState();
+        });
         res.json(result);
       })
       .catch((err) => {
@@ -166,5 +168,44 @@ router.get(
       });
   }
 );
+
+/* PUT create order */
+router.put("/:sid", param("sid").isInt(), async (req: Request, res: Response) => {
+  // Request must have a product id
+  if (!validationResult(req).isEmpty() && !req.body.pid) {
+    res.sendStatus(400);
+    return;
+  }
+  const body = req.body;
+
+  if (body.vid) {
+    try {
+      // Validate vid
+      Number(body.vid);
+    } catch (e) {
+      console.log("rest/session PUT: " + e);
+      res.sendStatus(403);
+      return;
+    }
+  }
+
+  try {
+    let order = await db.createOrder(
+      req.session.account!.id,
+      Number(req.params.sid),
+      body.pid,
+      body.note,
+      body.options,
+      body.vid
+    );
+    res.json({
+      oid: order.id
+    })
+  } catch (e) {
+    console.log("rest/session/ PUT: "+e)
+    res.sendStatus(500);
+  }
+  
+});
 
 module.exports = router;

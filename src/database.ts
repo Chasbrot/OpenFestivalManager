@@ -172,6 +172,7 @@ export class db {
       let order = new Order();
       order.note = orderNote;
       try {
+        // Check and get all objects
         let a = await AppDataSource.getRepository(Account).findOneByOrFail({
           id: accountId,
         });
@@ -190,16 +191,24 @@ export class db {
         order.product = p;
         order.session = s;
         await AppDataSource.getRepository(Order).save(order);
-        await this.setOrderStatus(order, StateType.CREATED, a);
-        for (const element of options) {
-          let i = await AppDataSource.getRepository(Ingredient).findOneByOrFail(
-            {
-              id: element,
-            }
-          );
-          order.orderedIngredients.push(i);
+        // Create first initial state and save
+        let state = new State(StateType.CREATED, a);
+        state.order = order;
+        AppDataSource.getRepository(State).save(state);
+        // Save all ordered options to the order
+        if (options) {
+          order.orderedIngredients = [];
+          for (const element of options) {
+            let i = await AppDataSource.getRepository(Ingredient).findOneByOrFail(
+              {
+                id: element,
+              }
+            );
+            order.orderedIngredients.push(i);
+          }
+          await AppDataSource.getRepository(Order).save(order);
         }
-        await AppDataSource.getRepository(Order).save(order);
+
       } catch (e) {
         return reject("db/createOrder: Error " + e);
       }

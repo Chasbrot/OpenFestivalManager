@@ -36,12 +36,14 @@ const restStationRouter = require("./rest/rest_station");
 const restTableGroupRouter = require("./rest/rest_tablegroup");
 const restTableRouter = require("./rest/rest_table");
 const restSessionRouter = require("./rest/rest_session");
+const restOrderRouter = require("./rest/rest_order");
 
 // Send for rest station to file, assign file
 router.use("/station", restStationRouter);
 router.use("/tablegroup", restTableGroupRouter);
 router.use("/table", restTableRouter);
 router.use("/session", restSessionRouter);
+router.use("/order", restOrderRouter);
 
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req: Request, res: Response) => {
@@ -238,40 +240,6 @@ router.get(
   }
 );
 
-/* GET order */
-router.get(
-  "/order/:oid",
-  param("oid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    AppDataSource.getRepository(Order)
-      .findOne({
-        relations: {
-          states: true,
-          variation: true,
-          bill: true,
-          product: true,
-        },
-        where: {
-          id: Number(req.params.oid),
-        },
-      })
-      .then((result) => {
-        if (result == null) {
-          res.sendStatus(404);
-        } else {
-          res.json(result);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
 
 /* GET paymentmethods */
 router.get("/paymentmethod", (_req: Request, res: Response) => {

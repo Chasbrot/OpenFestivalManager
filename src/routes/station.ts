@@ -145,7 +145,7 @@ router.get("/:sid", param("sid").isInt(), async function (req, res) {
     return;
   }
 
-  res.render("station/station_overview", {
+  res.render("station/station_overview_vue", {
     station: station,
     pre_orders: [],
   });

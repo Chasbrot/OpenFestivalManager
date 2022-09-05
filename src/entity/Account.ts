@@ -24,7 +24,8 @@ export class Account {
     name: string
 
   @Column({
-      nullable: true
+      nullable: true,
+      select: false // Default not included in selects (find etc.)
     })
     hash: string
 

@@ -78,6 +78,9 @@ router.get("/:sid/activeorders", (0, express_validator_1.param)("sid").isInt(), 
     }
     database_1.db.getActiveOrdersForStation(Number(req.params.sid))
         .then((result) => {
+        result.forEach((e) => {
+            e.getCurrentState();
+        });
         res.json(result);
     })
         .catch((err) => {
@@ -93,6 +96,9 @@ router.get("/:sid/pastorders", (0, express_validator_1.param)("sid").isInt(), (r
     }
     database_1.db.getPastOrdersForStation(Number(req.params.sid))
         .then((result) => {
+        result.forEach((e) => {
+            e.getCurrentState();
+        });
         res.json(result);
     })
         .catch((err) => {

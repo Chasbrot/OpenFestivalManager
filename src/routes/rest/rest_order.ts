@@ -19,17 +19,8 @@ import { State, StateType } from "../../entity/State";
 import { MoreThan, Not } from "typeorm";
 
 /* Check session and accounttype*/
-router.use(function (req, res, next) {
-  if (
-    req.session.account!.accounttype == AccountType.ADMIN ||
-    req.session.account!.accounttype == AccountType.USER
-  ) {
-    next();
-  } else {
-    console.log("rest/order/auth: unauthorized");
-    res.sendStatus(403);
-  }
-});
+// Every active session needs full access
+
 
 /* POST order/state */
 /* Creates new state entry for a order*/

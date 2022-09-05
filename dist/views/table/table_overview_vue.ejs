@@ -372,6 +372,7 @@
                             }
                         });
                     }
+                    let note = $("#"+pid+"note")[0].value;
                     const requestOptions = {
                         method: "PUT",
                         headers: {
@@ -381,6 +382,7 @@
                             pid: pid,
                             vid: vid,
                             options: complex ? options : null, // only send if selected
+                            note: note
                         })
                     };
                     const response = await fetch(`/rest/session/<%=sid%>`,

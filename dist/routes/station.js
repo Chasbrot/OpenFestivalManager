@@ -125,7 +125,7 @@ router.get("/:sid", (0, express_validator_1.param)("sid").isInt(), async functio
         res.render("/station/login", { err: "System Error" });
         return;
     }
-    res.render("station/station_overview", {
+    res.render("station/station_overview_vue", {
         station: station,
         pre_orders: [],
     });

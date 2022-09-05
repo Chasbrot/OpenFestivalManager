@@ -170,7 +170,9 @@ export class db {
   ):Promise<Order> {
     return new Promise(async (resolve, reject) => {
       let order = new Order();
-      order.note = orderNote;
+      if(orderNote != ""){
+        order.note = orderNote;
+      }
       try {
         // Check and get all objects
         let a = await AppDataSource.getRepository(Account).findOneByOrFail({
@@ -188,6 +190,7 @@ export class db {
           });
           order.variation = v;
         }
+        order.orderedBy = a;
         order.product = p;
         order.session = s;
         await AppDataSource.getRepository(Order).save(order);
@@ -508,8 +511,14 @@ export class db {
       relations: {
         product: {
           producer: true,
+          ingredients: true,
         },
         states: true,
+        variation: true,
+        orderedIngredients: true,
+        session: {
+          table: true
+        }
       },
       where: [
         {
@@ -560,6 +569,12 @@ export class db {
           producer: true,
         },
         states: true,
+        variation: true,
+        orderedIngredients: true,
+        session: {
+          table: true
+        },
+        orderedBy: true
       },
       where: [
         {

@@ -95,6 +95,9 @@ router.get(
     }
     db.getActiveOrdersForStation(Number(req.params.sid))
       .then((result) => {
+        result.forEach((e)=>{
+          e.getCurrentState();
+        })
         res.json(result);
       })
       .catch((err) => {
@@ -115,6 +118,9 @@ router.get(
     }
     db.getPastOrdersForStation(Number(req.params.sid))
       .then((result) => {
+        result.forEach((e)=>{
+          e.getCurrentState();
+        })
         res.json(result);
       })
       .catch((err) => {

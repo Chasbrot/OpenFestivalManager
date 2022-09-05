@@ -4,23 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const database_1 = require("./../../database");
-const Account_1 = require("../../entity/Account");
 const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
 const router = express_1.default.Router();
 const Order_1 = require("../../entity/Order");
 /* Check session and accounttype*/
-router.use(function (req, res, next) {
-    if (req.session.account.accounttype == Account_1.AccountType.ADMIN ||
-        req.session.account.accounttype == Account_1.AccountType.USER) {
-        next();
-    }
-    else {
-        console.log("rest/order/auth: unauthorized");
-        res.sendStatus(403);
-    }
-});
+// Every active session needs full access
 /* POST order/state */
 /* Creates new state entry for a order*/
 router.post("/:oid/state", (0, express_validator_1.param)("oid").isInt(), async (req, res) => {

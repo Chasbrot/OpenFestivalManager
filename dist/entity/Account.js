@@ -37,7 +37,8 @@ __decorate([
 ], Account.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        nullable: true
+        nullable: true,
+        select: false // Default not included in selects (find etc.)
     }),
     __metadata("design:type", String)
 ], Account.prototype, "hash", void 0);

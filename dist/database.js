@@ -159,7 +159,9 @@ class db {
     static createOrder(accountId, sessionId, productId, orderNote, options, variationId) {
         return new Promise(async (resolve, reject) => {
             let order = new Order_1.Order();
-            order.note = orderNote;
+            if (orderNote != "") {
+                order.note = orderNote;
+            }
             try {
                 // Check and get all objects
                 let a = await data_source_1.AppDataSource.getRepository(Account_1.Account).findOneByOrFail({
@@ -177,6 +179,7 @@ class db {
                     });
                     order.variation = v;
                 }
+                order.orderedBy = a;
                 order.product = p;
                 order.session = s;
                 await data_source_1.AppDataSource.getRepository(Order_1.Order).save(order);
@@ -482,8 +485,14 @@ class db {
             relations: {
                 product: {
                     producer: true,
+                    ingredients: true,
                 },
                 states: true,
+                variation: true,
+                orderedIngredients: true,
+                session: {
+                    table: true
+                }
             },
             where: [
                 {
@@ -533,6 +542,12 @@ class db {
                     producer: true,
                 },
                 states: true,
+                variation: true,
+                orderedIngredients: true,
+                session: {
+                    table: true
+                },
+                orderedBy: true
             },
             where: [
                 {

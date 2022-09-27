@@ -1,5 +1,5 @@
+import { ProductIngredient } from "./../../entity/ProductIngredient";
 import { db } from "./../../database";
-import { Product } from "../../entity/Product";
 import { Ingredient } from "../../entity/Ingredient";
 import { Account, AccountType } from "../../entity/Account";
 import { AppDataSource } from "../../data-source";
@@ -20,7 +20,6 @@ import { MoreThan, Not } from "typeorm";
 
 /* Check session and accounttype*/
 // Every active session needs full access
-
 
 /* POST order/state */
 /* Creates new state entry for a order*/
@@ -76,6 +75,69 @@ router.get("/:oid", param("oid").isInt(), (req: Request, res: Response) => {
       res.sendStatus(500);
     });
 });
+
+/* GET ordered Ingredients map from order */
+router.get(
+  "/:oid/oIMap",
+  param("oid").isInt(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    let product = null;
+    let order = null;
+    try {
+      order = await AppDataSource.getRepository("Order").findOneOrFail({
+        relations: {
+          orderedIngredients: true,
+          product: true,
+        },
+        where: {
+          id: Number(req.params.oid),
+        },
+      });
+      
+      product = await AppDataSource.getRepository("Product").findOneOrFail({
+        relations: {
+          ingredients: true,
+        },
+        where: {
+          id: Number(order.product.id),
+        },
+      });
+    } catch (e) {
+      console.log("rest/Order/oIMap: " + e);
+      res.sendStatus(500);
+      return;
+    }
+
+    let aI: ProductIngredient[] = product.ingredients;
+    let oI: Ingredient[] = order.orderedIngredients;
+
+    // Generate difference map
+    let oIMap = [];
+
+    for (let pi of aI) {
+      let found = false;
+      for (let i of oI) {
+        if (i.id == pi.ingredient.id) {
+          // Ingredient was ordered
+          found = true;
+        }
+      }
+      if (pi.optional && found) {
+        // Ingredient is optional and was selected
+        oIMap.push([pi.ingredient, true]);
+      } else if (!pi.optional && !found) {
+        // Ingredient is default and was removed
+        oIMap.push([pi.ingredient, false]);
+      }
+    }
+    res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+    res.json(oIMap);
+  }
+);
 
 
 module.exports = router;

@@ -47,7 +47,7 @@
                         <div class="pb-2">
                             <span class="pe-1">#{{o.id}}</span>
                             <!-- Extras or Note detected -->
-                            <span class="pe-1"><img v-if="o.note || o.orderedIngredients.length" src="/images/alert.png"
+                            <span class="pe-1"><img v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)" src="/images/alert.png"
                                     style="width: 15px" /></span>
 
                             <!-- Status icons-->
@@ -86,15 +86,16 @@
                         </div>
                         <!-- Options -->
                         <!-- Extras or Note detected -->
-                        <template v-if="o.note || o.orderedIngredients.length">
+                        <template v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)">
                             <div class="collapse show pt-1" data-parent="#orders" :id="'options_order'+o.id">
                                 <div class="card card-body p-2" :id="'div_options_order'+o.id">
-                                    <div v-if="o.orderedIngredients" class="row row-cols-3 py-0">
+                                    <div v-if="o.oimap" class="row row-cols-3 py-0">
                                         <!-- List ordered ingredients-->
-                                        <template v-for="pi in o.orderedIngredients">
+                                        <template v-for="oi in o.oimap">
                                             <div class="col">
-                                                <img src="/images/add.png" style="width: 20px" />
-                                                <span class="ps-1">{{pi.name}}</span>
+                                                <img v-if="oi[1]" src="/images/add.png" style="width: 20px" />
+                                                <img v-else src="/images/canceled.png" style="width: 20px" />
+                                                <span class="ps-1">{{oi[0].name}}</span>
                                             </div>
                                         </template>
                                     </div>
@@ -126,7 +127,7 @@
                     <div class="pb-2">
                         <span class="pe-1">#{{o.id}}</span>
                         <!-- Extras or Note detected -->
-                        <span class="pe-1"><img v-if="o.note || o.orderedIngredients.length" src="/images/alert.png"
+                        <span class="pe-1"><img v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)" src="/images/alert.png"
                                 style="width: 15px" /></span>
 
                         <!-- Status icons
@@ -174,15 +175,16 @@
                     </div>
                     <!-- Options -->
                     <!-- Extras or Note detected -->
-                    <template v-if="o.note || o.orderedIngredients.length">
+                    <template v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)">
                         <div class="collapse show pt-1" data-parent="#orders" :id="'options_order'+o.id">
                             <div class="card card-body p-2" :id="'div_options_order'+o.id">
-                                <div v-if="o.orderedIngredients" class="row row-cols-3 py-0">
+                                <div v-if="o.oimap" class="row row-cols-3 py-0">
                                     <!-- List ordered ingredients-->
-                                    <template v-for="pi in o.orderedIngredients">
+                                    <template v-for="oi in o.oimap">
                                         <div class="col">
-                                            <img src="/images/add.png" style="width: 20px" />
-                                            <span class="ps-1">{{pi.name}}</span>
+                                            <img v-if="oi[1]" src="/images/add.png" style="width: 20px" />
+                                            <img v-else src="/images/canceled.png" style="width: 20px" />
+                                            <span class="ps-1">{{oi[0].name}}</span>
                                         </div>
                                     </template>
                                 </div>
@@ -196,6 +198,7 @@
             </template>
         </div>
     </div>
+    <br>
     </div>
     </div>
 
@@ -244,21 +247,47 @@
             methods: {
                 async fetchActiveOrders() {
                     const url = `/rest/station/<%=station.id%>/activeorders`
-                    this.activeorders = await (await fetch(url)).json()
+                    var tmp = await (await fetch(url)).json()
+                    // Play notification sound
+                    if(!this.firstLoad){
+                        // Compare data structures
+                        if(JSON.stringify(this.activeorders) !== JSON.stringify(tmp)){
+                            // There is some difference => play sound
+                            var audio = new Audio('/media/notification.mp3'); // path to file
+                            audio.play();
+                        }
+                    }else{
+                        this.firstLoad=false;
+                    }
+                    // Load OI Map for each order
+                    for(var ao of this.activeorders){
+                        ao.oimap = await this.getOIMap(ao.id)
+                    }
+                    this.activeorders = tmp;
                     console.log(this.activeorders)
                 },
 
                 async fetchPastOrders() {
                     const url = `/rest/station/<%=station.id%>/pastorders`
                     this.pastorders = await (await fetch(url)).json()
+                    // Load OI Map for each order
+                    for(var po of this.pastorders){
+                        po.oimap = await this.getOIMap(po.id)
+                    }
                     console.log(this.pastorders)
                 },
 
+                async getOIMap(oid){
+                    const url = `/rest/order/${oid}/oIMap`
+                    return await (await fetch(url)).json()
+                },
+                
                 parseTime(timestamp) {
 
                     return (new Date(timestamp).getHours() + "").padStart(2, '0') + ':' + (
                         new Date(timestamp).getMinutes() + "").padStart(2, '0')
                 },
+                
                 async updateOrderState(oid, stateid) {
                     const requestOptions = {
                         method: "POST",

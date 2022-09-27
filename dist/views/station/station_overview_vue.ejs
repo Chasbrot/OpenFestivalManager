@@ -235,9 +235,10 @@
             data: () => ({
                 activeorders: [],
                 pastorders: [],
-                timer: ''
+                timer: '',
                 alerttypes: [],
                 selectedAlerttype: "",
+                firstLoad: true,
             }),
 
             created() {
@@ -245,10 +246,24 @@
                 console.log("created")
                 this.fetchActiveOrders()
                 this.fetchPastOrders()
-                this.timer = setInterval(this.fetchActiveOrders, 60000); // Update each minute
+                this.timer = setInterval(this.fetchActiveOrders, 30000); // Update each minute
+                this.fetchAlertTypes()
+                this.bindTimerReset()
             },
 
             methods: {
+                // Reset timer if user interacts with site
+                async bindTimerReset(){
+                    $('html').bind(
+                        'click mouseup mousedown keydown keypress keyup submit change scroll resize dblclick',
+                            function () {
+                                console.log("Timer reset")
+                            clearInterval(this.timer)
+                            this.timer = setInterval(this.fetchActiveOrders, 30000); // Update each minute
+                            console.log(this.timer)
+                    });
+                }
+                ,
                 async fetchActiveOrders() {
                     const url = `/rest/station/<%=station.id%>/activeorders`
                     var tmp = await (await fetch(url)).json()

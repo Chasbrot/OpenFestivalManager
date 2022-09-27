@@ -7,12 +7,14 @@ import sessions from 'express-session';
 import { uid, suid } from 'rand-token';
 import cookieParser from 'cookie-parser';
 import { Account } from 'entity/Account';
+import { Station } from 'entity/Station';
 
 
 // Add account data to session
 declare module 'express-session' {
   interface SessionData {
-    account: Account
+    account: Account,
+    station?: Station
   }
 }
 

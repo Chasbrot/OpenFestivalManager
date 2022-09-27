@@ -17,6 +17,7 @@ import { Session } from "../entity/Session";
 import { Order } from "../entity/Order";
 import { StateType } from "../entity/State";
 import { Not } from "typeorm";
+import { db }  from "../database";
 
 const accountRepository = AppDataSource.getRepository(Account);
 
@@ -27,7 +28,7 @@ router.use(function (req, res, next) {
   } else {
     console.log("rest/auth: No vaild session detected");
     //res.sendStatus(403);
-    res.redirect("/"); // For DEVELOPMENT 
+    res.redirect("/"); // For DEVELOPMENT
   }
 });
 
@@ -47,7 +48,7 @@ router.use("/order", restOrderRouter);
 
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req: Request, res: Response) => {
-  res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+  res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
   res.json(AccountType);
 });
 
@@ -109,7 +110,7 @@ router.get("/options", (_req: Request, res: Response) => {
   AppDataSource.getRepository(Ingredient)
     .find()
     .then((result) => {
-      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
       res.json(result);
     })
     .catch((err) => {
@@ -123,7 +124,7 @@ router.get("/categories", (_req: Request, res: Response) => {
   AppDataSource.getRepository(Category)
     .find()
     .then((result) => {
-      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
       res.json(result);
     })
     .catch((err) => {
@@ -133,31 +134,49 @@ router.get("/categories", (_req: Request, res: Response) => {
 });
 
 /* GET products from category */
-router.get("/category/:cid/products",param("cid").isInt(), (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
-    res.sendStatus(400);
-    return;
-  }
-  console.log(req.params.cid)
-  AppDataSource.getRepository(Product)
-    .find({
-      relations: {
-        category: true,
-        ingredients: true,
-        variations: true,
-      },
-      where: {
-        category: {
-          id: Number(req.params.cid),
+router.get(
+  "/category/:cid/products",
+  param("cid").isInt(),
+  (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    console.log(req.params.cid);
+    AppDataSource.getRepository(Product)
+      .find({
+        relations: {
+          category: true,
+          ingredients: true,
+          variations: true,
         },
-        productLock: Not(LockType.HIDDEN)
-      },
-      order: {
-        list_priority: "DESC"
-      }
-    })
+        where: {
+          category: {
+            id: Number(req.params.cid),
+          },
+          productLock: Not(LockType.HIDDEN),
+        },
+        order: {
+          list_priority: "DESC",
+        },
+      })
+      .then((result) => {
+        res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
+        res.json(result);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+      });
+  }
+);
+
+/* GET alerttypes */
+router.get("/alerttypes", (_req: Request, res: Response) => {
+  AppDataSource.getRepository(AlertType)
+    .find()
     .then((result) => {
-      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
       res.json(result);
     })
     .catch((err) => {
@@ -166,19 +185,37 @@ router.get("/category/:cid/products",param("cid").isInt(), (req: Request, res: R
     });
 });
 
-/* GET alerttypes */
-router.get("/alerttypes", (_req: Request, res: Response) => {
-  AppDataSource.getRepository(AlertType)
-    .find()
-    .then((result) => {
-      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
-      res.json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(500);
-    });
-});
+/* POST create alert */
+router.post(
+  "/alert/:aid",
+  param("aid").isInt(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty() && !req.body.new) {
+      res.sendStatus(400);
+      return;
+    }
+    // Only stations are allowed
+    if (req.session.account?.accounttype != AccountType.STATION) {
+      res.sendStatus(403);
+      return;
+    }
+    // Validate Alert ID
+    let alerttype = null;
+    try {
+      alerttype = await AppDataSource.getRepository(AlertType).findOneByOrFail({
+        id: Number(req.params.aid),
+      });
+    } catch (err) {
+      console.log("rest/alert: POST create alert " + err);
+      res.sendStatus(400);
+      return;
+    }
+
+    await db.createAlert(alerttype, req.session.station!);
+
+    res.sendStatus(200);
+  }
+);
 
 /* GET variations by product */
 router.get(
@@ -201,7 +238,7 @@ router.get(
         },
       })
       .then((result) => {
-        res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+        res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
         res.json(result);
       })
       .catch((err) => {
@@ -230,7 +267,7 @@ router.get(
         },
       })
       .then((result) => {
-        res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+        res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
         res.json(result);
       })
       .catch((err) => {
@@ -240,13 +277,12 @@ router.get(
   }
 );
 
-
 /* GET paymentmethods */
 router.get("/paymentmethod", (_req: Request, res: Response) => {
   AppDataSource.getRepository(PaymentMethod)
     .find()
     .then((result) => {
-      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
       res.json(result);
     })
     .catch((err) => {
@@ -261,7 +297,5 @@ router.get("/registrationactive", (_req: Request, res: Response) => {
     registrationactive: global.registrationActive,
   });
 });
-
-
 
 module.exports = router;

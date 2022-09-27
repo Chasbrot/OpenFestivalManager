@@ -51,6 +51,7 @@ router.post("/login", (0, express_validator_1.body)("username").isAlphanumeric()
     req.session.account = new Account_2.Account();
     req.session.account.id = station.id;
     req.session.account.accounttype = Account_1.AccountType.STATION;
+    req.session.station = station;
     res.redirect("/station/" + station.id);
 });
 /* GET order entry html part*/

@@ -15,7 +15,7 @@
                 <%= station.name%>
             </div>
             <div class="float-end">
-                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal"
+                <button type="button" class="btn btn-outline-warning me-2" data-bs-toggle="modal"
                     data-bs-target="#alertModal">
                     Hilfe
                 </button>
@@ -210,14 +210,16 @@
                     <h5 class="modal-title" id="exampleModalLabel">Unterstützung anfordern</h5>
                 </div>
                 <div class="modal-body">
-                    <form action="#" method="POST" id="alertform">
-                        <select class="form-control" id="alerttypes" name="makeAlert">
-                        </select>
-                    </form>
+                    <select v-model="selectedAlerttype" class="form-select">
+                        <option disabled value="">...</option>
+                        <template v-for="a in alerttypes">
+                            <option :value="a.id">{{a.name}}</option>
+                        </template>
+                    </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
-                    <button type="submit" class="btn btn-primary" form="alertform">Anfordern</button>
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="createAlert()">Anfordern</button>
                 </div>
             </div>
         </div>
@@ -234,6 +236,8 @@
                 activeorders: [],
                 pastorders: [],
                 timer: ''
+                alerttypes: [],
+                selectedAlerttype: "",
             }),
 
             created() {
@@ -312,8 +316,24 @@
                         this.fetchActiveOrders();
                     }
                 },
+                
+                async fetchAlertTypes() {
+                    const url = `/rest/alerttypes`
+                    this.alerttypes = await (await fetch(url)).json()
+                },
 
-
+                async createAlert() {
+                    const requestOptions = {
+                        method: "POST",
+                    };
+                    const response = await fetch(`/rest/alert/${this.selectedAlerttype}`,
+                        requestOptions);
+                    if (response.status != 200) {
+                        this.alert_error = "";
+                        alert("Aktion fehlgeschlagen " + response.status);
+                        console.log(response.statusText);
+                    }
+                },
 
             },
             beforeUnmount() {

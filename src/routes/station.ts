@@ -65,6 +65,7 @@ router.post(
     req.session.account = new Account();
     req.session.account.id = station.id;
     req.session.account.accounttype = AccountType.STATION;
+    req.session.station = station;
     res.redirect("/station/" + station.id);
   }
 );

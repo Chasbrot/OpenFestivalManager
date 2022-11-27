@@ -47,8 +47,8 @@
                         <div class="pb-2">
                             <span class="pe-1">#{{o.id}}</span>
                             <!-- Extras or Note detected -->
-                            <span class="pe-1"><img v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)" src="/images/alert.png"
-                                    style="width: 15px" /></span>
+                            <span class="pe-1"><img v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)"
+                                    src="/images/alert.png" style="width: 15px" /></span>
 
                             <!-- Status icons-->
                             <img v-if="o.currentState.statetype == 3" src="/images/check.png" style="width:15px">
@@ -109,98 +109,97 @@
                 </template>
             </div>
         </div>
-    </div>
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
-                aria-expanded="true" aria-controls="collapseTwo">
-                <span id="num_activeorders">{{activeorders.length}}</span>
-                <span class="ps-1">Aktive Bestellungen</span>
-            </button>
-        </h2>
-    </div>
-    <div id="collapseTwo" class="accordion-collapse collapse show" data-parent="#accordion">
-        <div class="list-group pt-2 px-2" id="activelist">
-            <template v-for="o in activeorders">
-                <div class="list-group-item pr-2 pl-1">
-                    <!-- Order header -->
-                    <div class="pb-2">
-                        <span class="pe-1">#{{o.id}}</span>
-                        <!-- Extras or Note detected -->
-                        <span class="pe-1"><img v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)" src="/images/alert.png"
-                                style="width: 15px" /></span>
 
-                        <!-- Status icons
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                    aria-expanded="true" aria-controls="collapseTwo">
+                    <span id="num_activeorders">{{activeorders.length}}</span>
+                    <span class="ps-1">Aktive Bestellungen</span>
+                </button>
+            </h2>
+        </div>
+        <div id="collapseTwo" class="accordion-collapse collapse show" data-parent="#accordion">
+            <div class="list-group pt-2 px-2" id="activelist">
+                <template v-for="o in activeorders">
+                    <div class="list-group-item pr-2 pl-1">
+                        <!-- Order header -->
+                        <div class="pb-2">
+                            <span class="pe-1">#{{o.id}}</span>
+                            <!-- Extras or Note detected -->
+                            <span class="pe-1"><img v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)"
+                                    src="/images/alert.png" style="width: 15px" /></span>
+
+                            <!-- Status icons
                         <img v-if="o.currentState.statetype == 0" src="/images/order.png" style="width:15px">
                         <img v-else-if="o.currentState.statetype == 1" src="/images/loading.gif" style="width:15px">
                         <img v-else-if="o.currentState.statetype == 2" src="/images/outbox.png" style="width:15px">
                         <img v-else-if="o.currentState.statetype == 3" src="/images/check.png" style="width:15px">
                         <img v-else-if="o.currentState.statetype == 4" src="/images/canceled.png" style="width:15px">
                         -->
-                        <!-- Order Data -->
-                        <span v-if="o.variation != null">{{o.product.name}},
-                            {{o.variation.attrname}}</span>
-                        <span v-else>{{o.product.name}}</span>
+                            <!-- Order Data -->
+                            <span v-if="o.variation != null">{{o.product.name}},
+                                {{o.variation.attrname}}</span>
+                            <span v-else>{{o.product.name}}</span>
 
 
-                        <!-- Right side of header-->
-                        <div class="float-end">
-                            <!-- Order recieved and waittime -->
-                            <span class="align-middle">
-                                <img src="/images/sand_clock.png" style="width: 18px">
-                                {{this.parseTime(o.currentState.created)}}
-                            </span>
+                            <!-- Right side of header-->
+                            <div class="float-end">
+                                <!-- Order recieved and waittime -->
+                                <span class="align-middle">
+                                    <img src="/images/sand_clock.png" style="width: 18px">
+                                    {{this.parseTime(o.currentState.created)}}
+                                </span>
 
-                            <!-- Table name -->
-                            <span class="align-middle px-3">
-                                {{o.session.table.name}}
-                            </span>
+                                <!-- Table name -->
+                                <span class="align-middle px-3">
+                                    {{o.session.table.name}}
+                                </span>
 
-                            <!-- State Change buttons -->
-                            <button v-if="o.currentState.statetype == 0" class="btn btn-info btn-sm" style="width:80px;"
-                                @click="this.updateOrderState(o.id, 1)">
-                                <img src="/images/chef.png" style="width: 20px; height: 22px" />
-                            </button>
-                            <button v-if="o.currentState.statetype == 1 || o.currentState.statetype == 2"
-                                class="btn btn-success btn-sm" style="width:164px;"
-                                @click="this.updateOrderState(o.id, 3)">
-                                <img src="/images/sent.png" style="width: 20px; height: 22px" />
-                            </button>
-                            <!-- Abort buttons -->
-                            <button v-if="o.currentState.statetype == 0" class="btn btn-danger btn-sm"
-                                style="width:80px;" @click="this.updateOrderState(o.id, 4)">
-                                <img src="/images/close.png" style="width: 24px; height: 24px" />
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Options -->
-                    <!-- Extras or Note detected -->
-                    <template v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)">
-                        <div class="collapse show pt-1" data-parent="#orders" :id="'options_order'+o.id">
-                            <div class="card card-body p-2" :id="'div_options_order'+o.id">
-                                <div v-if="o.oimap" class="row row-cols-3 py-0">
-                                    <!-- List ordered ingredients-->
-                                    <template v-for="oi in o.oimap">
-                                        <div class="col">
-                                            <img v-if="oi[1]" src="/images/add.png" style="width: 20px" />
-                                            <img v-else src="/images/canceled.png" style="width: 20px" />
-                                            <span class="ps-1">{{oi[0].name}}</span>
-                                        </div>
-                                    </template>
-                                </div>
+                                <!-- State Change buttons -->
+                                <button v-if="o.currentState.statetype == 0" class="btn btn-info btn-sm"
+                                    style="width:80px;" @click="this.updateOrderState(o.id, 1)">
+                                    <img src="/images/chef.png" style="width: 20px; height: 22px" />
+                                </button>
+                                <button v-if="o.currentState.statetype == 1 || o.currentState.statetype == 2"
+                                    class="btn btn-success btn-sm" style="width:164px;"
+                                    @click="this.updateOrderState(o.id, 3)">
+                                    <img src="/images/sent.png" style="width: 20px; height: 22px" />
+                                </button>
+                                <!-- Abort buttons -->
+                                <button v-if="o.currentState.statetype == 0" class="btn btn-danger btn-sm"
+                                    style="width:80px;" @click="this.updateOrderState(o.id, 4)">
+                                    <img src="/images/close.png" style="width: 24px; height: 24px" />
+                                </button>
                             </div>
-                            <!-- Show note -->
-                            <span v-if="o.note" class="form-control">Notiz: {{o.note}}</span>
                         </div>
-                    </template>
-                </div>
+                        <!-- Options -->
+                        <!-- Extras or Note detected -->
+                        <template v-if="o.note != null || (Array.isArray(o.oimap) && o.oimap.length)">
+                            <div class="collapse show pt-1" data-parent="#orders" :id="'options_order'+o.id">
+                                <div class="card card-body p-2" :id="'div_options_order'+o.id">
+                                    <div v-if="o.oimap" class="row row-cols-3 py-0">
+                                        <!-- List ordered ingredients-->
+                                        <template v-for="oi in o.oimap">
+                                            <div class="col">
+                                                <img v-if="oi[1]" src="/images/add.png" style="width: 20px" />
+                                                <img v-else src="/images/canceled.png" style="width: 20px" />
+                                                <span class="ps-1">{{oi[0].name}}</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                <!-- Show note -->
+                                <span v-if="o.note" class="form-control">Notiz: {{o.note}}</span>
+                            </div>
+                        </template>
+                    </div>
 
-            </template>
+                </template>
+            </div>
         </div>
     </div>
     <br>
-    </div>
-    </div>
 
     <!-- Modal -->
     <div class="modal" id="alertModal" tabindex="-1">

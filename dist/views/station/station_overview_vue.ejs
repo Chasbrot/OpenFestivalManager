@@ -238,6 +238,7 @@
                 alerttypes: [],
                 selectedAlerttype: "",
                 firstLoad: true,
+                audio: new Audio('/media/notification.mp3') // path to file
             }),
 
             created() {
@@ -245,7 +246,7 @@
                 console.log("created")
                 this.fetchActiveOrders()
                 this.fetchPastOrders()
-                this.timer = setInterval(this.fetchActiveOrders, 30000); // Update each minute
+                this.timer = setInterval(this.fetchActiveOrders, 10000); // Update each minute
                 this.fetchAlertTypes()
                 this.bindTimerReset()
             },
@@ -254,35 +255,46 @@
                 // Reset timer if user interacts with site
                 async bindTimerReset(){
                     $('html').bind(
-                        'click mouseup mousedown keydown keypress keyup submit change scroll resize dblclick',
-                            function () {
-                                console.log("Timer reset")
+                        'click keyup submit change scroll',
+                        function () {
+                            console.log("Timer reset")
                             clearInterval(this.timer)
-                            this.timer = setInterval(this.fetchActiveOrders, 30000); // Update each minute
-                            console.log(this.timer)
-                    });
+                            this.timer = setInterval(this.fetchActiveOrders, 10000); // Update every 10s
+                        }
+                    );
                 }
                 ,
-                async fetchActiveOrders() {
+                async fetchActiveOrders(muted) {
                     const url = `/rest/station/<%=station.id%>/activeorders`
                     var tmp = await (await fetch(url)).json()
+                    // Load OI Map for each order
+                    for(var ao of tmp){
+                        ao.oimap = await this.getOIMap(ao.id)
+                    }
                     // Play notification sound
                     if(!this.firstLoad){
                         // Compare data structures
                         if(JSON.stringify(this.activeorders) !== JSON.stringify(tmp)){
-                            // There is some difference => play sound
-                            var audio = new Audio('/media/notification.mp3'); // path to file
-                            audio.play();
+                            // Only play if no mute is requested
+                            var promise;
+                            if(!muted){
+                                    this.audio.pause();
+                                    this.audio.currentTime = 0;
+                                    promise = this.audio.play();
+                                    promise.then(_ => {
+                                        console.log("audio played")
+                                    }).catch(error => {
+                                        console.log(promise);
+                                        alert("Musik wurde blockiert. Bitte etwas ankicken! :)");
+                                    });
+                            }
                         }
                     }else{
                         this.firstLoad=false;
                     }
-                    // Load OI Map for each order
-                    for(var ao of this.activeorders){
-                        ao.oimap = await this.getOIMap(ao.id)
-                    }
+
                     this.activeorders = tmp;
-                    console.log(this.activeorders)
+                    //console.log(this.activeorders)
                 },
 
                 async fetchPastOrders() {
@@ -327,7 +339,7 @@
                             // Update past orders only when neccessery
                             this.fetchPastOrders();
                         }
-                        this.fetchActiveOrders();
+                        this.fetchActiveOrders(true);
                     }
                 },
                 

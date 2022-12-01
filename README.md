@@ -50,6 +50,9 @@ Access WebUI under localhost:3000 or IP-Address:3000
 ## Usage
 Access WebUI
 
+## Architecture
+![alt text](<./Architecture.PNG) 
+
 ## Finished UI Pages
 Move all UI to client-side rendering with REST-based communication to the service.
 - :x: Index

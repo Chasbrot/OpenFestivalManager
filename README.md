@@ -50,8 +50,9 @@ Access WebUI under localhost:3000 or IP-Address:3000
 ## Usage
 Access WebUI
 
-##Architecture
+## Architecture
 ![alt text](<./Architecture.PNG>) 
+For the Server Node.Js with Express is used, the database backend is provided by a PostgreSQL database. On the mobile client the UI is styled with Bootstrap 5.2 and the framework is provided by Vue.js. Frontend communication is handeled via REST API calls.
 
 ## Finished UI Pages
 Move all UI to client-side rendering with REST-based communication to the service.
@@ -75,6 +76,7 @@ Move all UI to client-side rendering with REST-based communication to the servic
   - :x: Statistics
   - :x: Data Insight
   - :x: Data Source
+  - :arrows_counterclockwise: Configuration
 
 ## ToDo Improvements
 

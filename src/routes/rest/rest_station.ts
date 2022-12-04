@@ -34,6 +34,29 @@ router.get("/", (_req: Request, res: Response) => {
     });
 });
 
+/* PUT create new station */
+router.put("/", async (req: Request, res: Response) => {
+  const body = req.body;
+  console.log("create new station request");
+  console.log(body);
+  // Check content
+  if (!body.name) {
+    res.sendStatus(400);
+    return;
+  }
+  // Create Table
+  let tg;
+  try {
+    let station = new Station(body.name);
+    await AppDataSource.getRepository(Station).save(station);
+  } catch (e) {
+    console.log("rest/station/PUT new: Error" + e);
+    res.sendStatus(500);
+    return;
+  }
+  res.sendStatus(200);
+});
+
 /* GET products by station */
 router.get(
   "/:sid/products",
@@ -127,6 +150,35 @@ router.get(
         console.log(err);
         res.sendStatus(500);
       });
+  }
+);
+
+/* DELETE alerttype*/
+router.delete(
+  "/:sid",
+  param("sid").isInt(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    console.log("delete station request");
+    console.log(body);
+    // Create Payment Method
+    try {
+      let tmp = await AppDataSource.getRepository(Station).findOneOrFail({
+        where: {
+          id: Number(req.params.sid),
+        },
+      });
+      await AppDataSource.getRepository(Station).remove(tmp);
+    } catch (e) {
+      console.log("rest/station/DELETE : Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
   }
 );
 

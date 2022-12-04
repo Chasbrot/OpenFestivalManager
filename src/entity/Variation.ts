@@ -21,4 +21,11 @@ export class Variation {
     @OneToMany(() => Order, (order) => order.variation)
     orders: Order[]
 
+
+    constructor(name: string, price: number, parent: Product) {
+        this.attrname = name;
+        this.price = price;
+        this.product = parent;
+      }
+
 }

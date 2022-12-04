@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Konsole</title>
+    <%- include('../header_common') %>
+</head>
+
+<body>
+
+    <%- include('admin_navbar')  %>
+    <br>
+    <div id="app">
+        <div class="row px-2 d-flex align-items-start">
+            <div class="col-2">
+                <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <button class="nav-link active" id="v-pills-tables-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
+                        aria-selected="true">Tische</button>
+                    <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-organization" type="button" role="tab"
+                        aria-controls="v-pills-organization" aria-selected="true">Organisation</button>
+                    <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
+                        aria-selected="true">Produkte</button>
+                </div>
+            </div>
+            <div class="col-10">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="v-pills-tables" role="tabpanel"
+                        aria-labelledby="v-pills-tables-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Tischgruppen
+                                <div class="float-end">
+                                    {{tableGroups.length}}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form action="#" method="POST">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="basic-addon1">Neue Tischgruppe:</span>
+                                        </div>
+                                        <input type="text" class="form-control" id="new_table_group"
+                                            placeholder="Name der Gruppe" name="new_table_group" required>
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary">Anlegen</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <br>
+                                <div class="list-group overflow-auto" style="max-height: 150px">
+                                    <template v-for="tg in tableGroups">
+                                        <div class="list-group-item">
+                                            {{tg.name}}
+                                            <div class="float-end">
+                                                <form action="configuration" method="POST">
+                                                    <button class="btn btn-danger btn-sm" id="remove_table_group"
+                                                        name="remove_table_group" @click="this.removeTableGroup(tg)">
+                                                        X
+                                                    </button>
+                                                </form>
+                                            </div>
+                                    </template>
+                                    <div v-if="!tableGroups" class="list-group-item">
+                                        Keine Tisch Gruppen definiert
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="card">
+                            <div class="card-header">
+                                Tische
+                                <div class="float-end">
+                                    {{tables.length}}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neuer Tisch:</span>
+                                    </div>
+                                    <select class="form-control" id="table_group_id" name="table_group_id" required
+                                        v-model="selectedTableGroup" @change="loadTablesFromTableGroup">
+                                        <option v-for="tg in tableGroups" :value="tg">
+                                            {{ tg.name }}
+                                        </option>
+                                        <option v-if="!tableGroups" value="-1" selected>
+                                            Leer
+                                        </option>
+                                    </select>
+                                    <input type="text" class="form-control" id="new_table" name="new_table"
+                                        placeholder="Nummer des Tisches" v-model="newTableNumber" required>
+                                    <div class="input-group-append">
+                                        <button @click="createTable" class="btn btn-primary">Anlegen</button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="list-group overflow-auto" id="tables_tablegroup" style="max-height: 150px">
+                                    <template v-for="t in tables">
+                                        <div class="list-group-item">
+                                            {{t.name}}
+                                            <div class="float-end">
+                                                <form action="configuration" method="POST">
+                                                    <button class="btn btn-danger btn-sm" id="remove_table"
+                                                        name="remove_table" @click="this.removeTable(t)">
+                                                        X
+                                                    </button>
+                                                </form>
+                                            </div>
+                                    </template>
+                                    <div v-if="tables.length===0" class="list-group-item">
+                                        Keine Tische vorhanden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-organization" role="tabpanel"
+                        aria-labelledby="v-pills-organization-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Stationen
+                                <div class="float-end">
+                                    {{stations.length}}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Station:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="new_station"
+                                        placeholder="Name der neuen Station" v-model="newStationName" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" @click="this.createStation()">Anlegen</button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="list-group overflow-auto" style="max-height: 150px" id="stations">
+                                    <template v-for="s in stations">
+                                        <div class="list-group-item">
+                                            {{s.name}}
+                                            <div class="float-end">
+                                                <button class="btn btn-danger btn-sm"
+                                                    @click="removeStation(s.id)">X</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="list-group-item" v-if="stations.length===0">
+                                        Keine Stationen gefunden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="card">
+                            <div class="card-header">
+                                Alarm Typen
+                                <div class="float-end">
+                                    {{alertTypes.length}}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neuer Alarmtyp:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="newAlertType"
+                                        placeholder="Name des Alarm Typen" v-model="newAlertTypeName" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary"
+                                            @click="this.createAlertType()">Anlegen</button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="list-group overflow-auto" id="alerttypes" style="max-height: 200px">
+                                    <template v-for="at in alertTypes">
+                                        <div class="list-group-item">
+                                            {{at.name}}
+                                            <div class="float-end">
+                                                <button class="btn btn-danger btn-sm"
+                                                    @click="removeAT(at.id)">X</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="list-group-item" v-if="alertTypes.length===0">
+                                        Keine AlarmTypen gefunden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="card">
+                            <div class="card-header">
+                                Produktkategorien
+                                <div class="float-end">
+                                    {{productCategories.length}}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Kategorie:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="newCategory"
+                                        placeholder="Name der Kategorie" v-model="newPCName" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary"
+                                            @click="this.createProductCategory()">Anlegen</button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="list-group overflow-auto" id="categories" style="max-height: 200px">
+                                    <template v-for="pc in productCategories">
+                                        <div class="list-group-item">
+                                            {{pc.name}}
+                                            <div class="float-end">
+                                                <button class="btn btn-danger btn-sm"
+                                                    @click="removePC(pc.id)">X</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="list-group-item" v-if="productCategories.length===0">
+                                        Keine Produktkategorien gefunden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="card">
+                            <div class="card-header">
+                                Bezahloptionen
+                                <div class="float-end">
+                                    {{paymentMethods.length}}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Option:</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="newPaymentMethod"
+                                        placeholder="Name der Bezahloption" v-model="newPMName" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary"
+                                            @click="this.createPaymentMethod()">Anlegen</button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="list-group overflow-auto form-check" id="paymentmethods"
+                                    style="max-height: 200px">
+                                    <template v-for="pm in paymentMethods">
+                                        <div class="list-group-item">
+                                            {{pm.name}}
+                                            <div class="float-end">
+                                                <input type="radio" class="btn-check" name="defaultPM" :id="pm.id"
+                                                    v-model="defaultMethod" :value="pm.id" autocomplete="off"
+                                                    @change="this.updateDefaultPM()">
+                                                <label class="btn btn-outline-secondary btn-sm"
+                                                    :for="pm.id">Standard</label>
+                                                <button class="btn btn-danger btn-sm" @click="removePM(pm.id)"
+                                                    :disabled="pm.id === defaultMethod">X</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="list-group-item" v-if="paymentMethods.length===0">
+                                        Keine Bezahloptionen gefunden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-products" role="tabpanel"
+                        aria-labelledby="v-pills-products-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Optionen
+                                <div class="float-end">
+                                    {{ingredients.length}}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Zutat:</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="new_option" name="new_option"
+                                        placeholder="Name der Zutat" v-model="newIngredientName" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary"
+                                            @click="this.createIngredient()">Anlegen</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group overflow-auto" style="max-height: 150px" id="ingredients">
+                                    <template v-for="i in ingredients">
+                                        <div class="list-group-item">
+                                            {{i.name}}
+                                            <div class="float-end">
+                                                <button class="btn btn-danger btn-sm"
+                                                    @click="this.removeIngredient(i.id)">
+                                                    X
+                                                </button>
+                                            </div>
+                                    </template>
+                                    <div v-if="ingredients.length===0" class="list-group-item">
+                                        Keine Zutaten vorhanden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class="card">
+                            <div class="card-header">
+                                Produkte
+                                <div class="float-end" v-if="products.length !== 0">
+                                    {{products.length}}
+                                </div>
+                            </div>
+                            <div class="card-body" v-if="products.length !== 0">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Station</th>
+                                            <th scope="col">Kategorie</th>
+                                            <th scope="col">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Produkt wird durch Helfer zugestellt">
+                                                    <img src="/images/shipping.png" width="20" height="20">
+                                                </span>
+                                            </th>
+                                            <th scope="col">Preis</th>
+                                            <th scope="col">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Priorisierung in der Bestellliste">
+                                                    <img src="/images/list.png" width="20" height="20">
+                                                </span>
+                                            </th>
+                                            <th scope="col">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Sicht-/Bestellbarkeit eingeschränkt">
+                                                    <img src="/images/lock.png" width="20" height="20">
+                                                </span>
+                                            </th>
+                                            <th scope="col">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Anzahl der Variationen des Produktes">
+                                                    <img src="/images/alternate.png" width="20" height="20">
+                                                </span>
+                                            </th>
+                                            <th scope="col">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Anzahl der Optionen des Produktes">
+                                                    <img src="/images/options.png" width="20" height="20">
+                                                </span>
+                                            </th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template v-for="p in products">
+                                            <tr>
+                                                <th scope="row">{{p.id}}</th>
+                                                <td>{{p.name}}</td>
+                                                <td>{{p.producer.name}}</td>
+                                                <td v-if="p.category">{{p.category.name}}</td>
+                                                <td v-else>-</td>
+                                                <td v-if="p.deliverable"><img src="/images/check.png" width="20"
+                                                        height="20"></td>
+                                                <td v-else><img src="/images/canceled.png" width="20" height="20"></td>
+                                                <td>{{p.price}} €</td>
+                                                <td>{{p.list_priority}}</td>
+                                                <td><span v-if="p.productLock==0">-</span>
+                                                    <img v-else-if="p.productLock==1" src="/images/production_warning.png" width="20" height="20">
+                                                    <img v-else-if="p.productLock==2" src="/images/lock.png" width="20" height="20">
+                                                    <img v-else-if="p.productLock==3" src="/images/hidden.png" width="20" height="20">
+                                                    <span v-else>{{p.productLock}}</span>
+                                                </td>
+                                                <td>{{p.variations.length}}</td>
+                                                <td>{{p.ingredients.length}}</td>
+                                                <td>
+                                                    <button class="btn btn-secondary btn-sm"
+                                                        @click="showProductDetails(p)">?</button>
+                                                    <button class="btn btn-danger btn-sm" @click="removeProduct(p.id)">X</button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" type="button" @click="this.showProductDetails(this.newProduct)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Error Modal -->
+        <div class="modal" id="errorModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-danger" id="errorTitle">Fehler</h5>
+                    </div>
+                    <div class="modal-body">
+                        <h6>{{ errorModalMessage }}</h6>
+                        <span>Debugging Information:</span> <br>
+                        <span>Request: {{errorModalRequest}}</span> <br>
+                        <span>Error: {{ errorModalException}}</span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Detail Modal -->
+        <div class="modal" id="productDetailModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="pdTitle">Produkteigenschaften</h5>
+                        <div class="float-end">
+                            <span class="text-secondary" v-if="!productDetailModal.id">ID:-</span>
+                            <span class="text-secondary" v-else>ID:{{productDetailModal.id}}</span>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <h5>Basisdaten</h5>
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Name:</span>
+                            <input type="text" class="form-control" placeholder="Name der Bezahloption"
+                                v-model="productDetailModal.name" required>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Preis:</span>
+                            <input type="number" class="form-control" placeholder="Preis"
+                                v-model="productDetailModal.price" min="0" step="0.1" required>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Erzeuger:</span>
+                            <select class="form-select" v-model="productDetailModal.producer">
+                                <option v-for="s in stations" :value="s">
+                                    {{ s.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <br>
+                        <h5>Erweitert</h5>
+                        <div class="input-group">
+                            <span class="input-group-text">Status:</span>
+                            <div class="btn-group" role="group" >
+                                <input type="radio" class="btn-check"  id="btnradio0" value="0" autocomplete="off" checked v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-success" for="btnradio0"><img src="/images/visible.png" width="20" height="20"></label>
+
+                                <input type="radio" class="btn-check" id="btnradio1" value="1" autocomplete="off" v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-warning" for="btnradio1"><img src="/images/production_warning.png" width="20" height="20"></label>
+                              
+                                <input type="radio" class="btn-check" id="btnradio2" value="2" autocomplete="off" v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-danger" for="btnradio2"><img src="/images/lock.png" width="20" height="20"></label>
+                              
+                                <input type="radio" class="btn-check"  id="btnradio3" value="3" autocomplete="off" v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-secondary" for="btnradio3"><img src="/images/hidden.png" width="20" height="20"></label>
+                              </div>
+                              <span class="input-group-text">Reihung:</span>
+                              <input type="number" class="form-control" placeholder="Reihung"
+                                v-model="productDetailModal.list_priority" min="0">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text">Kategorie:</span>
+                            <select class="form-select" v-model="productDetailModal.category">
+                                <option value="">-</option>
+                                <option v-for="c in productCategories" :value="c">
+                                    {{ c.name }}
+                                </option>
+                            </select>
+                            <span class="input-group-text">Zustellung:</span>
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0" type="checkbox" checked v-model="productDetailModal.deliverable">
+                            </div>
+                        </div>
+                        <br>
+                        <div v-if="productDetailModal && productDetailModal.id && productDetailModal.variations.length === 0">
+                            <h5>Optionen/Zutaten</h5>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Zutat:</span>
+                                </div>
+                                <select class="form-select" v-model="productDetailModal.ingredients">
+                                    <option v-for="i in ingredients" :value="i">
+                                        {{ i.name }}
+                                    </option>
+                                </select>
+                                <span class="input-group-text" id="inputGroup-sizing-default">Standard</span>
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" v-model="pDnewIngredient">
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary">+</button>
+                                </div>
+                            </div>
+                            <table class="table" v-if="productDetailModal && productDetailModal.ingredients && productDetailModal.ingredients.length > 0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Standard</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template v-for="(pi, index) in productDetailModal.ingredients">
+                                        <tr>
+                                            <td>{{pi.ingredient.name}}</td>
+                                            <td><input class="form-check-input mt-0" type="checkbox"
+                                                    v-model="productDetailModal.ingredients[index].optional"></td>
+                                            <td>
+                                                <button class="btn btn-danger btn-sm">X</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
+                        <div v-if="productDetailModal && productDetailModal.id && productDetailModal.ingredients.length === 0">
+                            <h5>Variationen</h5>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Variation:</span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Name"
+                                v-model="pDnewVariation.attrname" required>
+                                <input type="number" class="form-control" placeholder="Preis"
+                                v-model="pDnewVariation.price" min="0" required>
+                            
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" @click="this.createVariation(productDetailModal)">+</button>
+                                </div>
+                            </div>
+                            <table class="table" v-if="productDetailModal && productDetailModal.variations.length > 0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Preis</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template v-for="v in productDetailModal.variations">
+                                        <tr>
+                                            <td>{{v.attrname}}</td>
+                                            <td>{{v.price}}</td>
+                                            <td>
+                                                <button class="btn btn-danger btn-sm" @click="removeVariation(productDetailModal,v)">X</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
+                        <div v-if="productDetailModal && !productDetailModal.id">
+                            <h5>Optionen/Zutaten</h5>
+                            <h6 class="text-warning">Erst nach speichern verfügbar!</h6>
+                            <h5>Optionen/Zutaten</h5>
+                            <h6 class="text-warning">Erst nach speichern verfügbar!</h6>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" @click="this.updateProduct(this.productDetailModal)">Speichern</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize all tooltips at load
+        $(document).ready(function() {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+            $('[data-toggle="tooltip"]').tooltip();   
+        });
+    </script>
+
+</body>
+
+<!-- Vue Js -->
+<script>
+    const {
+        createApp
+    } = Vue
+
+    createApp({
+        data: () => ({
+            // Error Modal
+            errorModalMessage: "",
+            errorModalException: "",
+            errorModalRequest: "",
+            // TableGroups
+            tableGroups: [],
+            // Tables
+            selectedTableGroup: "",
+            tables: [],
+            newTableNumber: "",
+            // Stations
+            stations: [],
+            newStationName: "",
+            // Alerts
+            alertTypes: [],
+            newAlertTypeName: "",
+            // Product Categories
+            productCategories: [],
+            newPCName: "",
+            // Payment Methods
+            paymentMethods: [],
+            newPMName: "",
+            defaultMethod: "",
+            // Ingredients
+            ingredients: [],
+            newIngredientName: "",
+            // Products
+            products: [],
+            productDetailModal: "",
+            pDnewIngredient: "",
+            pDnewVariation: {attrname: "", price: 0},
+            newProduct: {ingredients:[], variations:[]},
+
+        }),
+
+        created() {
+            this.loadTableGroups();
+            this.loadTablesFromTableGroup()
+            this.loadStations()
+            this.loadAlertTypes()
+            this.loadProductCategories()
+            this.loadPaymentMethods()
+            this.loadIngredients()
+            this.loadProducts()
+        },
+
+        methods: {
+            /*
+             * Show error modal with relevant informations
+             */
+            async makeError(message, request, error) {
+                this.errorModalMessage = message
+                this.errorModalException = request
+                this.errorModalRequest = error
+                var errorModal = new bootstrap.Modal(document.getElementById('errorModal'))
+                errorModal.show()
+            },
+
+            /*
+             *  Fetch data from a defined url. If error returns null and displays a error
+             */
+            async fetchData(url) {
+                var result = await fetch(url);
+                if (result.status != 200) {
+                    this.makeError("Anfrage auf den Server fehlgeschlagen.", "GET " + url, result
+                        .statusText);
+                    console.log(result)
+                    return null;
+                }
+                return await (result.json());
+            },
+
+            async putData(url, data) {
+                const requestOptions = {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: data
+                };
+                const response = await fetch(url,
+                    requestOptions);
+                if (response.status != 200) {
+                    this.makeError("Anfrage fehlerhaft.", "PUT " + url + data, response.statusText);
+                    return false;
+                }
+                return await (response.json());
+            },
+
+            async deleteData(url, data) {
+                const requestOptions = {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: data
+                };
+                const response = await fetch(url,
+                    requestOptions);
+                if (response.status != 200) {
+                    this.makeError("Anfrage fehlerhaft.", "DELETE " + url + data, response.statusText);
+                    return false;
+                }
+                return true;
+            },
+
+            async loadTableGroups() {
+                this.tableGroups = await this.fetchData(`/rest/tablegroup`);
+            },
+
+            async loadTablesFromTableGroup() {
+                if (!this.selectedTableGroup) {
+                    return null;
+                }
+                this.tables = await this.fetchData(`/rest/tablegroup/${this.selectedTableGroup.id}/tables`);
+            },
+
+            async createTable() {
+                if (!this.selectedTableGroup || !this.newTableNumber) {
+                    return;
+                }
+                await this.putData("/rest/table",
+                    JSON.stringify({
+                        name: this.newTableNumber,
+                        tgid: this.selectedTableGroup.id
+                    })
+                );
+                await this.loadTablesFromTableGroup();
+                this.newTableNumber = "";
+            },
+
+            async createStation() {
+                if (!this.newStationName) {
+                    return;
+                }
+                await this.putData("/rest/station",
+                    JSON.stringify({
+                        name: this.newStationName
+                    })
+                );
+                await this.loadStations();
+                this.newStationName = "";
+            },
+
+            async loadStations() {
+                this.stations = await this.fetchData("/rest/station");
+            },
+
+            async loadAlertTypes() {
+                this.alertTypes = await this.fetchData("/rest/alerttypes");
+            },
+
+            async createAlertType() {
+                if (!this.newAlertTypeName) {
+                    return;
+                }
+                await this.putData("/rest/alerttypes",
+                    JSON.stringify({
+                        name: this.newAlertTypeName
+                    })
+                );
+                this.newAlertTypeName = "";
+                await this.loadAlertTypes();
+            },
+
+            async loadProductCategories() {
+                this.productCategories = await this.fetchData("/rest/category");
+            },
+
+            async createProductCategory() {
+                if (!this.newPCName) {
+                    return;
+                }
+                await this.putData("/rest/category",
+                    JSON.stringify({
+                        name: this.newPCName
+                    })
+                );
+                this.newPCName = "";
+                await this.loadProductCategories();
+            },
+
+            async loadPaymentMethods() {
+                this.paymentMethods = await this.fetchData("/rest/paymentmethod")
+                this.defaultMethod = await this.paymentMethods.find(e => e.default === true).id
+            },
+
+            async createPaymentMethod() {
+                if (!this.newPMName) {
+                    return;
+                }
+                await this.putData("/rest/paymentmethod",
+                    JSON.stringify({
+                        name: this.newPMName
+                    })
+                );
+                this.newPCName = "";
+                await this.loadPaymentMethods();
+            },
+
+            async updateDefaultPM() {
+                if (!this.defaultMethod) {
+                    return;
+                }
+                await this.putData("/rest/paymentmethod/default",
+                    JSON.stringify({
+                        pmid: this.defaultMethod
+                    })
+                );
+            },
+
+            async removePM(id) {
+                await this.deleteData(`/rest/paymentmethod/${id}`, "");
+                await this.loadPaymentMethods();
+            },
+
+            async removePC(id) {
+                await this.deleteData(`/rest/category/${id}`, "");
+                await this.loadProductCategories();
+            },
+
+            async removeAT(id) {
+                await this.deleteData(`/rest/alerttypes/${id}`, "");
+                await this.loadAlertTypes();
+            },
+
+            async removeStation(id) {
+                await this.deleteData(`/rest/station/${id}`, "");
+                await this.loadStations();
+            },
+
+            async loadIngredients() {
+                this.ingredients = await this.fetchData("/rest/ingredient");
+            },
+
+            async createIngredient() {
+                if (!this.newIngredientName) {
+                    return;
+                }
+                await this.putData("/rest/ingredient",
+                    JSON.stringify({
+                        name: this.newIngredientName
+                    })
+                );
+                this.newIngredientName = "";
+                await this.loadIngredients();
+            },
+
+            async removeIngredient(id) {
+                await this.deleteData(`/rest/ingredient/${id}`, "");
+                await this.loadIngredients();
+            },
+
+            async loadProducts() {
+                this.products = await this.fetchData("/rest/product/full");
+                console.log(this.products)
+            },
+
+            async showProductDetails(product) {
+                this.productDetailModal = product
+                var pdm = new bootstrap.Modal(document.getElementById('productDetailModal'))
+                pdm.show()
+            },
+
+            async updateProduct(product){
+                if(!product){
+                    return null;
+                }
+                console.log(product)
+                if(product.id){
+                    await this.putData(`/rest/product/${product.id}`, JSON.stringify(product));
+                    await this.loadProducts();
+                }else{
+                    let res = await this.putData(`/rest/product`, JSON.stringify(product));
+                    await this.loadProducts();
+                    console.log(res)
+                    this.productDetailModal = this.products.find(element => element.id == res.id);
+                    newProduct: {ingredients:[]; variations:[] }
+                }
+            },
+
+            async removeProduct(id) {
+                await this.deleteData(`/rest/product/${id}`, "");
+                await this.loadProducts();
+            },
+
+            async createVariation(product) {
+                if (!this.pDnewVariation|| !product) {
+                    return;
+                }
+                await this.putData(`/rest/product/${product.id}/variation`,
+                    JSON.stringify(this.pDnewVariation)
+                );
+                pDnewVariation: {attrname: ""; price: 0}
+                await this.updateVariationsFromProduct(product);
+            },
+
+            async updateVariationsFromProduct(product){
+                if(!product){
+                    return null;
+                }
+                product.variations = await this.fetchData(`/rest/product/${product.id}/variations`);
+            },
+
+            async removeVariation(p,v){
+                if(!v){
+                    return null;
+                }
+                await this.deleteData(`/rest/variation/${v.id}`);
+                await this.updateVariationsFromProduct(p);
+            }
+
+        },
+    }).mount('#app')
+</script>
+
+
+
+</html>

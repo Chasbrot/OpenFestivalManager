@@ -14,6 +14,11 @@ const typeorm_1 = require("typeorm");
 const Order_1 = require("./Order");
 const Product_1 = require("./Product");
 let Variation = class Variation {
+    constructor(name, price, parent) {
+        this.attrname = name;
+        this.price = price;
+        this.product = parent;
+    }
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
@@ -36,6 +41,7 @@ __decorate([
     __metadata("design:type", Array)
 ], Variation.prototype, "orders", void 0);
 Variation = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)(),
+    __metadata("design:paramtypes", [String, Number, Product_1.Product])
 ], Variation);
 exports.Variation = Variation;

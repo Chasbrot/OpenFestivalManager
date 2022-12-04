@@ -17,6 +17,7 @@ import { Session } from "../../entity/Session";
 import { Order } from "../../entity/Order";
 import { StateType } from "../../entity/State";
 import { MoreThan, Not } from "typeorm";
+import { TableGroup } from "../../entity/TableGroup";
 
 /* GET sessions from table */
 router.get(
@@ -48,6 +49,39 @@ router.get(
         });
     }
 );
+
+/* PUT create new session on table */
+router.put("/", async (req: Request, res: Response) => {
+  const body = req.body;
+  console.log("create new table request");
+  console.log(body);
+  // Check content
+  if (!body.name || !body.tgid) {
+    res.sendStatus(400);
+    return;
+  }
+  // Create Table
+  let tg;
+  try {
+    tg = await AppDataSource.getRepository(TableGroup).findOneOrFail({
+      relations: {
+        tables: true
+      },
+      where: {
+        id: Number(body.tgid),
+      },
+    });
+    let table = new Table(body.name);
+    tg.tables.push(table);
+    await AppDataSource.getRepository(Table).save(table)
+    await AppDataSource.getRepository(TableGroup).save(tg);
+  } catch (e) {
+    console.log("table/new: Error" + e);
+    res.sendStatus(500);
+    return;
+  }
+  res.sendStatus(200);
+});
 
 
 module.exports = router;

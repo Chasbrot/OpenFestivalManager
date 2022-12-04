@@ -17,7 +17,7 @@ import { Session } from "../entity/Session";
 import { Order } from "../entity/Order";
 import { StateType } from "../entity/State";
 import { Not } from "typeorm";
-import { db }  from "../database";
+import { db } from "../database";
 
 const accountRepository = AppDataSource.getRepository(Account);
 
@@ -38,6 +38,12 @@ const restTableGroupRouter = require("./rest/rest_tablegroup");
 const restTableRouter = require("./rest/rest_table");
 const restSessionRouter = require("./rest/rest_session");
 const restOrderRouter = require("./rest/rest_order");
+const restCategoryRouter = require("./rest/rest_category");
+const restPaymentMethodRouter = require("./rest/rest_paymentmethod");
+const restProductRouter = require("./rest/rest_product");
+const restAlertTypeRouter = require("./rest/rest_alerttypes");
+const restIngredientRouter = require("./rest/rest_ingredient");
+const restVariationRouter = require("./rest/rest_variation");
 
 // Send for rest station to file, assign file
 router.use("/station", restStationRouter);
@@ -45,6 +51,12 @@ router.use("/tablegroup", restTableGroupRouter);
 router.use("/table", restTableRouter);
 router.use("/session", restSessionRouter);
 router.use("/order", restOrderRouter);
+router.use("/category", restCategoryRouter);
+router.use("/paymentmethod", restPaymentMethodRouter);
+router.use("/product", restProductRouter);
+router.use("/alerttypes", restAlertTypeRouter);
+router.use("/ingredient", restIngredientRouter);
+router.use("/variation", restVariationRouter);
 
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req: Request, res: Response) => {
@@ -73,7 +85,7 @@ router.get(
 );
 
 /* PUT user account */
-router.get(
+router.put(
   "/account",
   body("username").isAlphanumeric(),
   body("password").isString(),
@@ -105,85 +117,7 @@ router.get("/uptime", (_req: Request, res: Response) => {
   res.json(process.uptime());
 });
 
-/* GET options */
-router.get("/options", (_req: Request, res: Response) => {
-  AppDataSource.getRepository(Ingredient)
-    .find()
-    .then((result) => {
-      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
-      res.json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(500);
-    });
-});
 
-/* GET categories */
-router.get("/categories", (_req: Request, res: Response) => {
-  AppDataSource.getRepository(Category)
-    .find()
-    .then((result) => {
-      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
-      res.json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(500);
-    });
-});
-
-/* GET products from category */
-router.get(
-  "/category/:cid/products",
-  param("cid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    console.log(req.params.cid);
-    AppDataSource.getRepository(Product)
-      .find({
-        relations: {
-          category: true,
-          ingredients: true,
-          variations: true,
-        },
-        where: {
-          category: {
-            id: Number(req.params.cid),
-          },
-          productLock: Not(LockType.HIDDEN),
-        },
-        order: {
-          list_priority: "DESC",
-        },
-      })
-      .then((result) => {
-        res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
-        res.json(result);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
-
-/* GET alerttypes */
-router.get("/alerttypes", (_req: Request, res: Response) => {
-  AppDataSource.getRepository(AlertType)
-    .find()
-    .then((result) => {
-      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
-      res.json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(500);
-    });
-});
 
 /* POST create alert */
 router.post(
@@ -216,80 +150,6 @@ router.post(
     res.sendStatus(200);
   }
 );
-
-/* GET variations by product */
-router.get(
-  "/product/:pid/variations",
-  param("pid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    AppDataSource.getRepository(Variation)
-      .find({
-        relations: {
-          product: true,
-        },
-        where: {
-          product: {
-            id: Number(req.params.pid),
-          },
-        },
-      })
-      .then((result) => {
-        res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
-        res.json(result);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
-
-/* GET product */
-router.get(
-  "/product/:pid",
-  param("pid").isInt(),
-  (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    AppDataSource.getRepository(Product)
-      .find({
-        relations: {
-          producer: true,
-        },
-        where: {
-          id: Number(req.params.pid),
-        },
-      })
-      .then((result) => {
-        res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
-        res.json(result);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
-
-/* GET paymentmethods */
-router.get("/paymentmethod", (_req: Request, res: Response) => {
-  AppDataSource.getRepository(PaymentMethod)
-    .find()
-    .then((result) => {
-      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
-      res.json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(500);
-    });
-});
 
 /* GET registration active*/
 router.get("/registrationactive", (_req: Request, res: Response) => {

@@ -27,6 +27,29 @@ router.get("/", (_req, res) => {
         res.sendStatus(500);
     });
 });
+/* PUT create new station */
+router.put("/", async (req, res) => {
+    const body = req.body;
+    console.log("create new station request");
+    console.log(body);
+    // Check content
+    if (!body.name) {
+        res.sendStatus(400);
+        return;
+    }
+    // Create Table
+    let tg;
+    try {
+        let station = new Station_1.Station(body.name);
+        await data_source_1.AppDataSource.getRepository(Station_1.Station).save(station);
+    }
+    catch (e) {
+        console.log("rest/station/PUT new: Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
+});
 /* GET products by station */
 router.get("/:sid/products", (0, express_validator_1.param)("sid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -105,5 +128,30 @@ router.get("/:sid/pastorders", (0, express_validator_1.param)("sid").isInt(), (r
         console.log(err);
         res.sendStatus(500);
     });
+});
+/* DELETE alerttype*/
+router.delete("/:sid", (0, express_validator_1.param)("sid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    const body = req.body;
+    console.log("delete station request");
+    console.log(body);
+    // Create Payment Method
+    try {
+        let tmp = await data_source_1.AppDataSource.getRepository(Station_1.Station).findOneOrFail({
+            where: {
+                id: Number(req.params.sid),
+            },
+        });
+        await data_source_1.AppDataSource.getRepository(Station_1.Station).remove(tmp);
+    }
+    catch (e) {
+        console.log("rest/station/DELETE : Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
 });
 module.exports = router;

@@ -1,53 +1,58 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, ManyToMany } from "typeorm"
-import { Station } from './Station';
-import { Order } from './Order';
-import { State } from './State';
-import { Bill } from './Bill';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+  ManyToMany,
+} from "typeorm";
+import { Station } from "./Station";
+import { Order } from "./Order";
+import { State } from "./State";
+import { Bill } from "./Bill";
 import { Session } from "./Session";
 
 export enum AccountType {
-    ADMIN,
-    USER,
-    STATION
-  }
-
+  ADMIN,
+  USER,
+  STATION,
+}
 
 @Entity()
 export class Account {
-    @PrimaryGeneratedColumn()
-    id: number
-
-    @Column({
-      length: 100,
-      unique: true
-    })
-    name: string
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({
-      nullable: true,
-      select: false // Default not included in selects (find etc.)
-    })
-    hash: string
+    length: 100,
+    unique: true,
+  })
+  name: string;
 
-    @Column({
-        type: 'enum',
-        enum: AccountType
-      })
-    accounttype: AccountType
+  @Column({
+    nullable: true,
+    select: false, // Default not included in selects (find etc.)
+  })
+  hash: string;
 
-    @OneToMany(() => Station, (station) => station.id)
-    responsiblefor: Station[]
+  @Column({
+    type: "enum",
+    enum: AccountType,
+  })
+  accounttype: AccountType;
 
-    @OneToMany(() => Account, (order) => order.id)
-    orders: Order[]
+  @OneToMany(() => Station, (station) => station.id)
+  responsiblefor: Station[];
 
-    @OneToMany(() => State, (state) => state.triggerer)
-    triggered: State[]
+  @OneToMany(() => Account, (order) => order.id)
+  orders: Order[];
 
-    @OneToMany(() => Bill, (bill) => bill.cashier)
-     bills: Bill[]
-  
-    @ManyToMany(() => Session, (session) => session.servers)
-  sessions: Session[]
+  @OneToMany(() => State, (state) => state.triggerer)
+  triggered: State[];
 
+  @OneToMany(() => Bill, (bill) => bill.cashier)
+  bills: Bill[];
+
+  @ManyToMany(() => Session, (session) => session.servers)
+  sessions: Session[];
 }

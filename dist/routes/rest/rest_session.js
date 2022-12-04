@@ -80,7 +80,7 @@ router.put("/", async (req, res) => {
         }
     }
     catch (e) {
-        console.log("table/new: Error" + e);
+        console.log("rest/session/new PUT: Error" + e);
         res.sendStatus(500);
         return;
     }
@@ -172,7 +172,7 @@ router.put("/:sid", (0, express_validator_1.param)("sid").isInt(), async (req, r
             Number(body.vid);
         }
         catch (e) {
-            console.log("rest/session PUT: " + e);
+            console.log("rest/session/order PUT: " + e);
             res.sendStatus(403);
             return;
         }
@@ -184,7 +184,7 @@ router.put("/:sid", (0, express_validator_1.param)("sid").isInt(), async (req, r
         });
     }
     catch (e) {
-        console.log("rest/session/ PUT: " + e);
+        console.log("rest/session/order PUT: " + e);
         res.sendStatus(500);
     }
 });

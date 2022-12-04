@@ -344,7 +344,7 @@
                     this.stations = await (await fetch(url)).json()
                 },
                 async fetchCategories() {
-                    const url = `/rest/categories`
+                    const url = `/rest/category`
                     this.categories = await (await fetch(url)).json()
                     // First product tab
                     if (this.categories.length) {

@@ -28,7 +28,8 @@
     "pg": "^8.7.3",
     "rand-token": "^1.0.1",
     "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.3.7"
+    "typeorm": "^0.3.7",
+    "vuejs-smart-table": "^0.0.8"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",

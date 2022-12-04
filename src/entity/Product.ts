@@ -1,59 +1,67 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, Double, ManyToMany, JoinTable } from "typeorm"
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+  Double,
+  ManyToMany,
+  JoinTable,
+} from "typeorm";
 import { Category } from "./Category";
 import { Ingredient } from "./Ingredient";
 import { Station } from "./Station";
 import { Variation } from "./Variation";
-import { ProductIngredient } from './ProductIngredient';
+import { ProductIngredient } from "./ProductIngredient";
 
 export enum LockType {
-  NONE=0,       // Product is available for ordering
-  TEMPORARY=1,  // Product is temporarly not available for ordering
-  INFINITE=2,   // Product is not available for a longer period
-  HIDDEN=3      // Product is hidden and not available
+  NONE = 0, // Product is available for ordering
+  TEMPORARY = 1, // Product is temporarly not available for ordering
+  INFINITE = 2, // Product is not available for a longer period
+  HIDDEN = 3, // Product is hidden and not available
 }
 
 @Entity()
 export class Product {
-    @PrimaryGeneratedColumn()
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    name: string
+  @Column()
+  name: string;
 
-    @Column({type: "decimal", precision: 10, scale: 2, default: 0})
-    price: number
+  @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
+  price: number;
 
-    @Column()
-    deliverable: boolean
+  @Column()
+  deliverable: boolean;
 
-    @Column({
-      default: 0
-    })
-    list_priority: number
-  
-    @Column({
-      default: LockType.NONE
-    })
-    productLock: LockType
+  @Column({
+    default: 0,
+  })
+  list_priority: number;
 
-    @ManyToOne(() => Category, (category) => category.products)
-    category: Category
+  @Column({
+    default: LockType.NONE,
+  })
+  productLock: LockType;
 
-    @ManyToOne(()=> Station, (station)=>station.products)
-    producer: Station
+  @ManyToOne(() => Category, (category) => category.products, {
+    nullable: true,
+  })
+  category: Category | null;
 
-    @OneToMany(() => Variation, (variation) => variation.product)
-    variations: Variation[];
+  @ManyToOne(() => Station, (station) => station.products)
+  producer: Station;
 
-    @OneToMany(()=> ProductIngredient, (ingredient)=> ingredient.product)
-    ingredients: ProductIngredient[];
-  
+  @OneToMany(() => Variation, (variation) => variation.product)
+  variations: Variation[];
 
-    constructor(name: string, price: number, deliverable: boolean) {
-        this.name = name;
-        this.price = price;
-        this.deliverable = deliverable;
-      }
+  @OneToMany(() => ProductIngredient, (ingredient) => ingredient.product)
+  ingredients: ProductIngredient[];
 
-
+  constructor(name: string, price: number, deliverable: boolean) {
+    this.name = name;
+    this.price = price;
+    this.deliverable = deliverable;
+  }
 }

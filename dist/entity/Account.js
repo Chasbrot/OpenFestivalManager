@@ -31,21 +31,21 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({
         length: 100,
-        unique: true
+        unique: true,
     }),
     __metadata("design:type", String)
 ], Account.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         nullable: true,
-        select: false // Default not included in selects (find etc.)
+        select: false, // Default not included in selects (find etc.)
     }),
     __metadata("design:type", String)
 ], Account.prototype, "hash", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        type: 'enum',
-        enum: AccountType
+        type: "enum",
+        enum: AccountType,
     }),
     __metadata("design:type", Number)
 ], Account.prototype, "accounttype", void 0);

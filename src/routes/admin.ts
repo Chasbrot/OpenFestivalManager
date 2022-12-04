@@ -23,7 +23,7 @@ router.use(function (req, res, next) {
   if (req.url.includes("login")) {
     next();
   } else {
-    if (req.session.account!.accounttype == AccountType.ADMIN) {
+    if (req.session.account && req.session.account!.accounttype == AccountType.ADMIN) {
       next();
     } else {
         console.log("admin/auth: unauthorized, redirecting to login")
@@ -237,14 +237,8 @@ router.get("/statistics", async (_req, res) => {
 });
 
 /* GET configuration page */
-router.get("/configuration", async (_req, res) => {
-  const tables = await AppDataSource.getRepository(Table).find();
-  const tablegroups = await AppDataSource.getRepository(TableGroup).find();
-
-  res.render("admin/admin_configuration", {
-    table_groups: tablegroups,
-    tables: tables,
-  });
+router.get("/configuration", async (req, res) => {
+  res.render("admin/admin_configuration_vue.ejs");
 });
 
 /* POST configuration page */

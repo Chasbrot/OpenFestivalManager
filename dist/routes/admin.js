@@ -16,7 +16,6 @@ const mysqldump_1 = __importDefault(require("mysqldump"));
 const multer_1 = __importDefault(require("multer"));
 const database_1 = require("../database");
 const State_1 = require("../entity/State");
-const Table_1 = require("../entity/Table");
 let upload = (0, multer_1.default)({ dest: "uploads/" });
 const router = express_1.default.Router();
 const accountRepository = data_source_1.AppDataSource.getRepository(Account_2.Account);
@@ -26,7 +25,7 @@ router.use(function (req, res, next) {
         next();
     }
     else {
-        if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        if (req.session.account && req.session.account.accounttype == Account_1.AccountType.ADMIN) {
             next();
         }
         else {
@@ -214,13 +213,8 @@ router.get("/statistics", async (_req, res) => {
     res.render("admin/admin_statistics", { dates: dates });
 });
 /* GET configuration page */
-router.get("/configuration", async (_req, res) => {
-    const tables = await data_source_1.AppDataSource.getRepository(Table_1.Table).find();
-    const tablegroups = await data_source_1.AppDataSource.getRepository(TableGroup_1.TableGroup).find();
-    res.render("admin/admin_configuration", {
-        table_groups: tablegroups,
-        tables: tables,
-    });
+router.get("/configuration", async (req, res) => {
+    res.render("admin/admin_configuration_vue.ejs");
 });
 /* POST configuration page */
 router.post("/configuration", function (req, res) {

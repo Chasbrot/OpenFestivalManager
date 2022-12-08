@@ -50,6 +50,12 @@ __decorate([
     __metadata("design:type", Number)
 ], Account.prototype, "accounttype", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        default: true
+    }),
+    __metadata("design:type", Boolean)
+], Account.prototype, "loginAllowed", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => Station_1.Station, (station) => station.id),
     __metadata("design:type", Array)
 ], Account.prototype, "responsiblefor", void 0);

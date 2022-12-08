@@ -51,7 +51,7 @@ router.post(
       name: req.body.username,
       accounttype: AccountType.USER,
     });
-    if (user == undefined) {
+    if (user == undefined || !user.loginAllowed) {
       res.render("personal/login_personal", { err: true });
       return;
     }

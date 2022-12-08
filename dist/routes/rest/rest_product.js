@@ -3,15 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const ProductIngredient_1 = require("./../../entity/ProductIngredient");
+const Category_1 = require("./../../entity/Category");
 const Variation_1 = require("./../../entity/Variation");
+const Ingredient_1 = require("./../../entity/Ingredient");
 const Product_1 = require("../../entity/Product");
+const Account_1 = require("../../entity/Account");
 const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
 const router = express_1.default.Router();
 const process_1 = __importDefault(require("process"));
 const Station_1 = require("../../entity/Station");
-const Category_1 = require("../../entity/Category");
 /* CREATE product */
 router.put("/", async (req, res) => {
     let body = req.body;
@@ -70,7 +73,9 @@ router.get("/full", (req, res) => {
         },
     })
         .then((result) => {
-        res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        if (req.session.account.accounttype != Account_1.AccountType.ADMIN) {
+            res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        }
         res.json(result);
     })
         .catch((err) => {
@@ -96,7 +101,9 @@ router.get("/:pid/variations", (0, express_validator_1.param)("pid").isInt(), (r
         },
     })
         .then((result) => {
-        res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        if (req.session.account.accounttype != Account_1.AccountType.ADMIN) {
+            res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        }
         res.json(result);
     })
         .catch((err) => {
@@ -120,7 +127,9 @@ router.get("/:pid", (0, express_validator_1.param)("pid").isInt(), (req, res) =>
         },
     })
         .then((result) => {
-        res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        if (req.session.account.accounttype != Account_1.AccountType.ADMIN) {
+            res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        }
         res.json(result);
     })
         .catch((err) => {
@@ -139,17 +148,13 @@ router.put("/:pid/variation", (0, express_validator_1.param)("pid").isInt(), asy
         res.sendStatus(400);
         return;
     }
+    console.log(body);
     let v;
     try {
         // Load product
         let p = await data_source_1.AppDataSource.getRepository(Product_1.Product).findOneByOrFail({ id: Number(req.params.pid) });
         v = new Variation_1.Variation(body.attrname, Number(body.price), p);
-        if (!p.variations) {
-            p.variations = [];
-        }
-        p.variations.push(v);
-        await data_source_1.AppDataSource.getRepository(Variation_1.Variation).save(v);
-        v = await data_source_1.AppDataSource.getRepository(Product_1.Product).save(v);
+        v = await data_source_1.AppDataSource.getRepository(Variation_1.Variation).save(v);
     }
     catch (e) {
         console.log("product/variation CREATE PUT: Error" + e);
@@ -186,14 +191,18 @@ router.put("/:pid", (0, express_validator_1.param)("pid").isInt(), async (req, r
                 id: Number(body.category.id),
             });
         }
+        else if (body.category == "") {
+            oldProduct.category = null;
+        }
         // Get list priority
-        if (body.list_priority) {
+        if (body.list_priority || body.list_priority == 0) {
             oldProduct.list_priority = Number(body.list_priority);
         }
         // Get lock state
-        if (body.productLock) {
+        if (body.productLock || body.list_priority == 0) {
             oldProduct.productLock = Number(body.productLock);
         }
+        console.log(oldProduct);
         // Save object to db
         await data_source_1.AppDataSource.getRepository(Product_1.Product).save(oldProduct);
     }
@@ -228,6 +237,80 @@ router.delete("/:pid", (0, express_validator_1.param)("pid").isInt(), async (req
     }
     catch (e) {
         console.log("rest/product/DELETE : Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
+});
+/* GET ingredient by product */
+router.get("/:pid/ingredients", (0, express_validator_1.param)("pid").isInt(), (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    data_source_1.AppDataSource.getRepository(Product_1.Product)
+        .findOneOrFail({
+        relations: {
+            ingredients: true
+        },
+        where: {
+            id: Number(req.params.pid),
+        },
+    })
+        .then((result) => {
+        if (req.session.account.accounttype != Account_1.AccountType.ADMIN) {
+            res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        }
+        res.json(result.ingredients);
+    })
+        .catch((err) => {
+        console.log("product/ingredients GET: Error" + err);
+        res.sendStatus(500);
+    });
+});
+/* PUT ingredient to product */
+router.put("/:pid/ingredients", (0, express_validator_1.param)("pid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    let body = req.body;
+    if (body == null) {
+        res.sendStatus(400);
+        return;
+    }
+    try {
+        // Load product
+        let p = await data_source_1.AppDataSource.getRepository(Product_1.Product).findOneByOrFail({ id: Number(req.params.pid) });
+        let i = await data_source_1.AppDataSource.getRepository(Ingredient_1.Ingredient).findOneByOrFail({ id: Number(body.ingredient.id) });
+        let pi = new ProductIngredient_1.ProductIngredient(p, i, Boolean(body.standard));
+        await data_source_1.AppDataSource.getRepository(ProductIngredient_1.ProductIngredient).save(pi);
+    }
+    catch (e) {
+        console.log("product/ingredients PUT: Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
+});
+/* DELETE ingredient from product */
+router.delete("/ingredient/:iid", (0, express_validator_1.param)("iid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    let body = req.body;
+    if (body == null) {
+        res.sendStatus(400);
+        return;
+    }
+    try {
+        // Load product
+        let pi = await data_source_1.AppDataSource.getRepository(ProductIngredient_1.ProductIngredient).findOneByOrFail({ id: Number(req.params.iid) });
+        await data_source_1.AppDataSource.getRepository(ProductIngredient_1.ProductIngredient).remove(pi);
+    }
+    catch (e) {
+        console.log("product/ingredients DELETE: Error" + e);
         res.sendStatus(500);
         return;
     }

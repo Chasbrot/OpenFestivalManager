@@ -41,7 +41,7 @@ router.post("/login", (0, express_validator_1.body)("username").isAlphanumeric()
         name: req.body.username,
         accounttype: Account_1.AccountType.USER,
     });
-    if (user == undefined) {
+    if (user == undefined || !user.loginAllowed) {
         res.render("personal/login_personal", { err: true });
         return;
     }

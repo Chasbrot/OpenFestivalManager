@@ -1,6 +1,6 @@
 import { AccountType } from './entity/Account';
 import express, { Express, Request, Response } from 'express';
-import { AppDataSource } from './data-source';
+import { AppDataSource, ds } from './data-source';
 import dotenv from 'dotenv';
 import path from 'path';
 import sessions from 'express-session';
@@ -8,6 +8,7 @@ import { uid, suid } from 'rand-token';
 import cookieParser from 'cookie-parser';
 import { Account } from 'entity/Account';
 import { Station } from 'entity/Station';
+import { exit } from 'process';
 
 
 // Add account data to session
@@ -92,13 +93,6 @@ app.use('/station', stationRouter);
 app.use('/rest', restRouter);
 
 
-
-// Start express server
-app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
-  console.log("[server]: Version " + process.env.VERSION);
-});
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,9 +101,15 @@ app.listen(port, () => {
 // to initialize initial connection with the database, register all entities
 // and "synchronize" database schema, call "initialize()" method of a newly created database
 // once in your application bootstrap
-AppDataSource.initialize()
-    .then(() => {
-        // here you can start to work with your database
-        console.log("Database initialized")
-    })
-    .catch((error: Error) => console.log(error))
+
+// Create DataSource from file
+if (!ds.createADSFromFile()) {
+  exit();
+}
+
+// Start express server
+app.listen(port, () => {
+  console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
+  console.log("[server]: Version " + process.env.VERSION);
+});
+

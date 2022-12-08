@@ -19,8 +19,6 @@ import { StateType } from "../entity/State";
 import { Not } from "typeorm";
 import { db } from "../database";
 
-const accountRepository = AppDataSource.getRepository(Account);
-
 /* Check if request has a valid session*/
 router.use(function (req, res, next) {
   if (req.session.account != null) {
@@ -44,6 +42,9 @@ const restProductRouter = require("./rest/rest_product");
 const restAlertTypeRouter = require("./rest/rest_alerttypes");
 const restIngredientRouter = require("./rest/rest_ingredient");
 const restVariationRouter = require("./rest/rest_variation");
+const restAccountRouter = require("./rest/rest_account");
+
+const restSystemRouter = require("./rest/rest_system");
 
 // Send for rest station to file, assign file
 router.use("/station", restStationRouter);
@@ -57,6 +58,8 @@ router.use("/product", restProductRouter);
 router.use("/alerttypes", restAlertTypeRouter);
 router.use("/ingredient", restIngredientRouter);
 router.use("/variation", restVariationRouter);
+router.use("/account", restAccountRouter);
+router.use("/system", restSystemRouter);
 
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req: Request, res: Response) => {
@@ -64,59 +67,11 @@ router.get("/accounttypes", async (_req: Request, res: Response) => {
   res.json(AccountType);
 });
 
-/* GET user account */
-router.get(
-  "/account/:id",
-  param("id").isInt(),
-  async (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    const user = await accountRepository.findOneBy({
-      id: parseInt(req.params.id),
-    });
-    if (user == null) {
-      res.sendStatus(404);
-    } else {
-      res.json(user);
-    }
-  }
-);
-
-/* PUT user account */
-router.put(
-  "/account",
-  body("username").isAlphanumeric(),
-  body("password").isString(),
-  async (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
-      return;
-    }
-    let a = new Account();
-    a.name = req.body.username;
-    // Hash password
-    a.hash = createHash("sha256").update(req.body.password).digest("hex");
-    a.accounttype = req.body.accounttype;
-    // Save new account
-    accountRepository
-      .save(a)
-      .then(() => {
-        res.sendStatus(200);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-      });
-  }
-);
 
 /* GET server uptime */
 router.get("/uptime", (_req: Request, res: Response) => {
   res.json(process.uptime());
 });
-
 
 
 /* POST create alert */

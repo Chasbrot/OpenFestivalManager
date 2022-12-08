@@ -16,8 +16,6 @@ import { Table } from "../entity/Table";
 let upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
-const accountRepository = AppDataSource.getRepository(Account);
-
 /* Check session and accounttype*/
 router.use(function (req, res, next) {
   if (req.url.includes("login")) {
@@ -38,7 +36,7 @@ router.get("/", async (_req: Request, res: Response) => {
   let users;
   let db_access = true;
   try {
-    users = await accountRepository.find({
+    users = await AppDataSource.getRepository(Account).find({
       where: [{ accounttype: AccountType.USER }],
     });
   } catch (err) {
@@ -122,7 +120,7 @@ router.post("/", upload.single("dbfile"), async (req, res, _next) => {
     user.name = body.username;
     user.hash = createHash("sha256").update(body.password).digest("hex");
     user.accounttype = body.accounttype;
-    accountRepository
+    AppDataSource.getRepository(Account)
       .save(user)
       .then(() => {
         console.log("admin/createuser: User created, " + user.name);
@@ -152,7 +150,7 @@ router.post("/", upload.single("dbfile"), async (req, res, _next) => {
         );
       } else {
         user.hash = hash;
-        accountRepository.save(user);
+        AppDataSource.getRepository(Account).save(user);
         console.log("admin/pwchange: Updated pw for user " + user.name);
       }
     } else {
@@ -180,7 +178,7 @@ router.post(
     }
 
     // Check if there are admin users in the db
-    const userCountQuery = accountRepository
+    const userCountQuery = AppDataSource.getRepository(Account)
       .createQueryBuilder("account")
       .where("account.accounttype = :at", { at: AccountType.ADMIN })
       .getCount();
@@ -205,13 +203,13 @@ router.post(
     hash.update(req.body.password);
 
     // Search for user
-    const user = await accountRepository.findOneBy({
+    const user = await AppDataSource.getRepository(Account).findOneBy({
       name: req.body.username,
       hash: hash.digest("hex"),
     });
 
-    // User not found
-    if (user == null) {
+    // User not found and check if user is allowed to login
+    if (user == null || !user.loginAllowed) {
       res.render("admin/admin_login", { err: true });
       return;
     }

@@ -12,22 +12,28 @@
     <br>
     <div id="app">
         <div class="row px-2 d-flex align-items-start">
-            <div class="col-2">
+            <div class="col-2" style="max-width: 200px">
                 <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                    <button class="nav-link active" id="v-pills-tables-tab" data-bs-toggle="pill"
+                    <button class="nav-link active" id="v-pills-database-tab" data-bs-toggle="pill"
+                    data-bs-target="#v-pills-database" type="button" role="tab" aria-controls="v-pills-database"
+                    aria-selected="true">Datenbank</button>
+                    <button class="nav-link" id="v-pills-tables-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
-                        aria-selected="true">Tische</button>
+                        aria-selected="true" :disabled="!dbconfig.connected">Tische</button>
                     <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-organization" type="button" role="tab"
-                        aria-controls="v-pills-organization" aria-selected="true">Organisation</button>
+                        aria-controls="v-pills-organization" aria-selected="true" :disabled="!dbconfig.connected">Organisation</button>
                     <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
-                        aria-selected="true">Produkte</button>
+                        aria-selected="true"  :disabled="!dbconfig.connected">Produkte</button>
+                    <button class="nav-link" id="v-pills-users-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-users"
+                        aria-selected="true"  :disabled="!dbconfig.connected">Benutzer</button>
                 </div>
             </div>
             <div class="col-10">
                 <div class="tab-content" id="v-pills-tabContent">
-                    <div class="tab-pane fade show active" id="v-pills-tables" role="tabpanel"
+                    <div class="tab-pane fade" id="v-pills-tables" role="tabpanel"
                         aria-labelledby="v-pills-tables-tab">
                         <div class="card">
                             <div class="card-header">
@@ -56,8 +62,7 @@
                                             {{tg.name}}
                                             <div class="float-end">
                                                 <form action="configuration" method="POST">
-                                                    <button class="btn btn-danger btn-sm" id="remove_table_group"
-                                                        name="remove_table_group" @click="this.removeTableGroup(tg)">
+                                                    <button class="btn btn-danger btn-sm" @click="this.removeTableGroup(tg)">
                                                         X
                                                     </button>
                                                 </form>
@@ -82,8 +87,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Neuer Tisch:</span>
                                     </div>
-                                    <select class="form-control" id="table_group_id" name="table_group_id" required
-                                        v-model="selectedTableGroup" @change="loadTablesFromTableGroup">
+                                    <select class="form-control" required v-model="selectedTableGroup" @change="loadTablesFromTableGroup">
                                         <option v-for="tg in tableGroups" :value="tg">
                                             {{ tg.name }}
                                         </option>
@@ -91,8 +95,7 @@
                                             Leer
                                         </option>
                                     </select>
-                                    <input type="text" class="form-control" id="new_table" name="new_table"
-                                        placeholder="Nummer des Tisches" v-model="newTableNumber" required>
+                                    <input type="text" class="form-control" placeholder="Nummer des Tisches" v-model="newTableNumber" required>
                                     <div class="input-group-append">
                                         <button @click="createTable" class="btn btn-primary">Anlegen</button>
                                     </div>
@@ -104,8 +107,7 @@
                                             {{t.name}}
                                             <div class="float-end">
                                                 <form action="configuration" method="POST">
-                                                    <button class="btn btn-danger btn-sm" id="remove_table"
-                                                        name="remove_table" @click="this.removeTable(t)">
+                                                    <button class="btn btn-danger btn-sm" @click="this.removeTable(t)">
                                                         X
                                                     </button>
                                                 </form>
@@ -332,28 +334,33 @@
                                             <th scope="col">Station</th>
                                             <th scope="col">Kategorie</th>
                                             <th scope="col">
-                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Produkt wird durch Helfer zugestellt">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Produkt wird durch Helfer zugestellt">
                                                     <img src="/images/shipping.png" width="20" height="20">
                                                 </span>
                                             </th>
                                             <th scope="col">Preis</th>
                                             <th scope="col">
-                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Priorisierung in der Bestellliste">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Priorisierung in der Bestellliste">
                                                     <img src="/images/list.png" width="20" height="20">
                                                 </span>
                                             </th>
                                             <th scope="col">
-                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Sicht-/Bestellbarkeit eingeschränkt">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Sicht-/Bestellbarkeit eingeschränkt">
                                                     <img src="/images/lock.png" width="20" height="20">
                                                 </span>
                                             </th>
                                             <th scope="col">
-                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Anzahl der Variationen des Produktes">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Anzahl der Variationen des Produktes">
                                                     <img src="/images/alternate.png" width="20" height="20">
                                                 </span>
                                             </th>
                                             <th scope="col">
-                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Anzahl der Optionen des Produktes">
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Anzahl der Optionen des Produktes">
                                                     <img src="/images/options.png" width="20" height="20">
                                                 </span>
                                             </th>
@@ -374,9 +381,12 @@
                                                 <td>{{p.price}} €</td>
                                                 <td>{{p.list_priority}}</td>
                                                 <td><span v-if="p.productLock==0">-</span>
-                                                    <img v-else-if="p.productLock==1" src="/images/production_warning.png" width="20" height="20">
-                                                    <img v-else-if="p.productLock==2" src="/images/lock.png" width="20" height="20">
-                                                    <img v-else-if="p.productLock==3" src="/images/hidden.png" width="20" height="20">
+                                                    <img v-else-if="p.productLock==1"
+                                                        src="/images/production_warning.png" width="20" height="20">
+                                                    <img v-else-if="p.productLock==2" src="/images/lock.png" width="20"
+                                                        height="20">
+                                                    <img v-else-if="p.productLock==3" src="/images/hidden.png"
+                                                        width="20" height="20">
                                                     <span v-else>{{p.productLock}}</span>
                                                 </td>
                                                 <td>{{p.variations.length}}</td>
@@ -384,18 +394,186 @@
                                                 <td>
                                                     <button class="btn btn-secondary btn-sm"
                                                         @click="showProductDetails(p)">?</button>
-                                                    <button class="btn btn-danger btn-sm" @click="removeProduct(p.id)">X</button>
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="removeProduct(p.id)">X</button>
                                                 </td>
                                             </tr>
                                         </template>
                                     </tbody>
                                 </table>
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-primary" type="button" @click="this.showProductDetails(this.newProduct)">+</button>
+                                    <button class="btn btn-primary" type="button"
+                                        @click="this.showProductDetails(this.newProduct)">+</button>
                                 </div>
                             </div>
                         </div>
                         <br>
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-users" role="tabpanel" aria-labelledby="v-pills-users-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Benutzer
+                                <div class="float-end">
+                                    {{accounts.length}}
+                                </div>
+                            </div>
+                            <br>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <span class="input-group-text">Globale Registrierung:</span>
+                                    <div class="input-group-text">
+                                        <input type="checkbox" class="form-check-input" v-model="registrationActive"
+                                            @change="updateRegActive()">
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="input-group">
+                                    <span class="input-group-text">Neuer Benutzer:</span>
+                                    <input type="text" class="form-control" v-model="newAccount.name"
+                                        placeholder="Name">
+                                    <input type="password" class="form-control" v-model="newAccount.password"
+                                        placeholder="Passwort">
+                                    <select class="form-select" v-model="newAccount.accounttype">
+                                        <option value="0">Admin</option>
+                                        <option value="1">Normal</option>
+                                        <option value="2">Station</option>
+                                    </select>
+                                    <span class="input-group-text">Aktiv?:</span>
+                                    <div class="input-group-text">
+                                        <input type="checkbox" class="form-check-input"
+                                            v-model="newAccount.loginAllowed">
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" @click="createAccount()">+</button>
+                                </div>
+                            </div>
+
+                            <div class="card-body" v-if="accounts.length !== 0">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Recht</th>
+                                            <th scope="col">Zugriff</th>
+                                            <th scope="col">Neues Passwort</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template v-for="a in accounts">
+                                            <tr>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text" v-if="!a.loginAllowed"><img
+                                                                src="/images/lock.png" height="15" width="15"></span>
+                                                        <input type="text" class="form-control" v-model="a.name"
+                                                            @change="updateAccount(a)">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <select class="form-select" v-model="a.accounttype"
+                                                        @change="updateAccount(a)">
+                                                        <option value="0">Admin</option>
+                                                        <option value="1">Normal</option>
+                                                        <option value="2">Station</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" class="form-check-input"
+                                                        v-model="a.loginAllowed" @change="updateAccount(a)">
+                                                </td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" v-model="a.password">
+                                                        <button class="btn btn-primary btn-sm"
+                                                            @click="removeAccount(a)">+</button>
+                                                    </div>
+
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="removeAccount(a)">X</button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                    <div class="tab-pane fade show active" id="v-pills-database" role="tabpanel"
+                        aria-labelledby="v-pills-database-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Datenbankverbindung
+                                <div class="float-end">
+                                    <span v-if="dbconfig.connected" class="text-success">Verbunden</span>
+                                    <span v-else class="text-danger">Nicht Verbunden</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3 row">
+                                    <label for="dbhost" class="col-sm-2 col-form-label">Host</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" v-model="dbconfig.host" required pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" minlength="8" maxlength="16">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label for="dbport" class="col-sm-2 col-form-label">Port</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" v-model="dbconfig.port" maxlength="5" minlength="4">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label for="dbport" class="col-sm-2 col-form-label">User</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" v-model="dbconfig.user">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label for="dbport" class="col-sm-2 col-form-label">Password</label>
+                                    <div class="col-sm-10">
+                                        <input type="password" class="form-control" v-model="dbconfig.password">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label for="dbport" class="col-sm-2 col-form-label">Schema Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" v-model="dbconfig.dbname">
+                                    </div>
+                                </div>
+
+                                
+                            </div>
+                            <div class="card-footer">
+                                <span class="text-success" v-if="dbtestresult==true">
+                                    Datenbank erfolgreich getestet!
+                                </span>
+                                <span class="text-danger" v-if="dbtestresult==false">
+                                    Datenbank Test fehlgeschlagen!
+                                </span>
+                                <div class="float-end">
+                                    <button type="button" class="btn btn-primary me-2" @click="dbTestSettings()">Test</button>
+                                    <button type="button" class="btn btn-primary" :disabled="dbtestresult!=true || true"  @click="dbSaveSettings()">Save</button>
+                                </div>
+
+                            </div>
+                        </div>
+                        <br>
+                        <div class="card">
+                            <div class="card-header">
+                                Datenbankwerkzeuge
+                            </div>
+                            <div class="card-body">
+                                <p class="text-danger">WARNING: The following tools can and will DELETE data from the database. Proceed with caution!</p>
+                                <div>
+                                    <button class="btn btn-danger me-2" data-toggle="tooltip" data-placement="top"
+                                    title="USE WITH CAUTION! Deletes all dynamic content from the Database. All sessions, personal, orders and necessery mapping data">Reset Dynamic Data</button>
+                                    <button class="btn btn-danger" data-toggle="tooltip" data-placement="top"
+                                    title="DELETES ALL DATA! Clears all user generated data for a fresh start">Reset Database</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -435,7 +613,7 @@
                         <h5>Basisdaten</h5>
                         <div class="input-group">
                             <span class="input-group-text" id="basic-addon1">Name:</span>
-                            <input type="text" class="form-control" placeholder="Name der Bezahloption"
+                            <input type="text" class="form-control" placeholder="Name ds Produkt"
                                 v-model="productDetailModal.name" required>
                         </div>
                         <div class="input-group">
@@ -455,21 +633,29 @@
                         <h5>Erweitert</h5>
                         <div class="input-group">
                             <span class="input-group-text">Status:</span>
-                            <div class="btn-group" role="group" >
-                                <input type="radio" class="btn-check"  id="btnradio0" value="0" autocomplete="off" checked v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-success" for="btnradio0"><img src="/images/visible.png" width="20" height="20"></label>
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" id="btnradio0" value="0" autocomplete="off"
+                                    checked v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-success" for="btnradio0"><img src="/images/visible.png"
+                                        width="20" height="20"></label>
 
-                                <input type="radio" class="btn-check" id="btnradio1" value="1" autocomplete="off" v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-warning" for="btnradio1"><img src="/images/production_warning.png" width="20" height="20"></label>
-                              
-                                <input type="radio" class="btn-check" id="btnradio2" value="2" autocomplete="off" v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-danger" for="btnradio2"><img src="/images/lock.png" width="20" height="20"></label>
-                              
-                                <input type="radio" class="btn-check"  id="btnradio3" value="3" autocomplete="off" v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-secondary" for="btnradio3"><img src="/images/hidden.png" width="20" height="20"></label>
-                              </div>
-                              <span class="input-group-text">Reihung:</span>
-                              <input type="number" class="form-control" placeholder="Reihung"
+                                <input type="radio" class="btn-check" id="btnradio1" value="1" autocomplete="off"
+                                    v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-warning" for="btnradio1"><img
+                                        src="/images/production_warning.png" width="20" height="20"></label>
+
+                                <input type="radio" class="btn-check" id="btnradio2" value="2" autocomplete="off"
+                                    v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-danger" for="btnradio2"><img src="/images/lock.png"
+                                        width="20" height="20"></label>
+
+                                <input type="radio" class="btn-check" id="btnradio3" value="3" autocomplete="off"
+                                    v-model="productDetailModal.productLock">
+                                <label class="btn btn-outline-secondary" for="btnradio3"><img src="/images/hidden.png"
+                                        width="20" height="20"></label>
+                            </div>
+                            <span class="input-group-text">Reihung:</span>
+                            <input type="number" class="form-control" placeholder="Reihung"
                                 v-model="productDetailModal.list_priority" min="0">
                         </div>
                         <div class="input-group">
@@ -482,30 +668,35 @@
                             </select>
                             <span class="input-group-text">Zustellung:</span>
                             <div class="input-group-text">
-                                <input class="form-check-input mt-0" type="checkbox" checked v-model="productDetailModal.deliverable">
+                                <input class="form-check-input mt-0" type="checkbox" checked
+                                    v-model="productDetailModal.deliverable">
                             </div>
                         </div>
                         <br>
-                        <div v-if="productDetailModal && productDetailModal.id && productDetailModal.variations.length === 0">
+                        <div
+                            v-if="productDetailModal && productDetailModal.id && productDetailModal.variations.length === 0">
                             <h5>Optionen/Zutaten</h5>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1">Zutat:</span>
                                 </div>
-                                <select class="form-select" v-model="productDetailModal.ingredients">
+                                <select class="form-select" v-model="pDnewIngredient.ingredient">
                                     <option v-for="i in ingredients" :value="i">
                                         {{ i.name }}
                                     </option>
                                 </select>
                                 <span class="input-group-text" id="inputGroup-sizing-default">Standard</span>
                                 <div class="input-group-text">
-                                    <input class="form-check-input mt-0" type="checkbox" v-model="pDnewIngredient">
+                                    <input class="form-check-input mt-0" type="checkbox"
+                                        v-model="pDnewIngredient.standard">
                                 </div>
                                 <div class="input-group-append">
-                                    <button class="btn btn-primary">+</button>
+                                    <button class="btn btn-primary"
+                                        @click="mapProductIngredient(productDetailModal)">+</button>
                                 </div>
                             </div>
-                            <table class="table" v-if="productDetailModal && productDetailModal.ingredients && productDetailModal.ingredients.length > 0">
+                            <table class="table"
+                                v-if="productDetailModal && productDetailModal.ingredients && productDetailModal.ingredients.length > 0">
                                 <thead>
                                     <tr>
                                         <th scope="col">Name</th>
@@ -517,10 +708,11 @@
                                     <template v-for="(pi, index) in productDetailModal.ingredients">
                                         <tr>
                                             <td>{{pi.ingredient.name}}</td>
-                                            <td><input class="form-check-input mt-0" type="checkbox"
+                                            <td><input class="form-check-input mt-0" type="checkbox" disabled
                                                     v-model="productDetailModal.ingredients[index].optional"></td>
                                             <td>
-                                                <button class="btn btn-danger btn-sm">X</button>
+                                                <button class="btn btn-danger btn-sm"
+                                                    @click="removeProductIngredient(pi)">X</button>
                                             </td>
                                         </tr>
                                     </template>
@@ -528,19 +720,21 @@
                             </table>
                             <br>
                         </div>
-                        <div v-if="productDetailModal && productDetailModal.id && productDetailModal.ingredients.length === 0">
+                        <div
+                            v-if="productDetailModal && productDetailModal.id && productDetailModal.ingredients.length === 0">
                             <h5>Variationen</h5>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1">Variation:</span>
                                 </div>
                                 <input type="text" class="form-control" placeholder="Name"
-                                v-model="pDnewVariation.attrname" required>
+                                    v-model="pDnewVariation.attrname" required>
                                 <input type="number" class="form-control" placeholder="Preis"
-                                v-model="pDnewVariation.price" min="0" required>
-                            
+                                    v-model="pDnewVariation.price" min="0" required>
+
                                 <div class="input-group-append">
-                                    <button class="btn btn-primary" @click="this.createVariation(productDetailModal)">+</button>
+                                    <button class="btn btn-primary"
+                                        @click="this.createVariation(productDetailModal)">+</button>
                                 </div>
                             </div>
                             <table class="table" v-if="productDetailModal && productDetailModal.variations.length > 0">
@@ -557,7 +751,8 @@
                                             <td>{{v.attrname}}</td>
                                             <td>{{v.price}}</td>
                                             <td>
-                                                <button class="btn btn-danger btn-sm" @click="removeVariation(productDetailModal,v)">X</button>
+                                                <button class="btn btn-danger btn-sm"
+                                                    @click="removeVariation(productDetailModal,v)">X</button>
                                             </td>
                                         </tr>
                                     </template>
@@ -573,7 +768,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="this.updateProduct(this.productDetailModal)">Speichern</button>
+                        <button type="button" class="btn btn-primary"
+                            @click="this.updateProduct(this.productDetailModal)">Speichern</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
                     </div>
                 </div>
@@ -583,10 +779,11 @@
 
     <script>
         // Initialize all tooltips at load
-        $(document).ready(function() {
+        $(document).ready(function () {
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-            $('[data-toggle="tooltip"]').tooltip();   
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
+                tooltipTriggerEl))
+            $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
 
@@ -629,10 +826,37 @@
             // Products
             products: [],
             productDetailModal: "",
-            pDnewIngredient: "",
-            pDnewVariation: {attrname: "", price: 0},
-            newProduct: {ingredients:[], variations:[]},
-
+            pDnewIngredient: {
+                ingredient: "",
+                standard: true
+            },
+            pDnewVariation: {
+                attrname: "",
+                price: 0
+            },
+            newProduct: {
+                ingredients: [],
+                variations: []
+            },
+            // Users
+            accounts: [],
+            newAccount: {
+                name: "",
+                password: "",
+                accounttype: 1,
+                loginAllowed: true
+            },
+            registrationActive: "",
+            // Database settings
+            dbconfig: {
+                connected: false,
+                host: "",
+                port: "",
+                user: "",
+                password: "",
+                dbname: ""
+            },
+            dbtestresult: undefined,
         }),
 
         created() {
@@ -644,6 +868,9 @@
             this.loadPaymentMethods()
             this.loadIngredients()
             this.loadProducts()
+            this.loadAccounts()
+            this.loadRegActive()
+            this.loadDBConfig()
         },
 
         methods: {
@@ -686,7 +913,34 @@
                     this.makeError("Anfrage fehlerhaft.", "PUT " + url + data, response.statusText);
                     return false;
                 }
-                return await (response.json());
+                // Catch non json answer
+                try {
+                    return await (response.json());
+                } catch (error) {
+                    return null;
+                }
+            },
+
+            async postData(url, data) {
+                const requestOptions = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: data
+                };
+                const response = await fetch(url,
+                    requestOptions);
+                if (response.status != 200) {
+                    this.makeError("Anfrage fehlerhaft.", "POST " + url + data, response.statusText);
+                    return false;
+                }
+                // Catch non json answer
+                try {
+                    return await (response.json());
+                } catch (error) {
+                    return null;
+                }
             },
 
             async deleteData(url, data) {
@@ -740,12 +994,18 @@
                         name: this.newStationName
                     })
                 );
+                console.log("test")
                 await this.loadStations();
                 this.newStationName = "";
             },
 
             async loadStations() {
                 this.stations = await this.fetchData("/rest/station");
+            },
+
+            async removeStation(id) {
+                await this.deleteData(`/rest/station/${id}`, "");
+                await this.loadStations();
             },
 
             async loadAlertTypes() {
@@ -826,11 +1086,6 @@
                 await this.loadAlertTypes();
             },
 
-            async removeStation(id) {
-                await this.deleteData(`/rest/station/${id}`, "");
-                await this.loadStations();
-            },
-
             async loadIngredients() {
                 this.ingredients = await this.fetchData("/rest/ingredient");
             },
@@ -855,7 +1110,6 @@
 
             async loadProducts() {
                 this.products = await this.fetchData("/rest/product/full");
-                console.log(this.products)
             },
 
             async showProductDetails(product) {
@@ -864,20 +1118,23 @@
                 pdm.show()
             },
 
-            async updateProduct(product){
-                if(!product){
+            async updateProduct(product) {
+                if (!product) {
                     return null;
                 }
                 console.log(product)
-                if(product.id){
+                if (product.id) {
                     await this.putData(`/rest/product/${product.id}`, JSON.stringify(product));
                     await this.loadProducts();
-                }else{
+                } else {
                     let res = await this.putData(`/rest/product`, JSON.stringify(product));
                     await this.loadProducts();
-                    console.log(res)
-                    this.productDetailModal = this.products.find(element => element.id == res.id);
-                    newProduct: {ingredients:[]; variations:[] }
+                    console.log(res.id)
+                    this.productDetailModal = await this.products.find(element => element.id == res.id);
+                    console.log(this.productDetailModal);
+                    newProduct: {
+                        ingredients: [];variations: []
+                    }
                 }
             },
 
@@ -887,30 +1144,107 @@
             },
 
             async createVariation(product) {
-                if (!this.pDnewVariation|| !product) {
+                if (!this.pDnewVariation || !product) {
                     return;
                 }
                 await this.putData(`/rest/product/${product.id}/variation`,
                     JSON.stringify(this.pDnewVariation)
                 );
-                pDnewVariation: {attrname: ""; price: 0}
+                pDnewVariation: {
+                    attrname: "";price: 0
+                }
                 await this.updateVariationsFromProduct(product);
             },
 
-            async updateVariationsFromProduct(product){
-                if(!product){
+            async updateVariationsFromProduct(product) {
+                if (!product || !product.id) {
                     return null;
                 }
                 product.variations = await this.fetchData(`/rest/product/${product.id}/variations`);
             },
 
-            async removeVariation(p,v){
-                if(!v){
+            async removeVariation(p, v) {
+                if (!v) {
                     return null;
                 }
                 await this.deleteData(`/rest/variation/${v.id}`);
                 await this.updateVariationsFromProduct(p);
+            },
+
+
+            async mapProductIngredient(product) {
+                if (!this.pDnewIngredient || !product) {
+                    return;
+                }
+                await this.putData(`/rest/product/${product.id}/ingredients`,
+                    JSON.stringify(this.pDnewIngredient)
+                );
+                pDnewIngredient: {
+                    ingredient: "";standard: true
+                };
+                await this.updateIngredientsFromProduct(product);
+            },
+
+            async updateIngredientsFromProduct(product) {
+                if (!product || !product.id) {
+                    return null;
+                }
+                console.log(product)
+                product.ingredients = await this.fetchData(`/rest/product/${product.id}/ingredients`);
+            },
+
+            async removeProductIngredient(pi) {
+                if (!pi) {
+                    return null;
+                }
+                await this.deleteData(`/rest/product/ingredient/${pi.id}`);
+                await this.updateIngredientsFromProduct(this.productDetailModal);
+            },
+
+            async loadAccounts() {
+                this.accounts = await this.fetchData("/rest/account");
+            },
+
+            async removeAccount(a) {
+                await this.deleteData(`/rest/account/${a.id}`);
+                await this.loadAccounts();
+            },
+
+            async updateAccount(a) {
+                await this.putData(`/rest/account/${a.id}`, JSON.stringify(a));
+                await this.loadAccounts();
+            },
+
+            async createAccount() {
+                await this.putData(`/rest/account`, JSON.stringify(this.newAccount));
+                newAccount: {
+                    name: "";password: "";accounttype: 1;loginAllowed: true
+                };
+                await this.loadAccounts();
+            },
+
+            async loadRegActive() {
+                this.registrationActive = await this.fetchData("/rest/registrationactive")
+            },
+
+            async updateRegActive() {
+                await this.putData("/rest/registrationactive", JSON.stringify({
+                    registrationActive: this.registrationActive
+                }));
+                await this.loadRegActive();
+            },
+
+            async loadDBConfig() {
+                this.dbconfig = await this.fetchData("/rest/system/database/config")
+            },
+
+            async dbTestSettings(){
+                let tmp = await this.postData("/rest/system/database/test", JSON.stringify(this.dbconfig));
+                this.dbtestresult = tmp.test_result;
             }
+
+
+
 
         },
     }).mount('#app')

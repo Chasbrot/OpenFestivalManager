@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Ingredient_1 = require("../../entity/Ingredient");
+const Account_1 = require("../../entity/Account");
 const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
@@ -14,7 +15,9 @@ router.get("/", (_req, res) => {
     data_source_1.AppDataSource.getRepository(Ingredient_1.Ingredient)
         .find()
         .then((result) => {
-        res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        if (_req.session.account.accounttype != Account_1.AccountType.ADMIN) {
+            res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        }
         res.json(result);
     })
         .catch((err) => {

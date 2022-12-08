@@ -18,7 +18,6 @@ const database_1 = require("../database");
 const State_1 = require("../entity/State");
 let upload = (0, multer_1.default)({ dest: "uploads/" });
 const router = express_1.default.Router();
-const accountRepository = data_source_1.AppDataSource.getRepository(Account_2.Account);
 /* Check session and accounttype*/
 router.use(function (req, res, next) {
     if (req.url.includes("login")) {
@@ -40,7 +39,7 @@ router.get("/", async (_req, res) => {
     let users;
     let db_access = true;
     try {
-        users = await accountRepository.find({
+        users = await data_source_1.AppDataSource.getRepository(Account_2.Account).find({
             where: [{ accounttype: Account_1.AccountType.USER }],
         });
     }
@@ -118,7 +117,7 @@ router.post("/", upload.single("dbfile"), async (req, res, _next) => {
         user.name = body.username;
         user.hash = (0, crypto_1.createHash)("sha256").update(body.password).digest("hex");
         user.accounttype = body.accounttype;
-        accountRepository
+        data_source_1.AppDataSource.getRepository(Account_2.Account)
             .save(user)
             .then(() => {
             console.log("admin/createuser: User created, " + user.name);
@@ -146,7 +145,7 @@ router.post("/", upload.single("dbfile"), async (req, res, _next) => {
             }
             else {
                 user.hash = hash;
-                accountRepository.save(user);
+                data_source_1.AppDataSource.getRepository(Account_2.Account).save(user);
                 console.log("admin/pwchange: Updated pw for user " + user.name);
             }
         }
@@ -167,7 +166,7 @@ router.post("/login", (0, express_validator_1.body)("username").isString(), (0, 
         return;
     }
     // Check if there are admin users in the db
-    const userCountQuery = accountRepository
+    const userCountQuery = data_source_1.AppDataSource.getRepository(Account_2.Account)
         .createQueryBuilder("account")
         .where("account.accounttype = :at", { at: Account_1.AccountType.ADMIN })
         .getCount();
@@ -188,12 +187,12 @@ router.post("/login", (0, express_validator_1.body)("username").isString(), (0, 
     const hash = (0, crypto_1.createHash)("sha256");
     hash.update(req.body.password);
     // Search for user
-    const user = await accountRepository.findOneBy({
+    const user = await data_source_1.AppDataSource.getRepository(Account_2.Account).findOneBy({
         name: req.body.username,
         hash: hash.digest("hex"),
     });
-    // User not found
-    if (user == null) {
+    // User not found and check if user is allowed to login
+    if (user == null || !user.loginAllowed) {
         res.render("admin/admin_login", { err: true });
         return;
     }

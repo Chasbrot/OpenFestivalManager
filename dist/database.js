@@ -211,16 +211,14 @@ class db {
      * @param  {Number} productId Id of the varied product
      * @param  {Number} price New price
      */
-    static createVariation(attrName, productId, _price) {
+    static createVariation(attrName, productId, price) {
         return new Promise(async (resolve, reject) => {
-            let v = new Variation_1.Variation();
-            v.attrname = attrName;
-            v.price = _price;
+            let v;
             try {
                 let p = await data_source_1.AppDataSource.getRepository(Product_1.Product).findOneByOrFail({
                     id: productId,
                 });
-                v.product = p;
+                v = new Variation_1.Variation(attrName, price, p);
                 await data_source_1.AppDataSource.getRepository(Variation_1.Variation).save(v);
             }
             catch (e) {

@@ -7,12 +7,10 @@ const Account_1 = require("../entity/Account");
 const data_source_1 = require("../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
-const crypto_1 = require("crypto");
 const router = express_1.default.Router();
 const process_1 = __importDefault(require("process"));
 const AlertType_1 = require("../entity/AlertType");
 const database_1 = require("../database");
-const accountRepository = data_source_1.AppDataSource.getRepository(Account_1.Account);
 /* Check if request has a valid session*/
 router.use(function (req, res, next) {
     if (req.session.account != null) {
@@ -36,6 +34,8 @@ const restProductRouter = require("./rest/rest_product");
 const restAlertTypeRouter = require("./rest/rest_alerttypes");
 const restIngredientRouter = require("./rest/rest_ingredient");
 const restVariationRouter = require("./rest/rest_variation");
+const restAccountRouter = require("./rest/rest_account");
+const restSystemRouter = require("./rest/rest_system");
 // Send for rest station to file, assign file
 router.use("/station", restStationRouter);
 router.use("/tablegroup", restTableGroupRouter);
@@ -48,48 +48,12 @@ router.use("/product", restProductRouter);
 router.use("/alerttypes", restAlertTypeRouter);
 router.use("/ingredient", restIngredientRouter);
 router.use("/variation", restVariationRouter);
+router.use("/account", restAccountRouter);
+router.use("/system", restSystemRouter);
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req, res) => {
     res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
     res.json(Account_1.AccountType);
-});
-/* GET user account */
-router.get("/account/:id", (0, express_validator_1.param)("id").isInt(), async (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
-        return;
-    }
-    const user = await accountRepository.findOneBy({
-        id: parseInt(req.params.id),
-    });
-    if (user == null) {
-        res.sendStatus(404);
-    }
-    else {
-        res.json(user);
-    }
-});
-/* PUT user account */
-router.put("/account", (0, express_validator_1.body)("username").isAlphanumeric(), (0, express_validator_1.body)("password").isString(), async (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
-        return;
-    }
-    let a = new Account_1.Account();
-    a.name = req.body.username;
-    // Hash password
-    a.hash = (0, crypto_1.createHash)("sha256").update(req.body.password).digest("hex");
-    a.accounttype = req.body.accounttype;
-    // Save new account
-    accountRepository
-        .save(a)
-        .then(() => {
-        res.sendStatus(200);
-    })
-        .catch((err) => {
-        console.log(err);
-        res.sendStatus(500);
-    });
 });
 /* GET server uptime */
 router.get("/uptime", (_req, res) => {

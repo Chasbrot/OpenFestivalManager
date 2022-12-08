@@ -27,7 +27,9 @@ router.get(
       AppDataSource.getRepository(TableGroup)
         .find()
         .then((result) => {
-          res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+          if (_req.session.account!.accounttype != AccountType.ADMIN) {
+            res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
+          }
           res.json(result);
         })
         .catch((err) => {
@@ -59,7 +61,9 @@ router.get(
           },
         })
         .then((result) => {
-          res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+          if (req.session.account!.accounttype != AccountType.ADMIN) {
+            res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
+          }
           res.json(result);
         })
         .catch((err) => {

@@ -10,6 +10,7 @@ const path_1 = __importDefault(require("path"));
 const express_session_1 = __importDefault(require("express-session"));
 const rand_token_1 = require("rand-token");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const process_1 = require("process");
 // Load data from .env config file
 dotenv_1.default.config();
 // Create express app
@@ -72,11 +73,6 @@ app.use('/personal', personalRouter);
 app.use('/table', tableRouter);
 app.use('/station', stationRouter);
 app.use('/rest', restRouter);
-// Start express server
-app.listen(port, () => {
-    console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
-    console.log("[server]: Version " + process.env.VERSION);
-});
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,9 +80,12 @@ app.listen(port, () => {
 // to initialize initial connection with the database, register all entities
 // and "synchronize" database schema, call "initialize()" method of a newly created database
 // once in your application bootstrap
-data_source_1.AppDataSource.initialize()
-    .then(() => {
-    // here you can start to work with your database
-    console.log("Database initialized");
-})
-    .catch((error) => console.log(error));
+// Create DataSource from file
+if (!data_source_1.ds.createADSFromFile()) {
+    (0, process_1.exit)();
+}
+// Start express server
+app.listen(port, () => {
+    console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
+    console.log("[server]: Version " + process.env.VERSION);
+});

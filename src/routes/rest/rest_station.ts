@@ -25,7 +25,9 @@ router.get("/", (_req: Request, res: Response) => {
   AppDataSource.getRepository(Station)
     .find()
     .then((result) => {
-      res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+      if (_req.session.account!.accounttype != AccountType.ADMIN) {
+        res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
+      }
       res.json(result);
     })
     .catch((err) => {

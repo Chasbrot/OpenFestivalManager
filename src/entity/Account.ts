@@ -41,6 +41,11 @@ export class Account {
   })
   accounttype: AccountType;
 
+  @Column({
+    default: true
+  })
+  loginAllowed: boolean;
+
   @OneToMany(() => Station, (station) => station.id)
   responsiblefor: Station[];
 

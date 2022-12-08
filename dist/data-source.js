@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppDataSource = void 0;
+exports.ds = exports.AppDataSource = void 0;
 require("reflect-metadata");
 const typeorm_1 = require("typeorm");
 // Import Model
@@ -20,17 +20,51 @@ const PaymentMethod_1 = require("./entity/PaymentMethod");
 const Session_1 = require("./entity/Session");
 const State_1 = require("./entity/State");
 const ProductIngredient_1 = require("./entity/ProductIngredient");
-exports.AppDataSource = new typeorm_1.DataSource({
-    type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "postgres",
-    password: "Pa..w0rd",
-    database: "festivalmanager",
-    entities: [Account_1.Account, Station_1.Station,
-        Alert_1.Alert, AlertType_1.AlertType, Table_1.Table, TableGroup_1.TableGroup, Category_1.Category,
-        Product_1.Product, Variation_1.Variation, Ingredient_1.Ingredient, Bill_1.Bill, Order_1.Order,
-        PaymentMethod_1.PaymentMethod, Session_1.Session, State_1.State, ProductIngredient_1.ProductIngredient],
-    synchronize: true,
-    logging: false,
-});
+class ds {
+    static async createADS(dbhost, port, user, password, dbname) {
+        try {
+            exports.AppDataSource = new typeorm_1.DataSource({
+                type: "postgres",
+                host: dbhost,
+                port: Number(port),
+                username: user,
+                password: password,
+                database: dbname,
+                entities: [
+                    Account_1.Account,
+                    Station_1.Station,
+                    Alert_1.Alert,
+                    AlertType_1.AlertType,
+                    Table_1.Table,
+                    TableGroup_1.TableGroup,
+                    Category_1.Category,
+                    Product_1.Product,
+                    Variation_1.Variation,
+                    Ingredient_1.Ingredient,
+                    Bill_1.Bill,
+                    Order_1.Order,
+                    PaymentMethod_1.PaymentMethod,
+                    Session_1.Session,
+                    State_1.State,
+                    ProductIngredient_1.ProductIngredient,
+                ],
+                synchronize: true,
+                logging: false,
+            });
+            await exports.AppDataSource.initialize()
+                .then(() => {
+                // here you can start to work with your database
+                console.log("app: Database initialized");
+            });
+        }
+        catch (err) {
+            console.log("app: Create DataSource failed, " + err);
+            return false;
+        }
+        return true;
+    }
+    static async createADSFromFile() {
+        return ds.createADS(process.env.DB_HOST, process.env.DB_PORT, process.env.DB_USER, process.env.DB_PASSWORD, process.env.DB_SCHEMA);
+    }
+}
+exports.ds = ds;

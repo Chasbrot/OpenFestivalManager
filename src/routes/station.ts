@@ -42,8 +42,13 @@ router.use(function (req, res, next) {
 });
 
 /* GET login page */
-router.get("/login", function (_req, res) {
-  res.render("station/login_station", { err: "" });
+router.get("/login", function (req, res) {
+  if (req.session.account?.accounttype == AccountType.STATION) {
+    // Redirect tp mainpage if station session exists
+    res.redirect("/station/"+req.session.station!.id);
+  } else {
+    res.render("station/login_station", { err: "" });
+  }
 });
 
 /* Station login */

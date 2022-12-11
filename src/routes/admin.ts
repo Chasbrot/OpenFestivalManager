@@ -162,8 +162,13 @@ router.post("/", upload.single("dbfile"), async (req, res, _next) => {
 });
 
 /* GET login page. */
-router.get("/login", (_req: Request, res: Response) => {
-  res.render("admin/admin_login", { err: false });
+router.get("/login", (req: Request, res: Response) => {
+  if (req.session.account?.accounttype == AccountType.ADMIN) {
+    // Redirect tp mainpage if admin session exists
+    res.redirect("/admin");
+  } else {
+    res.render("admin/admin_login", { err: false });
+  }
 });
 
 /* POST login page */

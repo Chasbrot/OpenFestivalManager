@@ -34,8 +34,13 @@ router.use(function (req, res, next) {
 });
 
 /* GET login page */
-router.get("/login", function (_req, res) {
-  res.render("personal/login_personal", { err: false });
+router.get("/login", function (req, res) {
+  if (req.session.account?.accounttype == AccountType.USER) {
+    // Redirect tp mainpage if user session exists
+    res.redirect("/personal/overview");
+  } else {
+    res.render("personal/login_personal", { err: false });
+  }
 });
 
 /* Personal login */

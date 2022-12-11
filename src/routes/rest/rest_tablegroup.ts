@@ -71,8 +71,71 @@ router.get(
           res.sendStatus(500);
         });
     }
-  );
+);
+  
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+  if (
+    req.session.account!.accounttype == AccountType.ADMIN
+  ) {
+    next();
+  } else {
+    console.log("rest/table/auth: unauthorized");
+    res.sendStatus(403);
+  }
+});
 
+/* PUT create ingredient*/
+router.put(
+  "/",
+  body("name").isString(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    console.log("create new tablegroup request");
+    console.log(body);
+    // Create PC
+    try {
+      let tmp = new TableGroup(body.name);
+      await AppDataSource.getRepository(TableGroup).save(tmp);
+    } catch (e) {
+      console.log("rest/tablegroup/PUT new: Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
+  }
+);
 
+/* DELETE tablegroup*/
+router.delete(
+  "/:tgid",
+  param("tgid").isInt(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    console.log("delete tablegroup request " + req.params.tgid);
+    // Create Payment Method
+    try {
+      let tmp = await AppDataSource.getRepository(TableGroup).findOneOrFail({
+        where: {
+          id: Number(req.params.tgid),
+        },
+      });
+      await AppDataSource.getRepository(TableGroup).remove(tmp);
+    } catch (e) {
+      console.log("rest/tablegroup/DELETE : Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
+  }
+);
 
 module.exports = router;

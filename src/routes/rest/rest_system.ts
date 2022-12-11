@@ -20,17 +20,15 @@ import { DataSourceOptions, MoreThan, Not } from "typeorm";
 import { TableGroup } from "../../entity/TableGroup";
 import { brotliDecompressSync } from "zlib";
 
-/* Check session and accounttype*/
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
 router.use(function (req, res, next) {
   if (
-    req.session.account &&
     req.session.account!.accounttype == AccountType.ADMIN
   ) {
     next();
   } else {
-    console.log("rest/account/auth: unauthorized");
-    res.sendStatus(401);
-    return;
+    console.log("rest/system/auth: unauthorized");
+    res.sendStatus(403);
   }
 });
 

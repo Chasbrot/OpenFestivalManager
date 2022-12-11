@@ -12,26 +12,6 @@ const process_1 = __importDefault(require("process"));
 const Order_1 = require("../../entity/Order");
 /* Check session and accounttype*/
 // Every active session needs full access
-/* POST order/state */
-/* Creates new state entry for a order*/
-router.post("/:oid/state", (0, express_validator_1.param)("oid").isInt(), async (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty() && !req.body.new) {
-        res.sendStatus(400);
-        return;
-    }
-    try {
-        let order = await data_source_1.AppDataSource.getRepository(Order_1.Order).findOneByOrFail({
-            id: Number(req.params.oid),
-        });
-        await database_1.db.setOrderStatus(order, req.body.new, req.session.account);
-    }
-    catch (e) {
-        console.log("rest/order/state POST: " + e);
-        res.sendStatus(500);
-        return;
-    }
-    res.sendStatus(200);
-});
 /* GET order */
 router.get("/:oid", (0, express_validator_1.param)("oid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -116,7 +96,37 @@ router.get("/:oid/oIMap", (0, express_validator_1.param)("oid").isInt(), async (
             oIMap.push([pi.ingredient, false]);
         }
     }
-    res.set('Cache-control', `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+    res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
     res.json(oIMap);
+});
+/* Check session and accounttype */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype) {
+        next();
+    }
+    else {
+        console.log("rest/order/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
+/* POST order/state */
+/* Creates new state entry for a order*/
+router.post("/:oid/state", (0, express_validator_1.param)("oid").isInt(), (0, express_validator_1.body)("new").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    try {
+        let order = await data_source_1.AppDataSource.getRepository(Order_1.Order).findOneByOrFail({
+            id: Number(req.params.oid),
+        });
+        await database_1.db.setOrderStatus(order, req.body.new, req.session.account);
+    }
+    catch (e) {
+        console.log("rest/order/state POST: " + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
 });
 module.exports = router;

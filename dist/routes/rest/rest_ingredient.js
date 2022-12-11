@@ -25,16 +25,25 @@ router.get("/", (_req, res) => {
         res.sendStatus(500);
     });
 });
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        next();
+    }
+    else {
+        console.log("rest/ingredient/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
 /* PUT create ingredient*/
-router.put("/", async (req, res) => {
-    const body = req.body;
-    console.log("create new ingredient request");
-    console.log(body);
-    // Check content
-    if (!body.name) {
+router.put("/", (0, express_validator_1.body)("name").isString(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
+    const body = req.body;
+    console.log("create new ingredient request");
+    console.log(body);
     // Create PC
     try {
         let tmp = new Ingredient_1.Ingredient(body.name);
@@ -48,19 +57,17 @@ router.put("/", async (req, res) => {
     res.sendStatus(200);
 });
 /* DELETE ingredient*/
-router.delete("/:oid", (0, express_validator_1.param)("oid").isInt(), async (req, res) => {
+router.delete("/:iid", (0, express_validator_1.param)("iid").isInt(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
-    const body = req.body;
-    console.log("delete ingredient request");
-    console.log(body);
+    console.log("delete ingredient request " + req.params.iid);
     // Create Payment Method
     try {
         let tmp = await data_source_1.AppDataSource.getRepository(Ingredient_1.Ingredient).findOneOrFail({
             where: {
-                id: Number(req.params.oid),
+                id: Number(req.params.iid),
             },
         });
         await data_source_1.AppDataSource.getRepository(Ingredient_1.Ingredient).remove(tmp);

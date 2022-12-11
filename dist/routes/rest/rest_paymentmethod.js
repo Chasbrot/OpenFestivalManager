@@ -25,29 +25,6 @@ router.get("/", (_req, res) => {
         res.sendStatus(500);
     });
 });
-/* PUT create paymentmethod*/
-router.put("/", async (req, res) => {
-    const body = req.body;
-    console.log("create new paymentmethod request");
-    console.log(body);
-    // Check content
-    if (!body.name) {
-        res.sendStatus(400);
-        return;
-    }
-    // Create Payment Method
-    try {
-        let pm = new PaymentMethod_1.PaymentMethod();
-        pm.name = body.name;
-        await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).save(pm);
-    }
-    catch (e) {
-        console.log("rest/paymentmethod/PUT new: Error" + e);
-        res.sendStatus(500);
-        return;
-    }
-    res.sendStatus(200);
-});
 /* GET default paymentmethod */
 router.get("/default", (_req, res) => {
     data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod)
@@ -63,19 +40,50 @@ router.get("/default", (_req, res) => {
         res.sendStatus(500);
     });
 });
-/* PUT set default payment method*/
-router.put("/default", async (req, res) => {
-    const body = req.body;
-    console.log("create new paymentmethod request");
-    console.log(body);
-    // Check content
-    if (!body.pmid) {
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        next();
+    }
+    else {
+        console.log("rest/paymentmethod/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
+/* PUT create paymentmethod*/
+router.put("/", (0, express_validator_1.body)("name").isString(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
+    const body = req.body;
+    console.log("create new paymentmethod request");
+    console.log(body);
     // Create Payment Method
     try {
-        let new_default = await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).findOneByOrFail({ id: Number(body.pmid) });
+        let pm = new PaymentMethod_1.PaymentMethod();
+        pm.name = body.name;
+        await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).save(pm);
+    }
+    catch (e) {
+        console.log("rest/paymentmethod/PUT new: Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
+});
+/* PUT set default payment method*/
+router.put("/default", (0, express_validator_1.body)("pmid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    const body = req.body;
+    console.log("create new paymentmethod request");
+    console.log(body);
+    // Create Payment Method
+    try {
+        let new_default = await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).findOneByOrFail({ id: body.pmid });
         let old_default = await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).findOneByOrFail({ default: true });
         old_default.default = false;
         new_default.default = true;
@@ -89,15 +97,13 @@ router.put("/default", async (req, res) => {
     }
     res.sendStatus(200);
 });
-/* DELETE alerttype*/
+/* DELETE paymentmethod*/
 router.delete("/:pmid", (0, express_validator_1.param)("pmid").isInt(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
-    const body = req.body;
-    console.log("delete paymentmethod request");
-    console.log(body);
+    console.log("delete paymentmethod request " + req.params.pmid);
     // Create Payment Method
     try {
         let pm = await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).findOneOrFail({

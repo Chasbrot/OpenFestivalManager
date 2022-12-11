@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const Account_1 = require("../../entity/Account");
 const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
@@ -20,7 +21,7 @@ router.get("/:tid/sessions", (0, express_validator_1.param)("tid").isInt(), (req
         .find({
         relations: {
             table: true,
-            states: true
+            states: true,
         },
         where: {
             table: {
@@ -36,22 +37,31 @@ router.get("/:tid/sessions", (0, express_validator_1.param)("tid").isInt(), (req
         res.sendStatus(500);
     });
 });
-/* PUT create new session on table */
-router.put("/", async (req, res) => {
-    const body = req.body;
-    console.log("create new table request");
-    console.log(body);
-    // Check content
-    if (!body.name || !body.tgid) {
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        next();
+    }
+    else {
+        console.log("rest/table/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
+/* PUT create new table */
+router.put("/", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("tgid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty() && !req.body.pid) {
         res.sendStatus(400);
         return;
     }
+    const body = req.body;
+    console.log("create new table request");
+    console.log(body);
     // Create Table
     let tg;
     try {
         tg = await data_source_1.AppDataSource.getRepository(TableGroup_1.TableGroup).findOneOrFail({
             relations: {
-                tables: true
+                tables: true,
             },
             where: {
                 id: Number(body.tgid),
@@ -64,6 +74,30 @@ router.put("/", async (req, res) => {
     }
     catch (e) {
         console.log("table/new: Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
+});
+/* DELETE table*/
+router.delete("/:tid", (0, express_validator_1.param)("tid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    const body = req.body;
+    console.log("delete table request " + req.params.tid);
+    // Create Payment Method
+    try {
+        let tmp = await data_source_1.AppDataSource.getRepository(Table_1.Table).findOneOrFail({
+            where: {
+                id: Number(req.params.tid),
+            },
+        });
+        await data_source_1.AppDataSource.getRepository(Table_1.Table).remove(tmp);
+    }
+    catch (e) {
+        console.log("rest/table/DELETE : Error" + e);
         res.sendStatus(500);
         return;
     }

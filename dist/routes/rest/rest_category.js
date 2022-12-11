@@ -27,28 +27,6 @@ router.get("/", (_req, res) => {
         res.sendStatus(500);
     });
 });
-/* PUT create category*/
-router.put("/", async (req, res) => {
-    const body = req.body;
-    console.log("create new product categories request");
-    console.log(body);
-    // Check content
-    if (!body.name) {
-        res.sendStatus(400);
-        return;
-    }
-    // Create PC
-    try {
-        let pc = new Category_1.Category(body.name);
-        await data_source_1.AppDataSource.getRepository(Category_1.Category).save(pc);
-    }
-    catch (e) {
-        console.log("rest/categories/PUT new: Error" + e);
-        res.sendStatus(500);
-        return;
-    }
-    res.sendStatus(200);
-});
 /* GET products from category */
 router.get("/:cid/products", (0, express_validator_1.param)("cid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -82,15 +60,44 @@ router.get("/:cid/products", (0, express_validator_1.param)("cid").isInt(), (req
         res.sendStatus(500);
     });
 });
-/* DELETE alerttype*/
-router.delete("/:cid", (0, express_validator_1.param)("cid").isInt(), async (req, res) => {
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        next();
+    }
+    else {
+        console.log("rest/category/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
+/* PUT create category*/
+router.put("/", (0, express_validator_1.body)("name").isString(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
     const body = req.body;
-    console.log("delete category request");
+    console.log("create new product categories request");
     console.log(body);
+    // Create PC
+    try {
+        let pc = new Category_1.Category(body.name);
+        await data_source_1.AppDataSource.getRepository(Category_1.Category).save(pc);
+    }
+    catch (e) {
+        console.log("rest/categories/PUT new: Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
+});
+/* DELETE category*/
+router.delete("/:cid", (0, express_validator_1.param)("cid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    console.log("delete category request " + req.params.cid);
     // Create Payment Method
     try {
         let tmp = await data_source_1.AppDataSource.getRepository(Category_1.Category).findOneOrFail({

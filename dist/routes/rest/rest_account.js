@@ -38,23 +38,19 @@ router.get("/", (req, res) => {
     });
 });
 /* PUT create user account */
-router.put("/", async (req, res) => {
+router.put("/", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("password").isString(), (0, express_validator_1.body)("accounttype").isInt(), (0, express_validator_1.body)("loginAllowed").isBoolean(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
-    let body = req.body;
-    if (!body.name || !body.password) {
-        res.sendStatus(400);
-        return;
-    }
+    const body = req.body;
     console.log(body);
     let a = new Account_1.Account();
     a.name = req.body.name;
     // Hash password
-    a.hash = (0, crypto_1.createHash)("sha256").update(req.body.password).digest("hex");
-    a.accounttype = req.body.accounttype;
-    a.loginAllowed = req.body.loginAllowed;
+    a.hash = (0, crypto_1.createHash)("sha256").update(body.password).digest("hex");
+    a.accounttype = body.accounttype;
+    a.loginAllowed = body.loginAllowed;
     // Save new account
     data_source_1.AppDataSource.getRepository(Account_1.Account)
         .save(a)
@@ -90,12 +86,12 @@ router.get("/:id", (0, express_validator_1.param)("id").isInt(), async (req, res
     });
 });
 /* PUT update account */
-router.put("/:aid", async (req, res) => {
+router.put("/:aid", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("password").isString(), (0, express_validator_1.body)("accounttype").isInt(), (0, express_validator_1.body)("loginAllowed").isBoolean(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
-    let body = req.body;
+    const body = req.body;
     try {
         let a = await data_source_1.AppDataSource.getRepository(Account_1.Account).findOneByOrFail({
             id: Number(req.params.aid),
@@ -115,12 +111,13 @@ router.put("/:aid", async (req, res) => {
     }
     res.sendStatus(200);
 });
-/* GET user account*/
+/* DELETE user account*/
 router.delete("/:aid", (0, express_validator_1.param)("id").isInt(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
+    console.log("delete user account request  " + req.params.aid);
     try {
         let a = await data_source_1.AppDataSource.getRepository(Account_1.Account).findOneByOrFail({
             id: Number(req.params.aid),

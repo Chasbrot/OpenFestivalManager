@@ -29,29 +29,6 @@ router.get("/", (_req, res) => {
         res.sendStatus(500);
     });
 });
-/* PUT create new station */
-router.put("/", async (req, res) => {
-    const body = req.body;
-    console.log("create new station request");
-    console.log(body);
-    // Check content
-    if (!body.name) {
-        res.sendStatus(400);
-        return;
-    }
-    // Create Table
-    let tg;
-    try {
-        let station = new Station_1.Station(body.name);
-        await data_source_1.AppDataSource.getRepository(Station_1.Station).save(station);
-    }
-    catch (e) {
-        console.log("rest/station/PUT new: Error" + e);
-        res.sendStatus(500);
-        return;
-    }
-    res.sendStatus(200);
-});
 /* GET products by station */
 router.get("/:sid/products", (0, express_validator_1.param)("sid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -69,31 +46,20 @@ router.get("/:sid/products", (0, express_validator_1.param)("sid").isInt(), (req
             producer: {
                 id: Number(req.params.sid),
             },
-            productLock: (0, typeorm_1.Not)(Product_1.LockType.HIDDEN)
+            productLock: (0, typeorm_1.Not)(Product_1.LockType.HIDDEN),
         },
         order: {
-            list_priority: "DESC"
-        }
+            list_priority: "DESC",
+        },
     })
         .then((result) => {
-        res.set('Cache-control', `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
         res.json(result);
     })
         .catch((err) => {
         console.log(err);
         res.sendStatus(500);
     });
-});
-/* Check session and accounttype*/
-router.use(function (req, res, next) {
-    if (req.session.account.accounttype == Account_1.AccountType.ADMIN ||
-        req.session.account.accounttype == Account_1.AccountType.STATION) {
-        next();
-    }
-    else {
-        console.log("rest/station/auth: unauthorized");
-        res.sendStatus(403);
-    }
 });
 /* GET active orders from station */
 router.get("/:sid/activeorders", (0, express_validator_1.param)("sid").isInt(), (req, res) => {
@@ -131,15 +97,46 @@ router.get("/:sid/pastorders", (0, express_validator_1.param)("sid").isInt(), (r
         res.sendStatus(500);
     });
 });
-/* DELETE alerttype*/
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        next();
+    }
+    else {
+        console.log("rest/station/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
+/* PUT create new station */
+router.put("/", (0, express_validator_1.body)("name").isString(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty() && !req.body.pid) {
+        res.sendStatus(400);
+        return;
+    }
+    const body = req.body;
+    console.log("create new station request");
+    console.log(body);
+    // Create Table
+    let tg;
+    try {
+        let station = new Station_1.Station(body.name);
+        await data_source_1.AppDataSource.getRepository(Station_1.Station).save(station);
+    }
+    catch (e) {
+        console.log("rest/station/PUT new: Error" + e);
+        res.sendStatus(500);
+        return;
+    }
+    res.sendStatus(200);
+});
+/* DELETE station*/
 router.delete("/:sid", (0, express_validator_1.param)("sid").isInt(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
     const body = req.body;
-    console.log("delete station request");
-    console.log(body);
+    console.log("delete station request " + req.params.sid);
     // Create Payment Method
     try {
         let tmp = await data_source_1.AppDataSource.getRepository(Station_1.Station).findOneOrFail({

@@ -21,29 +21,7 @@ import { MoreThan, Not } from "typeorm";
 /* Check session and accounttype*/
 // Every active session needs full access
 
-/* POST order/state */
-/* Creates new state entry for a order*/
-router.post(
-  "/:oid/state",
-  param("oid").isInt(),
-  async (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty() && !req.body.new) {
-      res.sendStatus(400);
-      return;
-    }
-    try {
-      let order = await AppDataSource.getRepository(Order).findOneByOrFail({
-        id: Number(req.params.oid),
-      });
-      await db.setOrderStatus(order, req.body.new, req.session.account!);
-    } catch (e) {
-      console.log("rest/order/state POST: " + e);
-      res.sendStatus(500);
-      return;
-    }
-    res.sendStatus(200);
-  }
-);
+
 
 /* GET order */
 router.get("/:oid", param("oid").isInt(), (req: Request, res: Response) => {
@@ -97,7 +75,7 @@ router.get(
           id: Number(req.params.oid),
         },
       });
-      
+
       product = await AppDataSource.getRepository("Product").findOneOrFail({
         relations: {
           ingredients: true,
@@ -134,10 +112,46 @@ router.get(
         oIMap.push([pi.ingredient, false]);
       }
     }
-    res.set('Cache-control', `max-age=${process.env.REST_CACHE_TIME}`)
+    res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
     res.json(oIMap);
   }
 );
 
+/* Check session and accounttype */
+router.use(function (req, res, next) {
+  if (
+    req.session.account!.accounttype
+  ) {
+    next();
+  } else {
+    console.log("rest/order/auth: unauthorized");
+    res.sendStatus(403);
+  }
+});
+
+/* POST order/state */
+/* Creates new state entry for a order*/
+router.post(
+  "/:oid/state",
+  param("oid").isInt(),
+  body("new").isInt(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    try {
+      let order = await AppDataSource.getRepository(Order).findOneByOrFail({
+        id: Number(req.params.oid),
+      });
+      await db.setOrderStatus(order, req.body.new, req.session.account!);
+    } catch (e) {
+      console.log("rest/order/state POST: " + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
+  }
+);
 
 module.exports = router;

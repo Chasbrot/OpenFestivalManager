@@ -52,34 +52,37 @@ router.get("/", (req: Request, res: Response) => {
 });
 
 /* PUT create user account */
-router.put("/", async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
-    res.sendStatus(400);
-    return;
-  }
-  let body = req.body;
-  if (!body.name || !body.password) {
-    res.sendStatus(400);
-    return;
+router.put(
+  "/",
+  body("name").isString(),
+  body("password").isString(),
+  body("accounttype").isInt(),
+  body("loginAllowed").isBoolean(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
     }
-    console.log(body)
-  let a = new Account();
-  a.name = req.body.name;
-  // Hash password
-  a.hash = createHash("sha256").update(req.body.password).digest("hex");
-    a.accounttype = req.body.accounttype;
-    a.loginAllowed = req.body.loginAllowed;
-  // Save new account
-  AppDataSource.getRepository(Account)
-    .save(a)
-    .then(() => {
-      res.sendStatus(200);
-    })
-    .catch((err) => {
-      console.log("/rest/account/PUT Error " + err);
-      res.sendStatus(500);
-    });
-});
+    const body = req.body;
+    console.log(body);
+    let a = new Account();
+    a.name = req.body.name;
+    // Hash password
+    a.hash = createHash("sha256").update(body.password).digest("hex");
+    a.accounttype = body.accounttype;
+    a.loginAllowed = body.loginAllowed;
+    // Save new account
+    AppDataSource.getRepository(Account)
+      .save(a)
+      .then(() => {
+        res.sendStatus(200);
+      })
+      .catch((err) => {
+        console.log("/rest/account/PUT Error " + err);
+        res.sendStatus(500);
+      });
+  }
+);
 
 /* GET user account*/
 router.get("/:id", param("id").isInt(), async (req: Request, res: Response) => {
@@ -105,32 +108,39 @@ router.get("/:id", param("id").isInt(), async (req: Request, res: Response) => {
 });
 
 /* PUT update account */
-router.put("/:aid", async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
-    res.sendStatus(400);
-    return;
-  }
-  let body = req.body;
-  try {
-    let a = await AppDataSource.getRepository(Account).findOneByOrFail({
-      id: Number(req.params.aid),
-    });
-    a.accounttype = body.accounttype;
-    a.name = body.name;
-    a.loginAllowed = body.loginAllowed;
-    if (body.password) {
-      a.hash = createHash("sha256").update(body.password).digest("hex");
+router.put(
+  "/:aid",
+  body("name").isString(),
+  body("password").isString(),
+  body("accounttype").isInt(),
+  body("loginAllowed").isBoolean(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
     }
-    await AppDataSource.getRepository(Account).save(a);
-  } catch (e) {
-    console.log("rest/account/PUT update : Error" + e);
-    res.sendStatus(500);
-    return;
+    const body = req.body;
+    try {
+      let a = await AppDataSource.getRepository(Account).findOneByOrFail({
+        id: Number(req.params.aid),
+      });
+      a.accounttype = body.accounttype;
+      a.name = body.name;
+      a.loginAllowed = body.loginAllowed;
+      if (body.password) {
+        a.hash = createHash("sha256").update(body.password).digest("hex");
+      }
+      await AppDataSource.getRepository(Account).save(a);
+    } catch (e) {
+      console.log("rest/account/PUT update : Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
   }
-  res.sendStatus(200);
-});
+);
 
-/* GET user account*/
+/* DELETE user account*/
 router.delete(
   "/:aid",
   param("id").isInt(),
@@ -139,6 +149,7 @@ router.delete(
       res.sendStatus(400);
       return;
     }
+    console.log("delete user account request  " + req.params.aid)
     try {
       let a = await AppDataSource.getRepository(Account).findOneByOrFail({
         id: Number(req.params.aid),

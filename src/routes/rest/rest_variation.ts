@@ -19,7 +19,20 @@ import { StateType } from "../../entity/State";
 import { MoreThan, Not } from "typeorm";
 import { TableGroup } from "../../entity/TableGroup";
 
-/* DELETE alerttype*/
+
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+  if (
+    req.session.account!.accounttype == AccountType.ADMIN
+  ) {
+    next();
+  } else {
+    console.log("rest/variation/auth: unauthorized");
+    res.sendStatus(403);
+  }
+});
+
+/* DELETE Variation*/
 router.delete(
   "/:vid",
   param("vid").isInt(),

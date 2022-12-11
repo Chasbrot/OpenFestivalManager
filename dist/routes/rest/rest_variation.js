@@ -3,12 +3,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const Account_1 = require("../../entity/Account");
 const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
 const router = express_1.default.Router();
 const Variation_1 = require("../../entity/Variation");
-/* DELETE alerttype*/
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        next();
+    }
+    else {
+        console.log("rest/variation/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
+/* DELETE Variation*/
 router.delete("/:vid", (0, express_validator_1.param)("vid").isInt(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);

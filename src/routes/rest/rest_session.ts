@@ -32,7 +32,11 @@ router.use(function (req, res, next) {
 });
 
 /* PUT create new session on table */
-router.put("/", async (req: Request, res: Response) => {
+router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
+  if (!validationResult(req).isEmpty()) {
+    res.sendStatus(400);
+    return;
+  }
   const body = req.body;
   console.log("new session request");
   console.log(body);
@@ -170,42 +174,37 @@ router.get(
 );
 
 /* PUT create order */
-router.put("/:sid", param("sid").isInt(), async (req: Request, res: Response) => {
-  // Request must have a product id
-  if (!validationResult(req).isEmpty() && !req.body.pid) {
-    res.sendStatus(400);
-    return;
-  }
-  const body = req.body;
-
-  if (body.vid) {
-    try {
-      // Validate vid
-      Number(body.vid);
-    } catch (e) {
-      console.log("rest/session/order PUT: " + e);
-      res.sendStatus(403);
+router.put(
+  "/:sid",
+  param("sid").isInt(),
+  body("vid").isInt(),
+  body("pid").isInt(),
+  body("note").isString(),
+  async (req: Request, res: Response) => {
+    // Request must have a product id
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
       return;
     }
-  }
+    const body = req.body;
 
-  try {
-    let order = await db.createOrder(
-      req.session.account!.id,
-      Number(req.params.sid),
-      body.pid,
-      body.note,
-      body.options,
-      body.vid
-    );
-    res.json({
-      oid: order.id
-    })
-  } catch (e) {
-    console.log("rest/session/order PUT: "+e)
-    res.sendStatus(500);
+    try {
+      let order = await db.createOrder(
+        req.session.account!.id,
+        Number(req.params.sid),
+        body.pid,
+        body.note,
+        body.options,
+        body.vid
+      );
+      res.json({
+        oid: order.id,
+      });
+    } catch (e) {
+      console.log("rest/session/order PUT: " + e);
+      res.sendStatus(500);
+    }
   }
-  
-});
+);
 
 module.exports = router;

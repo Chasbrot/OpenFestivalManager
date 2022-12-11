@@ -1,5 +1,5 @@
-import { ProductIngredient } from './../../entity/ProductIngredient';
-import { Category } from './../../entity/Category';
+import { ProductIngredient } from "./../../entity/ProductIngredient";
+import { Category } from "./../../entity/Category";
 
 import { Variation } from "./../../entity/Variation";
 import { Ingredient } from "./../../entity/Ingredient";
@@ -22,52 +22,6 @@ import { MoreThan, Not } from "typeorm";
 import { TableGroup } from "../../entity/TableGroup";
 import { toNamespacedPath } from "path";
 
-
-/* CREATE product */
-router.put("/", async (req: Request, res: Response) => {
-  let body = req.body;
-  console.log(req.body);
-  if (body == null) {
-    res.sendStatus(400);
-    return;
-  }
-  let tmp;
-  try {
-    // Create new product required
-     tmp = new Product(
-      body.name,
-      Number(body.price),
-      Boolean(body.deliverable)
-    );
-    // Get producing station Required
-    tmp.producer = await AppDataSource.getRepository(Station).findOneByOrFail({
-      id: Number(body.producer.id),
-    });
-    // Get category
-    if (body.category && body.category.id) {
-      tmp.category = await AppDataSource.getRepository(Category).findOneBy({
-        id: Number(body.category.id),
-      });
-    }
-    // Get list priority
-    if (body.list_priority) {
-      tmp.list_priority= Number(body.list_priority)
-    }
-    // Get lock state
-    if (body.productLock) {
-      tmp.productLock = Number(body.productLock)
-    }
-    tmp.variations = [];
-    tmp.ingredients = [];
-    // Save object to db
-    await AppDataSource.getRepository(Product).save(tmp);
-  } catch (e) {
-    console.log("product/ PUT: Error" + e);
-    res.sendStatus(500);
-    return;
-  }
-  res.json({id: tmp.id});
-});
 
 /* GET all with full data product */
 router.get("/full", (req: Request, res: Response) => {
@@ -156,113 +110,6 @@ router.get("/:pid", param("pid").isInt(), (req: Request, res: Response) => {
     });
 });
 
-/* Connect variation to product */
-router.put("/:pid/variation", param("pid").isInt(), async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
-    res.sendStatus(400);
-    return;
-  }
-  let body = req.body;
-  if (body == null) {
-    res.sendStatus(400);
-    return;
-  }
-  console.log(body)
-  let v;
-  try {
-    // Load product
-    let p = await AppDataSource.getRepository(Product).findOneByOrFail({ id: Number(req.params.pid) });
-    v = new Variation(body.attrname, Number(body.price), p);
-    v = await AppDataSource.getRepository(Variation).save(v)
-  } catch (e) {
-    console.log("product/variation CREATE PUT: Error" + e);
-    res.sendStatus(500);
-    return;
-  }
-  res.json({ id: v.id });
-});
-
-
-/* UPDATE product */
-router.put("/:pid", param("pid").isInt(), async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
-    res.sendStatus(400);
-    return;
-  }
-  let body = req.body;
-  if (body == null) {
-    res.sendStatus(400);
-    return;
-  }
-  try {
-    // Load product
-    let oldProduct = await AppDataSource.getRepository(Product).findOneByOrFail({ id: Number(req.params.pid) });
-    // Update Data
-    oldProduct.name = body.name;
-    oldProduct.price = Number(body.price);
-    oldProduct.deliverable = Boolean(body.deliverable);
-    // Get producing station Required
-    oldProduct.producer = await AppDataSource.getRepository(Station).findOneByOrFail({
-      id: Number(body.producer.id),
-    });
-    // Get category
-    if (body.category && body.category.id) {
-      oldProduct.category = await AppDataSource.getRepository(Category).findOneBy({
-        id: Number(body.category.id),
-      });
-    } else if (body.category == "") {
-      oldProduct.category = null;
-    }
-    // Get list priority
-    if (body.list_priority || body.list_priority==0) {
-      oldProduct.list_priority= Number(body.list_priority)
-    }
-    // Get lock state
-    if (body.productLock || body.list_priority==0) {
-      oldProduct.productLock = Number(body.productLock)
-    }
-    console.log(oldProduct)
-    // Save object to db
-    await AppDataSource.getRepository(Product).save(oldProduct);
-  } catch (e) {
-    console.log("product/ PUT: Error" + e);
-    res.sendStatus(500);
-    return;
-  }
-});
-
-
-
-/* DELETE product */
-router.delete("/:pid", param("pid").isInt(), async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
-    res.sendStatus(400);
-    return;
-  }
-  try {
-    let tmp = await AppDataSource.getRepository(Product).findOneOrFail({
-      relations: {
-        ingredients: true,
-        variations: true
-      },
-      where: {
-        id: Number(req.params.pid),
-      },
-    });
-    // Remove all variations
-    if (tmp.variations.length > 0) {
-      await AppDataSource.getRepository(Variation).remove(tmp.variations);
-    }
-    // Delete Product
-    await AppDataSource.getRepository(Product).remove(tmp, {transaction: true});
-  } catch (e) {
-    console.log("rest/product/DELETE : Error" + e);
-    res.sendStatus(500);
-    return;
-  }
-  res.sendStatus(200);
-});
-
 /* GET ingredient by product */
 router.get(
   "/:pid/ingredients",
@@ -275,10 +122,10 @@ router.get(
     AppDataSource.getRepository(Product)
       .findOneOrFail({
         relations: {
-          ingredients: true
+          ingredients: true,
         },
         where: {
-            id: Number(req.params.pid),
+          id: Number(req.params.pid),
         },
       })
       .then((result) => {
@@ -294,24 +141,219 @@ router.get(
   }
 );
 
-/* PUT ingredient to product */
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+  if (
+    req.session.account!.accounttype == AccountType.ADMIN
+  ) {
+    next();
+  } else {
+    console.log("rest/product/auth: unauthorized");
+    res.sendStatus(403);
+  }
+});
+
+/* CREATE product */
 router.put(
-  "/:pid/ingredients",
+  "/",
+  body("name").isString(),
+  body("price").isFloat(),
+  body("deliverable").isBoolean(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    console.log(req.body);
+    let tmp;
+    try {
+      // Create new product required
+      tmp = new Product(
+        body.name,
+        Number(body.price),
+        Boolean(body.deliverable)
+      );
+      // Get producing station Required
+      tmp.producer = await AppDataSource.getRepository(Station).findOneByOrFail(
+        {
+          id: Number(body.producer.id),
+        }
+      );
+      // Get category
+      if (body.category != undefined && body.category.id) {
+        tmp.category = await AppDataSource.getRepository(Category).findOneBy({
+          id: Number(body.category.id),
+        });
+      }
+      // Get list priority
+      if (body.list_priority != undefined) {
+        tmp.list_priority = Number(body.list_priority);
+      }
+      // Get lock state
+      if (body.productLock != undefined) {
+        tmp.productLock = Number(body.productLock);
+      }
+      tmp.variations = [];
+      tmp.ingredients = [];
+      // Save object to db
+      await AppDataSource.getRepository(Product).save(tmp);
+    } catch (e) {
+      console.log("product/ PUT: Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.json({ id: tmp.id });
+  }
+);
+
+/* Connect variation to product */
+router.put(
+  "/:pid/variation",
+  param("pid").isInt(),
+  body("attrname").isString(),
+  body("price").isFloat(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    console.log(body);
+    let v;
+    try {
+      // Load product
+      let p = await AppDataSource.getRepository(Product).findOneByOrFail({
+        id: Number(req.params.pid),
+      });
+      v = new Variation(body.attrname, Number(body.price), p);
+      v = await AppDataSource.getRepository(Variation).save(v);
+    } catch (e) {
+      console.log("product/variation CREATE PUT: Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.json({ id: v.id });
+  }
+);
+
+/* UPDATE product */
+router.put(
+  "/:pid",
+  param("pid").isInt(),
+  body("name").isString(),
+  body("price").isFloat(),
+  body("deliverable").isBoolean(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    try {
+      // Load product
+      let oldProduct = await AppDataSource.getRepository(
+        Product
+      ).findOneByOrFail({ id: Number(req.params.pid) });
+      // Update Data
+      oldProduct.name = body.name;
+      oldProduct.price = Number(body.price);
+      oldProduct.deliverable = Boolean(body.deliverable);
+      // Get producing station Required
+      oldProduct.producer = await AppDataSource.getRepository(
+        Station
+      ).findOneByOrFail({
+        id: Number(body.producer.id),
+      });
+      // Get category
+      if (body.category != undefined && body.category.id) {
+        oldProduct.category = await AppDataSource.getRepository(
+          Category
+        ).findOneBy({
+          id: Number(body.category.id),
+        });
+      } else if (body.category == undefined || body.category == "") {
+        oldProduct.category = null;
+      }
+      // Get list priority
+      if (body.list_priority != undefined) {
+        oldProduct.list_priority = Number(body.list_priority);
+      }
+      // Get lock state
+      if (body.productLock != undefined) {
+        oldProduct.productLock = Number(body.productLock);
+      }
+      console.log(oldProduct);
+      // Save object to db
+      await AppDataSource.getRepository(Product).save(oldProduct);
+    } catch (e) {
+      console.log("product/ PUT: Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+  }
+);
+
+/* DELETE product */
+router.delete(
+  "/:pid",
   param("pid").isInt(),
   async (req: Request, res: Response) => {
     if (!validationResult(req).isEmpty()) {
       res.sendStatus(400);
       return;
     }
-    let body = req.body;
-    if (body == null) {
+    console.log("delete product request " + req.params.pid);
+    try {
+      let tmp = await AppDataSource.getRepository(Product).findOneOrFail({
+        relations: {
+          ingredients: true,
+          variations: true,
+        },
+        where: {
+          id: Number(req.params.pid),
+        },
+      });
+      // Remove all variations
+      if (tmp.variations.length > 0) {
+        await AppDataSource.getRepository(Variation).remove(tmp.variations);
+      }
+      // Delete Product
+      await AppDataSource.getRepository(Product).remove(tmp, {
+        transaction: true,
+      });
+    } catch (e) {
+      console.log("rest/product/DELETE : Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
+  }
+);
+
+/* PUT ingredient to product */
+router.put(
+  "/:pid/ingredients",
+  param("pid").isInt(),
+  body("standard").isBoolean(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    if (body.ingredient == undefined) {
       res.sendStatus(400);
       return;
     }
     try {
       // Load product
-      let p = await AppDataSource.getRepository(Product).findOneByOrFail({ id: Number(req.params.pid) });
-      let i = await AppDataSource.getRepository(Ingredient).findOneByOrFail({ id: Number(body.ingredient.id) });
+      let p = await AppDataSource.getRepository(Product).findOneByOrFail({
+        id: Number(req.params.pid),
+      });
+      let i = await AppDataSource.getRepository(Ingredient).findOneByOrFail({
+        id: Number(body.ingredient.id),
+      });
       let pi = new ProductIngredient(p, i, Boolean(body.standard));
       await AppDataSource.getRepository(ProductIngredient).save(pi);
     } catch (e) {
@@ -332,14 +374,12 @@ router.delete(
       res.sendStatus(400);
       return;
     }
-    let body = req.body;
-    if (body == null) {
-      res.sendStatus(400);
-      return;
-    }
+    console.log("delete ingredient from product request " + req.params.iid);
     try {
       // Load product
-      let pi = await AppDataSource.getRepository(ProductIngredient).findOneByOrFail({ id: Number(req.params.iid) });
+      let pi = await AppDataSource.getRepository(
+        ProductIngredient
+      ).findOneByOrFail({ id: Number(req.params.iid) });
       await AppDataSource.getRepository(ProductIngredient).remove(pi);
     } catch (e) {
       console.log("product/ingredients DELETE: Error" + e);
@@ -349,7 +389,5 @@ router.delete(
     res.sendStatus(200);
   }
 );
-
-
 
 module.exports = router;

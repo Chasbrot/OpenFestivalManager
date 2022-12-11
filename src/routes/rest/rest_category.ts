@@ -35,28 +35,6 @@ router.get("/", (_req: Request, res: Response) => {
     });
 });
 
-/* PUT create category*/
-router.put("/", async (req: Request, res: Response) => {
-  const body = req.body;
-  console.log("create new product categories request");
-  console.log(body);
-  // Check content
-  if (!body.name) {
-    res.sendStatus(400);
-    return;
-  }
-  // Create PC
-  try {
-    let pc = new Category(body.name);
-    await AppDataSource.getRepository(Category).save(pc);
-  } catch (e) {
-    console.log("rest/categories/PUT new: Error" + e);
-    res.sendStatus(500);
-    return;
-  }
-  res.sendStatus(200);
-});
-
 /* GET products from category */
 router.get(
   "/:cid/products",
@@ -95,7 +73,44 @@ router.get(
   }
 );
 
-/* DELETE alerttype*/
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+  if (
+    req.session.account!.accounttype == AccountType.ADMIN
+  ) {
+    next();
+  } else {
+    console.log("rest/category/auth: unauthorized");
+    res.sendStatus(403);
+  }
+});
+
+/* PUT create category*/
+router.put(
+  "/",
+  body("name").isString(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    const body = req.body;
+    console.log("create new product categories request");
+    console.log(body);
+    // Create PC
+    try {
+      let pc = new Category(body.name);
+      await AppDataSource.getRepository(Category).save(pc);
+    } catch (e) {
+      console.log("rest/categories/PUT new: Error" + e);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
+  }
+);
+
+/* DELETE category*/
 router.delete(
   "/:cid",
   param("cid").isInt(),
@@ -104,9 +119,7 @@ router.delete(
       res.sendStatus(400);
       return;
     }
-    const body = req.body;
-    console.log("delete category request");
-    console.log(body);
+    console.log("delete category request " + req.params.cid);
     // Create Payment Method
     try {
       let tmp = await AppDataSource.getRepository(Category).findOneOrFail({

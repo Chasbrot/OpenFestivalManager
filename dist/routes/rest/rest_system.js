@@ -9,16 +9,14 @@ const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
 const router = express_1.default.Router();
 const process_1 = __importDefault(require("process"));
-/* Check session and accounttype*/
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
 router.use(function (req, res, next) {
-    if (req.session.account &&
-        req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
         next();
     }
     else {
-        console.log("rest/account/auth: unauthorized");
-        res.sendStatus(401);
-        return;
+        console.log("rest/system/auth: unauthorized");
+        res.sendStatus(403);
     }
 });
 /* GET all accounts */

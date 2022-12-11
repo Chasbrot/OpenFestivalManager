@@ -25,16 +25,25 @@ router.get("/", (_req, res) => {
         res.sendStatus(500);
     });
 });
+/* Check session and accounttype \/\/\/\/\/\/\/\/ ADMIN SPACE \/\/\/\/\/\/ */
+router.use(function (req, res, next) {
+    if (req.session.account.accounttype == Account_1.AccountType.ADMIN) {
+        next();
+    }
+    else {
+        console.log("rest/alerttypes/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
 /* PUT create alerttype*/
-router.put("/", async (req, res) => {
-    const body = req.body;
-    console.log("create new alerttype request");
-    console.log(body);
-    // Check content
-    if (!body.name) {
+router.put("/", (0, express_validator_1.body)("name").isString(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
     }
+    const body = req.body;
+    console.log("create new alerttype request");
+    console.log(body);
     // Create AlertType
     try {
         let at = new AlertType_1.AlertType(body.name);
@@ -53,9 +62,7 @@ router.delete("/:atid", (0, express_validator_1.param)("atid").isInt(), async (r
         res.sendStatus(400);
         return;
     }
-    const body = req.body;
-    console.log("delete alerttype request");
-    console.log(body);
+    console.log("delete alerttype request " + req.params.atid);
     // Create Payment Method
     try {
         let tmp = await data_source_1.AppDataSource.getRepository(AlertType_1.AlertType).findOneOrFail({

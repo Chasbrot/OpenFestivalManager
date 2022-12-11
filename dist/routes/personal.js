@@ -28,8 +28,14 @@ router.use(function (req, res, next) {
     }
 });
 /* GET login page */
-router.get("/login", function (_req, res) {
-    res.render("personal/login_personal", { err: false });
+router.get("/login", function (req, res) {
+    if (req.session.account?.accounttype == Account_1.AccountType.USER) {
+        // Redirect tp mainpage if user session exists
+        res.redirect("/personal/overview");
+    }
+    else {
+        res.render("personal/login_personal", { err: false });
+    }
 });
 /* Personal login */
 router.post("/login", (0, express_validator_1.body)("username").isAlphanumeric(), async function (req, res, _next) {

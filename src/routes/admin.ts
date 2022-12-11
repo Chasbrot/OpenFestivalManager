@@ -33,37 +33,18 @@ router.use(function (req, res, next) {
 
 /* GET main admin page */
 router.get("/", async (_req: Request, res: Response) => {
-  let users;
-  let db_access = true;
-  try {
-    users = await AppDataSource.getRepository(Account).find({
-      where: [{ accounttype: AccountType.USER }],
-    });
-  } catch (err) {
-    console.log(err);
-    db_access = false;
-  }
-
   res.render("admin/admin", {
     uptime: process.uptime() | 0,
-    db_a: db_access,
-    regActive: global.registrationActive,
-    personal: users,
+    db_a: AppDataSource.isInitialized,
   });
 });
 
-router.post("/", upload.single("dbfile"), async (req, res, _next) => {
+router.post("/", async (req, res, _next) => {
   // store all the user input data
   const body = req.body;
 
-  if (body.registrationPersonal == "on") {
-    global.registrationActive = true;
-  } else {
-    global.registrationActive = false;
-  }
-
   /* Logout admin session*/
-  if (req.body.logout) {
+  if (body.logout) {
     req.session.destroy(function (err) {
       if (err) {
         console.log(err);
@@ -73,89 +54,6 @@ router.post("/", upload.single("dbfile"), async (req, res, _next) => {
     });
     res.redirect("/admin/login");
     return;
-  }
-
-  /* Export database to sql file*/
-  if (req.body.exportdb) {
-    console.log("Exporting Database");
-    let time = new Date();
-    let filename =
-      "dump_" + time.getFullYear() + time.getMonth() + time.getDate();
-    mysqldump({
-      connection: {
-        host: "localhost",
-        user: "root",
-        password: "Pa..w0rd",
-        database: "festivalmanager",
-      },
-      dumpToFile: "./" + filename + ".sql",
-    })
-      .then(async () => {
-        res.download("./" + filename + ".sql");
-      })
-      .catch((err) => {
-        console.log("admin/sqldump: " + err);
-      });
-    return;
-  }
-
-  /* Export database to sql file*/
-  if (req.body.resetDynamic) {
-    console.log("Resetting Dynamic Data");
-    res.sendStatus(501);
-    return;
-  }
-
-  /* Export database to sql file*/
-  if (req.body.resetComplete) {
-    console.log("Resetting All Data");
-    /* Drop Database and reinitialize */
-    res.sendStatus(501);
-    return;
-  }
-
-  /* Create new user */
-  if (body.username && body.password && body.accounttype) {
-    let user = new Account();
-    user.name = body.username;
-    user.hash = createHash("sha256").update(body.password).digest("hex");
-    user.accounttype = body.accounttype;
-    AppDataSource.getRepository(Account)
-      .save(user)
-      .then(() => {
-        console.log("admin/createuser: User created, " + user.name);
-      })
-      .catch((err) => {
-        console.log("admin/createuser: User creation failed" + err);
-        console.log(user);
-      });
-  }
-
-  /* Change Password */
-  if (req.body.password1) {
-    const b = req.body;
-    console.log("Changing Password");
-    if (req.session.account?.id == -1) {
-      console.log("Cannot change built-in admin");
-      res.redirect("/admin");
-      return;
-    }
-    // Vaildate Password rules
-    if (b.password1.length >= 8 && b.password1) {
-      const hash = createHash("sha256").update(b.password1).digest("hex");
-      let user = req.session.account;
-      if (user == undefined) {
-        console.log(
-          "admin/pwchange: No User found for : " + req.session.account
-        );
-      } else {
-        user.hash = hash;
-        AppDataSource.getRepository(Account).save(user);
-        console.log("admin/pwchange: Updated pw for user " + user.name);
-      }
-    } else {
-      console.log("admin/pwchange: Passwords not the same or length match");
-    }
   }
 
   res.redirect("/admin"); // redirect to user form page after inserting the data
@@ -241,163 +139,7 @@ router.get("/statistics", async (_req, res) => {
 
 /* GET configuration page */
 router.get("/configuration", async (req, res) => {
-  res.render("admin/admin_configuration_vue.ejs");
-});
-
-/* POST configuration page */
-router.post("/configuration", function (req, res) {
-  const body = req.body;
-  console.log(body);
-
-  // Neue Tisch Gruppe anlegen
-  if (body.new_table_group) {
-    db.createTableGroup(body.new_table_group)
-      .catch((err: Error) => {
-        console.log(err);
-      })
-      .then(() => {
-        console.log("admin/config: table group record inserted");
-      });
-  }
-
-  // Neuen Tisch anlegen
-  if (body.new_table && body.table_group_id) {
-    db.createTable(body.new_table, body.table_group_id)
-      .catch((err: Error) => {
-        console.log(err);
-      })
-      .then(() => {
-        console.log("admin/config: table record inserted");
-      });
-  }
-
-  // Neue Station anlegen
-  if (body.new_station) {
-    db.createStation(body.new_station)
-      .catch((err: Error) => {
-        console.log(err);
-      })
-      .then(() => {
-        console.log("admin/config: station record inserted");
-      });
-  }
-
-  // Neue Zutat anlegen
-  if (body.new_option) {
-    db.createOption(body.new_option)
-    .catch((err: Error) => {
-      console.log(err);
-    })
-    .then(() => {
-      console.log("admin/config: option record inserted");
-    });
-  }
-
-  // Neue Zutat anlegen
-  if (body.newPaymentMethod) {
-    let pmm = new PaymentMethod();
-    pmm.name = body.newPaymentMethod;
-    AppDataSource.getRepository(PaymentMethod).save(pmm)
-    .catch((err: Error) => {
-      console.log(err);
-    })
-    .then(() => {
-      console.log("admin/config: paymentmethod record inserted");
-    });
-  }
-
-  // Neues Produkt anlegen
-  if (body.product_name) {
-    console.log(req.body);
-    let station = Number(body.product_station);
-    let name = body.product_name;
-    let options = body.product_option;
-    let defaults = body.product_option_standard;
-    let deliverable = body.product_deliverable == "on";
-    let cost = body.product_cost;
-    let priority = Number(body.product_priority);
-    let category = Number(body.product_category);
-
-    db.createProduct(
-      station,
-      name,
-      deliverable,
-      cost,
-      priority,
-      options,
-      defaults,
-      category
-    ).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // Remove Produkt
-  if (body.remove_product) {
-    db.removeProduct(body.remove_product).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // Remove Produkt
-  if (body.remove_option) {
-    db.removeIngredient(body.remove_option).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // Remove Tisch
-  if (body.remove_table) {
-    db.removeTable(body.remove_table).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // Remove Tisch Gruppe
-  if (body.remove_table_group) {
-    // Tische entfernen
-    db.removeTableGroup(body.remove_table_group).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // New alert type
-  if (body.newAlertType) {
-    db.createAlertType(body.newAlertType).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // New alert type
-  if (body.deleteAlertType) {
-    db.removeAlertType(body.deleteAlertType).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // New category
-  if (body.newCategory) {
-    let cat = new Category(body.newCategory);
-    AppDataSource.getRepository(Category).save(cat).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // Delete Category
-  if (body.deleteCategory) {
-    db.removeCategory(body.deleteCategory).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  // New category
-  if (body.new_variation_product && body.new_variation_name) {
-    db.createVariation(body.new_variation_name, body.new_variation_product, body.new_variation_price).catch((err: Error) => {
-      console.log(err);
-    });
-  }
-
-  res.redirect("/admin/configuration");
+  res.render("admin/admin_configuration.ejs");
 });
 
 /* GET orderdata page */

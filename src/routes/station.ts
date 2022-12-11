@@ -75,60 +75,6 @@ router.post(
   }
 );
 
-/* GET order entry html part*/
-router.get("/orderentry/:oid", param("oid").isInt(), async function (req, res) {
-  if (!validationResult(req).isEmpty()) {
-    res.sendStatus(400);
-    console.log("session/orderentry: Input validation failed");
-    return;
-  }
-  let order, wt, rec;
-  try {
-    // Load session and error if null
-    order = await AppDataSource.getRepository(Order).findOneOrFail({
-      relations: {
-        session: {
-          table: true,
-        },
-        states: true,
-        product: true,
-        variation: true,
-        orderedIngredients: true,
-      },
-      where: {
-        id: req.params!.oid,
-      },
-    });
-  } catch (e) {
-    console.log("station/overview: Error" + e);
-    res.sendStatus(500);
-    return;
-  }
-  rec =
-    order.getCurrentState()!.created.getHours() +
-    ":" +
-    order.getCurrentState()!.created.getMinutes();
-  let createdState = order.states.find((v: State) => {
-    if (v.statetype == StateType.CREATED) {
-      return v;
-    }
-  })!;
-  wt = (
-    (new Date().valueOf() - createdState.created.valueOf()) /
-    60000
-  ).toFixed(0);
-
-  // Difference map for ordered vs available ingredients
-  let diffMap = await db.getOrderIngredientsDiffMap(order);
-
-  res.render("station/orderentry", {
-    order: order,
-    waittime: wt,
-    recieved: rec,
-    special: order.note != "" || diffMap.size,
-    ingredients: diffMap,
-  });
-});
 
 /* GET station overview */
 router.get("/:sid", param("sid").isInt(), async function (req, res) {
@@ -151,7 +97,7 @@ router.get("/:sid", param("sid").isInt(), async function (req, res) {
     return;
   }
 
-  res.render("station/station_overview_vue", {
+  res.render("station/station_overview", {
     station: station,
     pre_orders: [],
   });
@@ -175,49 +121,6 @@ router.post("/:sid", async function (req, res) {
       }
     });
     res.redirect("/station/login");
-    return;
-  }
-  try {
-    if (body.oid) {
-      let order = await db.getOrderFromId(body.oid);
-      switch (body.change) {
-        case "processingOrder":
-          await db.setOrderStatus(
-            order,
-            StateType.COOKING,
-            req.session.account!
-          );
-          break;
-        case "sendingOrder":
-          await db.setOrderStatus(
-            order,
-            StateType.DELIVERING,
-            req.session.account!
-          );
-          break;
-        case "deliveredOrder":
-          await db.setOrderStatus(
-            order,
-            StateType.FINISHED,
-            req.session.account!
-          );
-          break;
-        case "canceledOrder":
-          await db.setOrderStatus(
-            order,
-            StateType.CANCELED,
-            req.session.account!
-          );
-          break;
-        default:
-          res.sendStatus(404);
-          console.log("station/post: unkown data " + body);
-          return;
-      }
-    }
-  } catch (e) {
-    console.log("station/post: Error" + e);
-    res.sendStatus(500);
     return;
   }
 

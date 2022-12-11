@@ -15,26 +15,26 @@
             <div class="col-2" style="max-width: 200px">
                 <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                     <button class="nav-link active" id="v-pills-database-tab" data-bs-toggle="pill"
-                    data-bs-target="#v-pills-database" type="button" role="tab" aria-controls="v-pills-database"
-                    aria-selected="true">Datenbank</button>
+                        data-bs-target="#v-pills-database" type="button" role="tab" aria-controls="v-pills-database"
+                        aria-selected="true">Datenbank</button>
                     <button class="nav-link" id="v-pills-tables-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
                         aria-selected="true" :disabled="!dbconfig.connected">Tische</button>
                     <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-organization" type="button" role="tab"
-                        aria-controls="v-pills-organization" aria-selected="true" :disabled="!dbconfig.connected">Organisation</button>
+                        aria-controls="v-pills-organization" aria-selected="true"
+                        :disabled="!dbconfig.connected">Organisation</button>
                     <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
-                        aria-selected="true"  :disabled="!dbconfig.connected">Produkte</button>
+                        aria-selected="true" :disabled="!dbconfig.connected">Produkte</button>
                     <button class="nav-link" id="v-pills-users-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-users"
-                        aria-selected="true"  :disabled="!dbconfig.connected">Benutzer</button>
+                        aria-selected="true" :disabled="!dbconfig.connected">Benutzer</button>
                 </div>
             </div>
             <div class="col-10">
                 <div class="tab-content" id="v-pills-tabContent">
-                    <div class="tab-pane fade" id="v-pills-tables" role="tabpanel"
-                        aria-labelledby="v-pills-tables-tab">
+                    <div class="tab-pane fade" id="v-pills-tables" role="tabpanel" aria-labelledby="v-pills-tables-tab">
                         <div class="card">
                             <div class="card-header">
                                 Tischgruppen
@@ -43,29 +43,27 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <form action="#" method="POST">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="basic-addon1">Neue Tischgruppe:</span>
-                                        </div>
-                                        <input type="text" class="form-control" id="new_table_group"
-                                            placeholder="Name der Gruppe" name="new_table_group" required>
-                                        <div class="input-group-append">
-                                            <button type="submit" class="btn btn-primary">Anlegen</button>
-                                        </div>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Neue Tischgruppe:</span>
                                     </div>
-                                </form>
+                                    <input type="text" class="form-control" placeholder="Name der Gruppe"
+                                        v-model="newTableGroupName" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary"
+                                            @click="createTableGroup()">Anlegen</button>
+                                    </div>
+                                </div>
                                 <br>
                                 <div class="list-group overflow-auto" style="max-height: 150px">
                                     <template v-for="tg in tableGroups">
                                         <div class="list-group-item">
                                             {{tg.name}}
                                             <div class="float-end">
-                                                <form action="configuration" method="POST">
-                                                    <button class="btn btn-danger btn-sm" @click="this.removeTableGroup(tg)">
-                                                        X
-                                                    </button>
-                                                </form>
+                                                <button class="btn btn-danger btn-sm"
+                                                    @click="this.removeTableGroup(tg.id)">
+                                                    X
+                                                </button>
                                             </div>
                                     </template>
                                     <div v-if="!tableGroups" class="list-group-item">
@@ -87,7 +85,8 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Neuer Tisch:</span>
                                     </div>
-                                    <select class="form-control" required v-model="selectedTableGroup" @change="loadTablesFromTableGroup">
+                                    <select class="form-control" required v-model="selectedTableGroup"
+                                        @change="loadTablesFromTableGroup">
                                         <option v-for="tg in tableGroups" :value="tg">
                                             {{ tg.name }}
                                         </option>
@@ -95,7 +94,8 @@
                                             Leer
                                         </option>
                                     </select>
-                                    <input type="text" class="form-control" placeholder="Nummer des Tisches" v-model="newTableNumber" required>
+                                    <input type="text" class="form-control" placeholder="Nummer des Tisches"
+                                        v-model="newTableNumber" required>
                                     <div class="input-group-append">
                                         <button @click="createTable" class="btn btn-primary">Anlegen</button>
                                     </div>
@@ -106,11 +106,9 @@
                                         <div class="list-group-item">
                                             {{t.name}}
                                             <div class="float-end">
-                                                <form action="configuration" method="POST">
-                                                    <button class="btn btn-danger btn-sm" @click="this.removeTable(t)">
+                                                    <button class="btn btn-danger btn-sm" @click="this.removeTable(t.id)">
                                                         X
                                                     </button>
-                                                </form>
                                             </div>
                                     </template>
                                     <div v-if="tables.length===0" class="list-group-item">
@@ -515,13 +513,15 @@
                                 <div class="mb-3 row">
                                     <label for="dbhost" class="col-sm-2 col-form-label">Host</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" v-model="dbconfig.host" required pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" minlength="8" maxlength="16">
+                                        <input type="text" class="form-control" v-model="dbconfig.host" required
+                                            pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" minlength="8" maxlength="16">
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
                                     <label for="dbport" class="col-sm-2 col-form-label">Port</label>
                                     <div class="col-sm-10">
-                                        <input type="number" class="form-control" v-model="dbconfig.port" maxlength="5" minlength="4">
+                                        <input type="number" class="form-control" v-model="dbconfig.port" maxlength="5"
+                                            minlength="4">
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -543,7 +543,7 @@
                                     </div>
                                 </div>
 
-                                
+
                             </div>
                             <div class="card-footer">
                                 <span class="text-success" v-if="dbtestresult==true">
@@ -553,8 +553,10 @@
                                     Datenbank Test fehlgeschlagen!
                                 </span>
                                 <div class="float-end">
-                                    <button type="button" class="btn btn-primary me-2" @click="dbTestSettings()">Test</button>
-                                    <button type="button" class="btn btn-primary" :disabled="dbtestresult!=true || true"  @click="dbSaveSettings()">Save</button>
+                                    <button type="button" class="btn btn-primary me-2"
+                                        @click="dbTestSettings()">Test</button>
+                                    <button type="button" class="btn btn-primary" :disabled="dbtestresult!=true || true"
+                                        @click="dbSaveSettings()">Save</button>
                                 </div>
 
                             </div>
@@ -565,12 +567,15 @@
                                 Datenbankwerkzeuge
                             </div>
                             <div class="card-body">
-                                <p class="text-danger">WARNING: The following tools can and will DELETE data from the database. Proceed with caution!</p>
+                                <p class="text-danger">WARNING: The following tools can and will DELETE data from the
+                                    database. Proceed with caution!</p>
                                 <div>
                                     <button class="btn btn-danger me-2" data-toggle="tooltip" data-placement="top"
-                                    title="USE WITH CAUTION! Deletes all dynamic content from the Database. All sessions, personal, orders and necessery mapping data">Reset Dynamic Data</button>
+                                        title="USE WITH CAUTION! Deletes all dynamic content from the Database. All sessions, personal, orders and necessery mapping data">Reset
+                                        Dynamic Data</button>
                                     <button class="btn btn-danger" data-toggle="tooltip" data-placement="top"
-                                    title="DELETES ALL DATA! Clears all user generated data for a fresh start">Reset Database</button>
+                                        title="DELETES ALL DATA! Clears all user generated data for a fresh start">Reset
+                                        Database</button>
                                 </div>
                             </div>
                         </div>
@@ -803,6 +808,7 @@
             errorModalRequest: "",
             // TableGroups
             tableGroups: [],
+            newTableGroupName: "",
             // Tables
             selectedTableGroup: "",
             tables: [],
@@ -964,6 +970,24 @@
                 this.tableGroups = await this.fetchData(`/rest/tablegroup`);
             },
 
+            async createTableGroup() {
+                if (!this.newTableGroupName) {
+                    return;
+                }
+                await this.putData("/rest/tablegroup",
+                    JSON.stringify({
+                        name: this.newTableGroupName,
+                    })
+                );
+                await this.loadTableGroups();
+                this.newTableGroupName = "";
+            },
+
+            async removeTableGroup(id) {
+                await this.deleteData(`/rest/tablegroup/${id}`, "");
+                await this.loadTableGroups();
+            },
+
             async loadTablesFromTableGroup() {
                 if (!this.selectedTableGroup) {
                     return null;
@@ -983,6 +1007,11 @@
                 );
                 await this.loadTablesFromTableGroup();
                 this.newTableNumber = "";
+            },
+
+            async removeTable(id) {
+                await this.deleteData(`/rest/table/${id}`, "");
+                await this.loadTablesFromTableGroup();
             },
 
             async createStation() {
@@ -1238,7 +1267,7 @@
                 this.dbconfig = await this.fetchData("/rest/system/database/config")
             },
 
-            async dbTestSettings(){
+            async dbTestSettings() {
                 let tmp = await this.postData("/rest/system/database/test", JSON.stringify(this.dbconfig));
                 this.dbtestresult = tmp.test_result;
             }

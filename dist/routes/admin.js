@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const TableGroup_1 = require("../entity/TableGroup");
 const Account_1 = require("../entity/Account");
 const data_source_1 = require("../data-source");
 const express_1 = __importDefault(require("express"));
@@ -11,7 +10,6 @@ const express_validator_1 = require("express-validator");
 const Account_2 = require("../entity/Account");
 const crypto_1 = require("crypto");
 const multer_1 = __importDefault(require("multer"));
-const State_1 = require("../entity/State");
 let upload = (0, multer_1.default)({ dest: "uploads/" });
 const router = express_1.default.Router();
 /* Check session and accounttype*/
@@ -108,14 +106,7 @@ router.post("/login", (0, express_validator_1.body)("username").isString(), (0, 
 });
 /* GET statistics page */
 router.get("/statistics", async (_req, res) => {
-    const dates = await data_source_1.AppDataSource.createQueryBuilder()
-        .select("created")
-        .from(State_1.State, "state")
-        .distinct()
-        .getMany();
-    console.log(dates);
-    throw Error("WIP");
-    res.render("admin/admin_statistics", { dates: dates });
+    res.render("admin/admin_statistics_vue");
 });
 /* GET configuration page */
 router.get("/configuration", async (req, res) => {
@@ -123,9 +114,7 @@ router.get("/configuration", async (req, res) => {
 });
 /* GET orderdata page */
 router.get("/orderdata", async function (_req, res) {
-    // Count all tables
-    let tg = await data_source_1.AppDataSource.getRepository(TableGroup_1.TableGroup).find();
-    res.render("admin/admin_orderdata", { table_groups: tg });
+    res.render("admin/admin_orderdata_vue");
 });
 /*
 router.get('/error', function (req, res) {

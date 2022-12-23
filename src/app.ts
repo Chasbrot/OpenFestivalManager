@@ -35,6 +35,7 @@ if (process.env.DEVELOPMENT == "true") {
 // view engine setup (express js)
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -109,7 +110,7 @@ if (!ds.createADSFromFile()) {
 
 // Start express server
 app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
+  console.log(`[server]: Server is running at https://localhost:${port}`);
   console.log("[server]: Version " + process.env.VERSION);
 });
 

@@ -10,8 +10,60 @@ const express_validator_1 = require("express-validator");
 const router = express_1.default.Router();
 const process_1 = __importDefault(require("process"));
 const Order_1 = require("../../entity/Order");
+const State_1 = require("../../entity/State");
+const typeorm_1 = require("typeorm");
 /* Check session and accounttype*/
 // Every active session needs full access
+/* Check session and accounttype */
+router.use(function (req, res, next) {
+    if (req.session.account) {
+        next();
+    }
+    else {
+        console.log("rest/order/auth: unauthorized");
+        res.sendStatus(403);
+    }
+});
+/* GET all dates where a order was placed*/
+router.get("/dates", async (req, res) => {
+    data_source_1.AppDataSource.createQueryBuilder()
+        .select("DATE_TRUNC('day',created) AS day")
+        .from(State_1.State, "state")
+        .distinct()
+        .orderBy({ day: "DESC" })
+        .getRawMany()
+        .then((result) => {
+        res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
+        res.json(result);
+    })
+        .catch((err) => {
+        console.log("rest/order/dates GET: " + err);
+        res.sendStatus(500);
+    });
+});
+/* GET all open orders */
+router.get("/open", async (req, res) => {
+    try {
+        let o = await data_source_1.AppDataSource.getRepository(Order_1.Order).find({
+            relations: {
+                states: true,
+            },
+            where: {
+                // Which are NOT finished
+                states: {
+                    history: false,
+                    statetype: (0, typeorm_1.Not)(State_1.StateType.CLOSED || State_1.StateType.CANCELED),
+                },
+            },
+        });
+        console.log(o);
+        res.json(o);
+    }
+    catch (e) {
+        console.log("rest/order/open GET: " + e);
+        res.sendStatus(500);
+    }
+});
 /* GET order */
 router.get("/:oid", (0, express_validator_1.param)("oid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -98,16 +150,6 @@ router.get("/:oid/oIMap", (0, express_validator_1.param)("oid").isInt(), async (
     }
     res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
     res.json(oIMap);
-});
-/* Check session and accounttype */
-router.use(function (req, res, next) {
-    if (req.session.account.accounttype) {
-        next();
-    }
-    else {
-        console.log("rest/order/auth: unauthorized");
-        res.sendStatus(403);
-    }
 });
 /* POST order/state */
 /* Creates new state entry for a order*/

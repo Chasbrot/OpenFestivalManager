@@ -19,6 +19,23 @@ import { StateType } from "../../entity/State";
 import { MoreThan, Not } from "typeorm";
 import { TableGroup } from "../../entity/TableGroup";
 
+/* GET all tables */
+router.get(
+  "/",
+  (_req: Request, res: Response) => {
+    AppDataSource.getRepository(Table)
+      .find({
+      })
+      .then((result) => {
+        res.json(result);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+      });
+  }
+);
+
 /* GET sessions from table */
 router.get(
   "/:tid/sessions",

@@ -21,7 +21,58 @@ import { MoreThan, Not } from "typeorm";
 /* Check session and accounttype*/
 // Every active session needs full access
 
+/* Check session and accounttype */
+router.use(function (req, res, next) {
+  if (req.session.account!) {
+    next();
+  } else {
+    console.log("rest/order/auth: unauthorized");
+    res.sendStatus(403);
+  }
+});
 
+/* GET all dates where a order was placed*/
+router.get("/dates", async (req: Request, res: Response) => {
+  AppDataSource.createQueryBuilder()
+    .select("DATE_TRUNC('day',created) AS day")
+    .from(State, "state")
+    .distinct()
+    .orderBy({day: "DESC"})
+    .getRawMany()
+    .then((result) => {
+      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
+      res.json(result);
+    })
+    .catch((err) => {
+      console.log("rest/order/dates GET: " + err);
+      res.sendStatus(500);
+    });
+});
+
+
+
+/* GET all open orders */
+router.get("/open", async (req: Request, res: Response) => {
+  try {
+    let o = await AppDataSource.getRepository(Order).find({
+      relations: {
+        states: true,
+      },
+      where: {
+        // Which are NOT finished
+        states: {
+          history: false,
+          statetype: Not(StateType.CLOSED || StateType.CANCELED),
+        },
+      },
+    });
+    console.log(o);
+    res.json(o);
+  } catch (e) {
+    console.log("rest/order/open GET: " + e);
+    res.sendStatus(500);
+  }
+});
 
 /* GET order */
 router.get("/:oid", param("oid").isInt(), (req: Request, res: Response) => {
@@ -117,17 +168,7 @@ router.get(
   }
 );
 
-/* Check session and accounttype */
-router.use(function (req, res, next) {
-  if (
-    req.session.account!.accounttype
-  ) {
-    next();
-  } else {
-    console.log("rest/order/auth: unauthorized");
-    res.sendStatus(403);
-  }
-});
+
 
 /* POST order/state */
 /* Creates new state entry for a order*/

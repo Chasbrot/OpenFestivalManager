@@ -125,16 +125,7 @@ router.post(
 
 /* GET statistics page */
 router.get("/statistics", async (_req, res) => {
-  const dates = await AppDataSource.createQueryBuilder()
-    .select("created")
-    .from(State, "state")
-    .distinct()
-    .getMany();
-
-  console.log(dates);
-  throw Error("WIP");
-
-  res.render("admin/admin_statistics", { dates: dates });
+  res.render("admin/admin_statistics_vue");
 });
 
 /* GET configuration page */
@@ -144,9 +135,7 @@ router.get("/configuration", async (req, res) => {
 
 /* GET orderdata page */
 router.get("/orderdata", async function (_req, res) {
-  // Count all tables
-  let tg = await AppDataSource.getRepository(TableGroup).find();
-  res.render("admin/admin_orderdata", { table_groups: tg });
+  res.render("admin/admin_orderdata_vue");
 });
 
 /*

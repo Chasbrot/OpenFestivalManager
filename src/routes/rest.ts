@@ -45,8 +45,10 @@ const restVariationRouter = require("./rest/rest_variation");
 const restAccountRouter = require("./rest/rest_account");
 
 const restSystemRouter = require("./rest/rest_system");
+const restStatisticsRouter = require("./rest/rest_statistics");
 
 // Send for rest station to file, assign file
+// - Datamodel
 router.use("/station", restStationRouter);
 router.use("/tablegroup", restTableGroupRouter);
 router.use("/table", restTableRouter);
@@ -59,7 +61,11 @@ router.use("/alerttypes", restAlertTypeRouter);
 router.use("/ingredient", restIngredientRouter);
 router.use("/variation", restVariationRouter);
 router.use("/account", restAccountRouter);
+// - Management
 router.use("/system", restSystemRouter);
+router.use("/statistics", restStatisticsRouter);
+
+// Random unsorted rest requests
 
 /* GET list accounttypes */
 router.get("/accounttypes", async (_req: Request, res: Response) => {

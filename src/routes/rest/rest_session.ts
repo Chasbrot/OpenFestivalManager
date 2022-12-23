@@ -98,6 +98,32 @@ router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
   });
 });
 
+/* GET all global active sessions */
+router.get("/active", async (req: Request, res: Response) => {
+  
+  try {
+    let s = await AppDataSource.getRepository(Session).find({
+      relations: {
+        states: true,
+      },
+      where: 
+        {
+          // Which are NOT closed
+          states: {
+            history: false,
+            statetype: Not(StateType.CLOSED) ,
+          },
+        },
+    });
+    res.json(s);
+    
+  } catch (e) {
+    console.log("rest/session/active GET: " + e);
+    res.sendStatus(500);
+    return;
+  }
+});
+
 /* GET session */
 router.get("/:sid", param("sid").isInt(), (req: Request, res: Response) => {
   if (!validationResult(req).isEmpty()) {
@@ -206,5 +232,7 @@ router.put(
     }
   }
 );
+
+
 
 module.exports = router;

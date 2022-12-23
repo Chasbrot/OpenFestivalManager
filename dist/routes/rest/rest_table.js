@@ -11,6 +11,18 @@ const router = express_1.default.Router();
 const Table_1 = require("../../entity/Table");
 const Session_1 = require("../../entity/Session");
 const TableGroup_1 = require("../../entity/TableGroup");
+/* GET all tables */
+router.get("/", (_req, res) => {
+    data_source_1.AppDataSource.getRepository(Table_1.Table)
+        .find({})
+        .then((result) => {
+        res.json(result);
+    })
+        .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+    });
+});
 /* GET sessions from table */
 router.get("/:tid/sessions", (0, express_validator_1.param)("tid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -22,6 +34,9 @@ router.get("/:tid/sessions", (0, express_validator_1.param)("tid").isInt(), (req
         relations: {
             table: true,
             states: true,
+            servers: true,
+            bills: true,
+            orders: true,
         },
         where: {
             table: {

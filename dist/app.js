@@ -86,6 +86,6 @@ if (!data_source_1.ds.createADSFromFile()) {
 }
 // Start express server
 app.listen(port, () => {
-    console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
+    console.log(`[server]: Server is running at https://localhost:${port}`);
     console.log("[server]: Version " + process.env.VERSION);
 });

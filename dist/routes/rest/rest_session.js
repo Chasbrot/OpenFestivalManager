@@ -92,6 +92,29 @@ router.put("/", (0, express_validator_1.body)("tid").isInt(), async (req, res) =
         sid: s.id,
     });
 });
+/* GET all global active sessions */
+router.get("/active", async (req, res) => {
+    try {
+        let s = await data_source_1.AppDataSource.getRepository(Session_1.Session).find({
+            relations: {
+                states: true,
+            },
+            where: {
+                // Which are NOT closed
+                states: {
+                    history: false,
+                    statetype: (0, typeorm_1.Not)(State_1.StateType.CLOSED),
+                },
+            },
+        });
+        res.json(s);
+    }
+    catch (e) {
+        console.log("rest/session/active GET: " + e);
+        res.sendStatus(500);
+        return;
+    }
+});
 /* GET session */
 router.get("/:sid", (0, express_validator_1.param)("sid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {

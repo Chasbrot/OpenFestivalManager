@@ -54,11 +54,11 @@ class ds {
             await exports.AppDataSource.initialize()
                 .then(() => {
                 // here you can start to work with your database
-                console.log("app: Database initialized");
+                console.log("[server]: Database initialized");
             });
         }
         catch (err) {
-            console.log("app: Create DataSource failed, " + err);
+            console.log("[server]: Create DataSource failed, " + err);
             return false;
         }
         return true;

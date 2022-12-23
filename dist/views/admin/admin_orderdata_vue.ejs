@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Konsole</title>
+    <%- include('../header_common') %>
+</head>
+
+<body>
+    <%- include('admin_navbar') %>
+        <br />
+        <div id="app">
+            <div class="row px-2 d-flex align-items-start">
+                <div class="col-2" style="max-width: 200px">
+                    <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist"
+                        aria-orientation="vertical">
+                        <button class="nav-link active" id="v-pills-sessions-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-sessions" type="button" role="tab" aria-controls="v-pills-sessions"
+                            aria-selected="true">
+                            Sitzungen
+                        </button>
+                        <button class="nav-link" id="v-pills-orders-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-orders" type="button" role="tab" aria-controls="v-pills-orders"
+                            aria-selected="true">
+                            Bestellungen
+                        </button>
+                    </div>
+                </div>
+                <div class="col-10">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <div class="tab-pane fade active show" id="v-pills-sessions" role="tabpanel"
+                            aria-labelledby="v-pills-sessions-tab">
+                            <div class="card">
+                                <div class="card-header">Suchen über Tisch</div>
+                                <div class="card-body">
+                                    <div class="mb-3 row">
+                                        <span class="col-sm-2 col-form-label">Tischgruppe</span>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" v-model="selectedTableGroup">
+                                                <option value=""></option>
+                                                <option v-for="tg in tableGroups" :value="tg">
+                                                    {{ tg.name }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <span class="col-sm-2 col-form-label">Tisch</span>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" v-model="selectedTable">
+                                                <option v-for="t in tables" :value="t">
+                                                    {{ t.name }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <br />
+                                    <table class="table" v-if="sessions.length > 0">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Session ID</th>
+                                                <th scope="col">Start</th>
+                                                <th scope="col">Ende</th>
+                                                <th scope="col">
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Bestellungen">
+                                                        <img src="/images/order2.png" width="20" height="20" />
+                                                    </span>
+                                                </th>
+                                                <th scope="col">
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Rechnungen">
+                                                        <img src="/images/bill.png" width="20" height="20" />
+                                                    </span>
+                                                </th>
+                                                <th scope="col">Kellner</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template v-for="s in sessions">
+                                                <tr>
+                                                    <td>{{ s.id }}</td>
+                                                    <td>{{ parseTime(s.states[0].created) }}</td>
+                                                    <td v-if="s.states.length-1 != 0">
+                                                        {{
+                                                        parseTime(s.states[s.states.length - 1].created)
+                                                        }}
+                                                    </td>
+                                                    <td v-else>-</td>
+                                                    <td>{{ s.orders.length }}</td>
+                                                    <td>{{ s.servers.length }}</td>
+                                                    <td>
+                                                        <template v-for="servs in s.servers">
+                                                            <p>{{ servs.name }}</p>
+                                                        </template>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                    <span v-else>Keine Daten gefunden!</span>
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-orders" role="tabpanel"
+                            aria-labelledby="v-pills-orders-tab">
+                            <div class="card">
+                                <div class="card-header">Bestellung suchen</div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="sessionid">Sitzungs ID:</label>
+                                        <input type="number" class="form-control" id="sessionid" />
+                                    </div>
+                                    <button class="btn btn-primary form-control" onclick="loadOrders()">
+                                        Suche
+                                    </button>
+                                </div>
+
+                                <div class="card-body">
+                                    Bestellungen der Sitzung:
+                                    <div class="card" style="max-height: 200px">
+                                        <div class="card-body overflow-auto pt-0 px-1">
+                                            <div class="list-group pt-0" id="ordersFromSession"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Modal -->
+        <div class="modal" id="errorModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-danger" id="errorTitle">Fehler</h5>
+                    </div>
+                    <div class="modal-body">
+                        <h6>{{ errorModalMessage }}</h6>
+                        <span>Debugging Information:</span> <br>
+                        <span>Request: {{errorModalRequest}}</span> <br>
+                        <span>Error: {{ errorModalException}}</span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</body>
+
+<!-- Vue Js -->
+<script type="module" type="text/javascript">
+    import fw from "/vue/datamodel.js";
+
+    const { createApp } = Vue;
+
+    createApp({
+        data: () => ({
+            // Error Modal
+            errorModalMessage: "",
+            errorModalException: "",
+            errorModalRequest: "",
+            // Session Views
+            tableGroups: [],
+            selectedTableGroup: "",
+            tables: [],
+            selectedTable: "",
+            sessions: "",
+        }),
+
+        // Execute at page load
+        created() {
+            this.loadData();
+            
+        },
+
+        // Update data on changes
+        watch: {
+            async selectedTableGroup(nTG, oTG) {
+                this.tables = await fw.loadTablesFromTableGroup(
+                    this.selectedTableGroup
+                );
+            },
+            async selectedTable(nT, oT) {
+                this.sessions = await fw.loadSessionsFromTable(this.selectedTable);
+            },
+        },
+
+        // Helper functions
+        methods: {
+            parseTime(timestamp) {
+                const d = new Date(timestamp);
+                return d.getHours() + ":" + d.getMinutes();
+            },
+            async loadData() {
+                this.data = await fw.testFunction();
+                this.tableGroups = await fw.loadTableGroups();
+            },
+        },
+
+    }).mount("#app");
+</script>
+
+</html>

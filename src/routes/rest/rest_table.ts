@@ -33,6 +33,9 @@ router.get(
         relations: {
           table: true,
           states: true,
+          servers: true,
+          bills: true,
+          orders: true,
         },
         where: {
           table: {

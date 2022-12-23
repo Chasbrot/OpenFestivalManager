@@ -3,11 +3,26 @@
   "version": "1.0.0",
   "description": "A order management system for festivals",
   "main": "app.js",
+  "bin": "dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "start": "node dist/app.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/app.js\""
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/app.js\"",
+    "pack": "pkg package.json && move festivalmanager.exe releases/festivalmanager-latest.exe"
+  },
+  "pkg": {
+    "scripts": [
+      "dist/*.js",
+      "dist/entity/*.js", 
+      "dist/routes/*.js"
+    ],
+    "assets": [
+        "dist/views/**/*",
+        "dist/public/**/*"
+    ],
+    "targets": [ "node14-win-x64" ],
+    "output": "releases"
   },
   "author": "",
   "license": "ISC",

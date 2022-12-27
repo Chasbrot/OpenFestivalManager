@@ -135,39 +135,19 @@
         </div>
 
         <!-- Error Modal -->
-        <div class="modal" id="errorModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger" id="errorTitle">Fehler</h5>
-                    </div>
-                    <div class="modal-body">
-                        <h6>{{ errorModalMessage }}</h6>
-                        <span>Debugging Information:</span> <br>
-                        <span>Request: {{errorModalRequest}}</span> <br>
-                        <span>Error: {{ errorModalException}}</span>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <%- include('../errorModal') %>
 
 </body>
 
 <!-- Vue Js -->
 <script type="module" type="text/javascript">
     import fw from "/vue/datamodel.js";
+    import hlp from "/vue/helper.js";
 
     const { createApp } = Vue;
 
-    createApp({
+    let app = createApp({
         data: () => ({
-            // Error Modal
-            errorModalMessage: "",
-            errorModalException: "",
-            errorModalRequest: "",
             // Session Views
             tableGroups: [],
             selectedTableGroup: "",
@@ -206,7 +186,12 @@
             },
         },
 
-    }).mount("#app");
+    });
+    app.config.errorHandler = (err, instance, info) => {
+        console.log("Error",err, info)
+        hlp.makeError("The application has generated an error.", info, err);
+    }
+    app.mount("#app");
 </script>
 
 </html>

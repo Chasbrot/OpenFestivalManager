@@ -582,230 +582,215 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Error Modal -->
-        <div class="modal" id="errorModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger" id="errorTitle">Fehler</h5>
-                    </div>
-                    <div class="modal-body">
-                        <h6>{{ errorModalMessage }}</h6>
-                        <span>Debugging Information:</span> <br>
-                        <span>Request: {{errorModalRequest}}</span> <br>
-                        <span>Error: {{ errorModalException}}</span>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Product Detail Modal -->
-        <div class="modal" id="productDetailModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="pdTitle">Produkteigenschaften</h5>
-                        <div class="float-end">
-                            <span class="text-secondary" v-if="!productDetailModal.id">ID:-</span>
-                            <span class="text-secondary" v-else>ID:{{productDetailModal.id}}</span>
-                        </div>
-                    </div>
-                    <div class="modal-body">
-                        <h5>Basisdaten</h5>
-                        <div class="input-group">
-                            <span class="input-group-text" id="basic-addon1">Name:</span>
-                            <input type="text" class="form-control" placeholder="Name ds Produkt"
-                                v-model="productDetailModal.name" required>
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-text" id="basic-addon1">Preis:</span>
-                            <input type="number" class="form-control" placeholder="Preis"
-                                v-model="productDetailModal.price" min="0" step="0.1" required>
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-text" id="basic-addon1">Erzeuger:</span>
-                            <select class="form-select" v-model="productDetailModal.producer">
-                                <option v-for="s in stations" :value="s">
-                                    {{ s.name }}
-                                </option>
-                            </select>
-                        </div>
-                        <br>
-                        <h5>Erweitert</h5>
-                        <div class="input-group">
-                            <span class="input-group-text">Status:</span>
-                            <div class="btn-group" role="group">
-                                <input type="radio" class="btn-check" id="btnradio0" value="0" autocomplete="off"
-                                    checked v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-success" for="btnradio0"><img src="/images/visible.png"
-                                        width="20" height="20"></label>
-
-                                <input type="radio" class="btn-check" id="btnradio1" value="1" autocomplete="off"
-                                    v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-warning" for="btnradio1"><img
-                                        src="/images/production_warning.png" width="20" height="20"></label>
-
-                                <input type="radio" class="btn-check" id="btnradio2" value="2" autocomplete="off"
-                                    v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-danger" for="btnradio2"><img src="/images/lock.png"
-                                        width="20" height="20"></label>
-
-                                <input type="radio" class="btn-check" id="btnradio3" value="3" autocomplete="off"
-                                    v-model="productDetailModal.productLock">
-                                <label class="btn btn-outline-secondary" for="btnradio3"><img src="/images/hidden.png"
-                                        width="20" height="20"></label>
-                            </div>
-                            <span class="input-group-text">Reihung:</span>
-                            <input type="number" class="form-control" placeholder="Reihung"
-                                v-model="productDetailModal.list_priority" min="0">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-text">Kategorie:</span>
-                            <select class="form-select" v-model="productDetailModal.category">
-                                <option value="">-</option>
-                                <option v-for="c in productCategories" :value="c">
-                                    {{ c.name }}
-                                </option>
-                            </select>
-                            <span class="input-group-text">Zustellung:</span>
-                            <div class="input-group-text">
-                                <input class="form-check-input mt-0" type="checkbox" checked
-                                    v-model="productDetailModal.deliverable">
+            <!-- Product Detail Modal -->
+            <div class="modal" id="productDetailModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pdTitle">Produkteigenschaften</h5>
+                            <div class="float-end">
+                                <span class="text-secondary" v-if="!productDetailModal.id">ID:-</span>
+                                <span class="text-secondary" v-else>ID:{{productDetailModal.id}}</span>
                             </div>
                         </div>
-                        <br>
-                        <div
-                            v-if="productDetailModal && productDetailModal.id && productDetailModal.variations.length === 0">
-                            <h5>Optionen/Zutaten</h5>
+                        <div class="modal-body">
+                            <h5>Basisdaten</h5>
                             <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon1">Zutat:</span>
-                                </div>
-                                <select class="form-select" v-model="pDnewIngredient.ingredient">
-                                    <option v-for="i in ingredients" :value="i">
-                                        {{ i.name }}
+                                <span class="input-group-text" id="basic-addon1">Name:</span>
+                                <input type="text" class="form-control" placeholder="Name ds Produkt"
+                                    v-model="productDetailModal.name" required>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">Preis:</span>
+                                <input type="number" class="form-control" placeholder="Preis"
+                                    v-model="productDetailModal.price" min="0" step="0.1" required>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">Erzeuger:</span>
+                                <select class="form-select" v-model="productDetailModal.producer">
+                                    <option v-for="s in stations" :value="s">
+                                        {{ s.name }}
                                     </option>
                                 </select>
-                                <span class="input-group-text" id="inputGroup-sizing-default">Standard</span>
-                                <div class="input-group-text">
-                                    <input class="form-check-input mt-0" type="checkbox"
-                                        v-model="pDnewIngredient.standard">
-                                </div>
-                                <div class="input-group-append">
-                                    <button class="btn btn-primary"
-                                        @click="mapProductIngredient(productDetailModal)">+</button>
-                                </div>
                             </div>
-                            <table class="table"
-                                v-if="productDetailModal && productDetailModal.ingredients && productDetailModal.ingredients.length > 0">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Standard</th>
-                                        <th scope="col"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template v-for="(pi, index) in productDetailModal.ingredients">
-                                        <tr>
-                                            <td>{{pi.ingredient.name}}</td>
-                                            <td><input class="form-check-input mt-0" type="checkbox" disabled
-                                                    v-model="productDetailModal.ingredients[index].optional"></td>
-                                            <td>
-                                                <button class="btn btn-danger btn-sm"
-                                                    @click="removeProductIngredient(pi)">X</button>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
                             <br>
-                        </div>
-                        <div
-                            v-if="productDetailModal && productDetailModal.id && productDetailModal.ingredients.length === 0">
-                            <h5>Variationen</h5>
+                            <h5>Erweitert</h5>
                             <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="basic-addon1">Variation:</span>
-                                </div>
-                                <input type="text" class="form-control" placeholder="Name"
-                                    v-model="pDnewVariation.attrname" required>
-                                <input type="number" class="form-control" placeholder="Preis"
-                                    v-model="pDnewVariation.price" min="0" required>
+                                <span class="input-group-text">Status:</span>
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" id="btnradio0" value="0" autocomplete="off"
+                                        checked v-model="productDetailModal.productLock">
+                                    <label class="btn btn-outline-success" for="btnradio0"><img
+                                            src="/images/visible.png" width="20" height="20"></label>
 
-                                <div class="input-group-append">
-                                    <button class="btn btn-primary"
-                                        @click="this.createVariation(productDetailModal)">+</button>
+                                    <input type="radio" class="btn-check" id="btnradio1" value="1" autocomplete="off"
+                                        v-model="productDetailModal.productLock">
+                                    <label class="btn btn-outline-warning" for="btnradio1"><img
+                                            src="/images/production_warning.png" width="20" height="20"></label>
+
+                                    <input type="radio" class="btn-check" id="btnradio2" value="2" autocomplete="off"
+                                        v-model="productDetailModal.productLock">
+                                    <label class="btn btn-outline-danger" for="btnradio2"><img src="/images/lock.png"
+                                            width="20" height="20"></label>
+
+                                    <input type="radio" class="btn-check" id="btnradio3" value="3" autocomplete="off"
+                                        v-model="productDetailModal.productLock">
+                                    <label class="btn btn-outline-secondary" for="btnradio3"><img
+                                            src="/images/hidden.png" width="20" height="20"></label>
+                                </div>
+                                <span class="input-group-text">Reihung:</span>
+                                <input type="number" class="form-control" placeholder="Reihung"
+                                    v-model="productDetailModal.list_priority" min="0">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">Kategorie:</span>
+                                <select class="form-select" v-model="productDetailModal.category">
+                                    <option value="">-</option>
+                                    <option v-for="c in productCategories" :value="c">
+                                        {{ c.name }}
+                                    </option>
+                                </select>
+                                <span class="input-group-text">Zustellung:</span>
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" checked
+                                        v-model="productDetailModal.deliverable">
                                 </div>
                             </div>
-                            <table class="table" v-if="productDetailModal && productDetailModal.variations.length > 0">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Preis</th>
-                                        <th scope="col"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template v-for="v in productDetailModal.variations">
-                                        <tr>
-                                            <td>{{v.attrname}}</td>
-                                            <td>{{v.price}}</td>
-                                            <td>
-                                                <button class="btn btn-danger btn-sm"
-                                                    @click="removeVariation(productDetailModal,v)">X</button>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
                             <br>
+                            <div
+                                v-if="productDetailModal && productDetailModal.id && productDetailModal.variations.length === 0">
+                                <h5>Optionen/Zutaten</h5>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Zutat:</span>
+                                    </div>
+                                    <select class="form-select" v-model="pDnewIngredient.ingredient">
+                                        <option v-for="i in ingredients" :value="i">
+                                            {{ i.name }}
+                                        </option>
+                                    </select>
+                                    <span class="input-group-text" id="inputGroup-sizing-default">Standard</span>
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                            v-model="pDnewIngredient.standard">
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary"
+                                            @click="mapProductIngredient(productDetailModal)">+</button>
+                                    </div>
+                                </div>
+                                <table class="table"
+                                    v-if="productDetailModal && productDetailModal.ingredients && productDetailModal.ingredients.length > 0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Standard</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template v-for="(pi, index) in productDetailModal.ingredients">
+                                            <tr>
+                                                <td>{{pi.ingredient.name}}</td>
+                                                <td><input class="form-check-input mt-0" type="checkbox" disabled
+                                                        v-model="productDetailModal.ingredients[index].optional"></td>
+                                                <td>
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="removeProductIngredient(pi)">X</button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                                <br>
+                            </div>
+                            <div
+                                v-if="productDetailModal && productDetailModal.id && productDetailModal.ingredients.length === 0">
+                                <h5>Variationen</h5>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Variation:</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Name"
+                                        v-model="pDnewVariation.attrname" required>
+                                    <input type="number" class="form-control" placeholder="Preis"
+                                        v-model="pDnewVariation.price" min="0" required>
+
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary"
+                                            @click="this.createVariation(productDetailModal)">+</button>
+                                    </div>
+                                </div>
+                                <table class="table"
+                                    v-if="productDetailModal && productDetailModal.variations.length > 0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Preis</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template v-for="v in productDetailModal.variations">
+                                            <tr>
+                                                <td>{{v.attrname}}</td>
+                                                <td>{{v.price}}</td>
+                                                <td>
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="removeVariation(productDetailModal,v)">X</button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                                <br>
+                            </div>
+                            <div v-if="productDetailModal && !productDetailModal.id">
+                                <h5>Optionen/Zutaten</h5>
+                                <h6 class="text-warning">Erst nach speichern verfügbar!</h6>
+                                <h5>Optionen/Zutaten</h5>
+                                <h6 class="text-warning">Erst nach speichern verfügbar!</h6>
+                            </div>
                         </div>
-                        <div v-if="productDetailModal && !productDetailModal.id">
-                            <h5>Optionen/Zutaten</h5>
-                            <h6 class="text-warning">Erst nach speichern verfügbar!</h6>
-                            <h5>Optionen/Zutaten</h5>
-                            <h6 class="text-warning">Erst nach speichern verfügbar!</h6>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary"
+                                @click="this.updateProduct(this.productDetailModal)">Speichern</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary"
-                            @click="this.updateProduct(this.productDetailModal)">Speichern</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        // Initialize all tooltips at load
-        $(document).ready(function () {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
-                tooltipTriggerEl))
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-    </script>
+        <!-- Error Modal -->
+        <%- include('../errorModal') %>
+
+            <script>
+                // Initialize all tooltips at load
+                $(document).ready(function () {
+                    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
+                        tooltipTriggerEl))
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
+            </script>
 
 </body>
 
 <!-- Vue Js -->
-<script>
+<script type="module" type="text/javascript">
+    import dm from "/vue/datamodel.js";
+    import hlp from "/vue/helper.js";
+    import rest from "/vue/rest.js";
+
     const {
         createApp
     } = Vue
 
-    createApp({
+    let app = createApp({
+        mixins: [dm],
         data: () => ({
-            // Error Modal
-            errorModalMessage: "",
-            errorModalException: "",
-            errorModalRequest: "",
             // TableGroups
             tableGroups: [],
             newTableGroupName: "",
@@ -1276,7 +1261,13 @@
 
 
         },
-    }).mount('#app')
+    });
+
+    app.config.errorHandler = (err, instance, info) => {
+        console.log("Error", err, info)
+        hlp.makeError("The application has generated an error.", info, err);
+    }
+    app.mount("#app");
 </script>
 
 

@@ -18,11 +18,17 @@
                         Aktuelle Auslastung
                     </div>
                     <div class="card-body">
-                        <span>Offene Bestellungen: {{openOrders.length}}</span>
+                        <span>Offene Bestellungen: </span>
+                        <span v-if="openOrders">{{openOrders.length}}</span>
+                        <span v-else>-</span>
                         <br>
-                        <span>Belegung: {{activeSessions.length}}/{{allTables.length}}</span>
+                        <span>Belegung: </span>
+                        <span v-if="activeSessions && allTables">{{activeSessions.length}}/{{allTables.length}}</span>
+                        <span v-else>-/-</span>
                         <br>
-                        <span>Abgeschlossene Bestellungen heute: {{closedOrders.length}}</span>
+                        <span>Abgeschlossene Bestellungen heute: </span>
+                        <span v-if="closedOrders">{{closedOrders.length}}</span>
+                        <span v-else>-/-</span>
                     </div>
                 </div>
                 <br>
@@ -95,8 +101,10 @@
                 <br>
 
             </div>
-        </div>
 
+            <!-- Error Modal -->
+            <%- include('../errorModal') %>
+        </div>
 
 
 </body>
@@ -108,12 +116,8 @@
 
     const { createApp } = Vue;
 
-    createApp({
+    let app = createApp({
         data: () => ({
-            // Error Modal
-            errorModalMessage: "",
-            errorModalException: "",
-            errorModalRequest: "",
             // Data
             orderDates: [],
             openOrders: [],
@@ -127,17 +131,16 @@
             selectedStation: "",
             closedOrders: [],
             // Sold
-            selectedDaySold:"",
+            selectedDaySold: "",
             selectedStationSold: "",
-            soldProducts:[],
-            
+            soldProducts: [],
+
 
         }),
 
         // Execute at page load
-        created() {
+        mounted() {
             this.loadData();
-
         },
 
         // Update data on changes
@@ -145,21 +148,21 @@
             async selectedDayChart(n, o) {
                 if (this.selectedDayChart) {
                     await this.createChart()
-                }else{
+                } else {
                     this.chart.destroy()
                 }
             },
             async selectedDaySold(n, o) {
                 if (this.selectedDaySold && this.selectedStationSold) {
-                    this.soldProducts =await this.loadSoldData()
-                }else{
+                    this.soldProducts = await this.loadSoldData()
+                } else {
                     this.soldProducts = null;
                 }
             },
             async selectedStationSold(n, o) {
                 if (this.selectedStationSold && this.selectedDaySold) {
-                    this.soldProducts =await this.loadSoldData()
-                }else{
+                    this.soldProducts = await this.loadSoldData()
+                } else {
                     this.soldProducts = null;
                 }
             },
@@ -252,16 +255,16 @@
                 });
             },
 
-            async loadSoldData(){
+            async loadSoldData() {
                 let raw = await hlp.loadDailyOrdersFromStation(this.selectedDaySold, this.selectedStationSold.id);
                 // Group by product
-                let ordered= new Map();
-                for(const r of raw){
+                let ordered = new Map();
+                for (const r of raw) {
                     let found = ordered.get(r.product.name);
-                    if(found){
-                        ordered.set(r.product.name,found+1);
-                    }else{
-                        ordered.set(r.product.name,1);
+                    if (found) {
+                        ordered.set(r.product.name, found + 1);
+                    } else {
+                        ordered.set(r.product.name, 1);
                     }
                 }
                 return ordered;
@@ -272,7 +275,16 @@
 
 
 
-    }).mount("#app");
+    });
+
+    app.config.errorHandler = (err, instance, info) => {
+        console.log("Error",err, info)
+        hlp.makeError("The application has generated an error.", info, err);
+    }
+    app.mount("#app");
+
+
+
 </script>
 
 </html>

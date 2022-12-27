@@ -66,7 +66,6 @@ router.get("/open", async (req: Request, res: Response) => {
         },
       },
     });
-    console.log(o);
     res.json(o);
   } catch (e) {
     console.log("rest/order/open GET: " + e);

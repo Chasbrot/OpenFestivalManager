@@ -58,7 +58,7 @@ router.post(
     let result;
     try {
       // Check for station id
-        if (req.body.sid == -1) {
+      if (req.body.sid == -1) {
           // Dont' filter for station
         result = await AppDataSource.getRepository(Order).find({
           relations: {

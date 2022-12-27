@@ -143,7 +143,7 @@ router.put(
 /* DELETE user account*/
 router.delete(
   "/:aid",
-  param("id").isInt(),
+  param("aid").isInt(),
   async (req: Request, res: Response) => {
     if (!validationResult(req).isEmpty()) {
       res.sendStatus(400);

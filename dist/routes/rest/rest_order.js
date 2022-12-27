@@ -56,7 +56,6 @@ router.get("/open", async (req, res) => {
                 },
             },
         });
-        console.log(o);
         res.json(o);
     }
     catch (e) {

@@ -112,7 +112,7 @@ router.put("/:aid", (0, express_validator_1.body)("name").isString(), (0, expres
     res.sendStatus(200);
 });
 /* DELETE user account*/
-router.delete("/:aid", (0, express_validator_1.param)("id").isInt(), async (req, res) => {
+router.delete("/:aid", (0, express_validator_1.param)("aid").isInt(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;

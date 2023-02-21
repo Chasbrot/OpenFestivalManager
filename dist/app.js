@@ -11,8 +11,25 @@ const express_session_1 = __importDefault(require("express-session"));
 const rand_token_1 = require("rand-token");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const process_1 = require("process");
-// Load data from .env config file
-dotenv_1.default.config();
+const fs = require('fs');
+// Read command line arguments
+var argv = require('minimist')(process.argv.slice(2));
+if (!argv.env) {
+    console.log("Using default env");
+    let ret = dotenv_1.default.config({ path: __dirname + '/../.env' });
+    if (ret.error) {
+        console.log("Config parsing failed");
+        process.exit(1);
+    }
+}
+else {
+    // Load data from .env config file
+    let ret = dotenv_1.default.config({ path: argv.env });
+    if (ret.error) {
+        console.log("Config parsing failed");
+        process.exit(1);
+    }
+}
 // Create express app
 const app = (0, express_1.default)();
 // Set port

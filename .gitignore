@@ -1,2 +1,7 @@
 ﻿node_modules
 .vscode
+.env
+uploads
+dist/entity
+dist/rest
+dist/routes

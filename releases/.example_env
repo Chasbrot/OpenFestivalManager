@@ -1,0 +1,11 @@
+PORT=3000
+DEVELOPMENT=true
+REST_CACHE_TIME=3600
+VERSION=1.0.0
+# Database Options
+DB_TYPE=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=
+DB_PASSWORD=
+DB_SCHEMA=festivalmanager

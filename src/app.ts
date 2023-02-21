@@ -9,6 +9,26 @@ import cookieParser from 'cookie-parser';
 import { Account } from 'entity/Account';
 import { Station } from 'entity/Station';
 import { exit } from 'process';
+const fs = require('fs');
+
+
+// Read command line arguments
+var argv = require('minimist')(process.argv.slice(2));
+if (!argv.env) {
+  console.log("Using default env")
+  let ret = dotenv.config({path:__dirname+'/../.env'})
+  if (ret.error) {
+    console.log("Config parsing failed")
+    process.exit(1)
+  }
+} else {
+  // Load data from .env config file
+  let ret = dotenv.config({path: argv.env})
+  if (ret.error) {
+    console.log("Config parsing failed")
+    process.exit(1)
+  }
+}
 
 
 // Add account data to session
@@ -19,8 +39,7 @@ declare module 'express-session' {
   }
 }
 
-// Load data from .env config file
-dotenv.config();
+
 
 // Create express app
 const app: Express = express();

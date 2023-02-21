@@ -44,7 +44,7 @@ A webbased ordering tool for small festivals ("festl" in austrian). It manages f
   - Important first line of defence -> Access restriction
 
 ## Installation
-Clone Repo to Server and start webservice with: node app.js<br>
+Download newest .exe from releases and start. Config file is passed via --env #PATH#. 
 Access WebUI under localhost:3000 or IP-Address:3000
 
 ## Usage
@@ -65,7 +65,7 @@ Move all UI to client-side rendering with REST-based communication to the servic
   - :x: Move
   - :x: Overview (Ordering Page)
   - :x: Bill (Billing Page)
-  - :x: Bills (Overview of all Bills)
+  - :heavy_check_mark: Bills (Overview of all Bills)
   - :x: Order details
 - :x: Station
   - :x: Login
@@ -74,9 +74,9 @@ Move all UI to client-side rendering with REST-based communication to the servic
   - :x: Login
   - :x: Overview (Dashboard)
   - :x: Statistics
-  - :x: Data Insight
+  - :heavy_check_mark: Data Insight
   - :x: Data Source
-  - :arrows_counterclockwise: Configuration
+  - :heavy_check_mark: Configuration
 
 ## ToDo Improvements
 

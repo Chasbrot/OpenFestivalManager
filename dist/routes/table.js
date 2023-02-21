@@ -191,24 +191,8 @@ router.get("/:sid/bills", (0, express_validator_1.param)("sid").isInt(), async f
         return;
     }
     try {
-        let bills = await data_source_1.AppDataSource.getRepository(Bill_1.Bill).find({
-            relations: {
-                session: true,
-                cashier: true,
-                method: true,
-                orders: {
-                    product: true,
-                    variation: true
-                }
-            },
-            where: {
-                session: {
-                    id: req.params.sid
-                }
-            }
-        });
-        res.render("table/table_bills", {
-            bills: bills,
+        res.render("table/table_bills_vue", {
+            sid: req.params.sid,
         });
     }
     catch (e) {

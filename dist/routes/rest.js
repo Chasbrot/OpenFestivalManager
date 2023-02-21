@@ -35,6 +35,7 @@ const restAlertTypeRouter = require("./rest/rest_alerttypes");
 const restIngredientRouter = require("./rest/rest_ingredient");
 const restVariationRouter = require("./rest/rest_variation");
 const restAccountRouter = require("./rest/rest_account");
+const restBillingRouter = require("./rest/rest_billing");
 const restSystemRouter = require("./rest/rest_system");
 const restStatisticsRouter = require("./rest/rest_statistics");
 // Send for rest station to file, assign file
@@ -51,6 +52,7 @@ router.use("/alerttypes", restAlertTypeRouter);
 router.use("/ingredient", restIngredientRouter);
 router.use("/variation", restVariationRouter);
 router.use("/account", restAccountRouter);
+router.use("/billing", restBillingRouter);
 // - Management
 router.use("/system", restSystemRouter);
 router.use("/statistics", restStatisticsRouter);

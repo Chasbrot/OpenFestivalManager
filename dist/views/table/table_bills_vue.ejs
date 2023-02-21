@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Tisch</title>
+    <%- include('../header_common') %>
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- Nav bar -->
+        <nav class="navbar navbar-expand-ti navbar-dark bg-dark py-1">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="javascript:history.back()">Zurück</a>
+                <div class="navbar-brand float-end">Rechnungen</div>
+            </div>
+        </nav>
+
+        
+        <!-- Bestellungen -->
+        <div class="card">
+            <div class="card-body overflow-auto py-0 px-1">
+                <div class="accordion" id="accordion">
+                    <div v-if="bills.length != 0" class="list-group">
+                        <template v-for="b in bills">
+                            <div class="list-group-item py-0 px-0">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" :data-bs-target="'#collapse'+b.id"
+                                            aria-expanded="false" :aria-controls="'collapse'+b.id">
+                                            <span>{{getSum(b)}}€</span>
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div :id="'collapse'+b.id" class="accordion-collapse collapse" data-bs-parent="#accordion">
+                                    <div class="accordion-body px-1">
+                                        <div class="list-group-item">
+                                            <span>Rechnung durch: {{b.cashier.name}} um {{parseTime(b.paymentTime)}}, {{b.method.name}}</span>
+                                        </div>
+                                        <br>
+                                        <div class="list-group">
+                                            <template v-for="[key, value] in groupOrders(b)">
+                                                <div v-if="key.variation != null" class="list-group-item">
+                                                    <span>{{value}}x {{key.product.name}}, {{key.variation.attrname}}</span>
+                                                    <div class="float-end">
+                                                        <span>{{key.variation.price}}</span>
+                                                    </div>
+                                                </div>
+                                                <div v-else class="list-group-item">
+                                                    <span>{{value}}x {{key.product.name}}</span>
+                                                    <div class="float-end">
+                                                        <span>{{key.product.price}}</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <h4 v-else class="text-center">Keine Rechnugen gefunden</h4>
+                </div>
+            </div>
+        </div>
+        <!-- Zusammenfassung -->
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 style="display: inline;">Gesamt: </h3>
+                <h3 style="display: inline;">{{getTotalSum()}}</h3>
+                <h3 style="display: inline;">€</h3>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+    <!-- Vue Js -->
+    <script type="module" type="text/javascript">
+        import dm from "/vue/datamodel.js";
+        import hlp from "/vue/helper.js";
+
+        const { createApp } = Vue;
+
+        let app = createApp({
+            data: () => ({
+                // Data
+                bills: [],
+            }),
+
+            // Execute at page load
+            mounted() {
+                this.loadData();
+                
+            },
+
+            // Helper functions
+            methods: {
+                parseTime(timestamp) {
+                    const d = new Date(timestamp);
+                    if(d.getMinutes() < 10){
+                        return d.getHours() + ":0" + d.getMinutes();
+                    }else{
+                        return d.getHours() + ":" + d.getMinutes();
+                    }
+                    
+                },
+
+                parseDate(timestamp) {
+                    const d = new Date(timestamp);
+                    return d.getDate() + "." + d.getMonth() + "." + d.getFullYear();
+                },
+
+
+                async loadData() {
+                    this.bills = await dm.loadBillsFromSessionId("<%=sid%>");
+                    console.log(this.bills)
+                },
+
+                getSum(bill){
+                    var s=0;
+                    bill.orders.forEach((o)=>{
+                        if(o.variation != null){
+                            s+= parseFloat(o.variation.price);
+                        }else{
+                            s+= parseFloat(o.product.price);
+                        }
+                    })
+                    return s;
+                },
+
+                getTotalSum(){
+                    var ts=0;
+                    this.bills.forEach((b)=>{
+                        ts+=parseFloat(this.getSum(b));
+                    })
+                    return ts;
+                },
+
+                /*
+                * Groups orders by product and variation id
+                */
+                groupOrders(bill){
+                    const orderMap = new Map();
+                    bill.orders.forEach((o)=>{
+                        // Check if in map
+                        var found=false;
+                        for (let key of orderMap.keys()){
+                            console.log(key)
+                            // Same product
+                            if(key.product.id == o.product.id){
+                                // Same variation
+                                if(key.variation==null && o.variation==null){
+                                    orderMap.set(key, orderMap.get(key)+1);
+                                    found = true; 
+                                    break;
+                                }else if(key.variation!=null && o.variation!=null){
+                                    // Not null and same
+                                    if(key.variation.id ==  o.variation.id){
+                                        orderMap.set(key, orderMap.get(key)+1);
+                                        found = true; 
+                                        break; 
+                                    }
+                                }
+                            } 
+                        };
+                        if(!found){
+                            orderMap.set(o,1);  
+                        }
+                    });
+                    console.log(orderMap);
+                    return orderMap;
+                },
+
+
+
+            }
+
+
+
+        });
+
+        app.config.errorHandler = (err, instance, info) => {
+            console.log("Error", err, info)
+            hlp.makeError("The application has generated an error.", info, err);
+        }
+        app.mount("#app");
+
+
+
+    </script>
+
+</html>

@@ -205,26 +205,8 @@ router.get("/:sid/bills", param("sid").isInt(), async function (req, res) {
   }
 
   try {
-    let bills = await AppDataSource.getRepository(Bill).find({
-      relations: {
-        session: true,
-        cashier: true,
-        method: true,
-        orders: {
-          product: true,
-          variation: true
-        }
-      },
-      where: {
-        session: {
-          id: req.params!.sid
-        }
-      }
-    });
-
-
-    res.render("table/table_bills", {
-      bills: bills,
+    res.render("table/table_bills_vue", {
+      sid: req.params!.sid,
     });
   } catch (e) {
     console.log("table/bills: " + e);

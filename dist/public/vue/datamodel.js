@@ -276,5 +276,12 @@ export default {
         return await rest.fetchData(`/rest/table/${table.id}/sessions`);
     },
 
+    async loadBillsFromSessionId(sessionid) {
+        if (!sessionid) {
+            return;
+        }
+        return await rest.fetchData(`/rest/billing/${sessionid}/closedbills`);
+    },
+
 }
 

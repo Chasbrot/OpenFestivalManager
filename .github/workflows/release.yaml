@@ -1,3 +1,5 @@
+# Tag a commit with a version number and 
+# this action will build a .exe for it
 on:
   push:
     # Sequence of patterns matched against refs/tags
@@ -14,7 +16,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+      # Build .exe file and name it
       - name: Create package
         run: |
            npm install
@@ -22,7 +24,7 @@ jobs:
            pkg package.json
            mv festivalmanager.exe festivalmanager-${{ github.ref_name }}.exe
         shell: bash
-
+      # Create a github release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -34,7 +36,7 @@ jobs:
           body: New Release with improvements
           draft: false
           prerelease: true
-
+      # Upload .exe file to github release
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:

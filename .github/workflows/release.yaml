@@ -14,6 +14,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Create package
+        uses: actions/setup-node@v3
+        run: pkg package.json
+        run: mv festivalmanager.exe releases/festivalmanager-${{ github.ref_name }}.exe
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -24,13 +30,14 @@ jobs:
           release_name: Release ${{ github.ref }}
           body: New Release with improvements
           draft: false
-          prerelease: false
+          prerelease: true
+          
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: releases/festivalmanager-${{ github.ref }}.exe
-          asset_name: festivalmanager-${{ github.ref }}.exe
+          file: releases/festivalmanager-${{ github.ref_name }}.exe
+          asset_name: festivalmanager-${{ github.ref_name }}.exe
           tag: ${{ github.ref }}
           overwrite: true
           body: "This is the new release."

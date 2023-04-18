@@ -17,7 +17,8 @@ jobs:
 
       - name: Create package
         run: |
-           npm pkg package.json
+           npm install -g pkg
+           pkg package.json
            mv festivalmanager.exe releases/festivalmanager-${{ github.ref_name }}.exe
         shell: bash
 

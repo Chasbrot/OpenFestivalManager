@@ -88,6 +88,7 @@ Move all UI to client-side rendering with REST-based communication to the servic
   - :heavy_check_mark: Station UI
   - :heavy_check_mark: Table UI
 - :heavy_check_mark: Session Management improvement
+- :x: Multi-language support (english/german)
 
 ### Admin UI
 - :x: Show state of the modules (DHCP, DNS, DB)

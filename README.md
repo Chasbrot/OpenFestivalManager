@@ -2,12 +2,11 @@
 
 ## Getting started on dev
 
-Clone repository
-Open repository with MSV code
-Open terminal
+Clone repository </br>
+Open repository with MSV code </br>
+Open terminal</br>
 
-npm install 
-
+npm install </br>
 npm run devstart
 
 ## Description

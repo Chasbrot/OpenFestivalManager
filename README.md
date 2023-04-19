@@ -1,4 +1,4 @@
-# FestivalManager
+# OpenFestivalManager
 
 ## Getting started on dev
 

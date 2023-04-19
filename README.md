@@ -101,6 +101,8 @@ Move all UI to client-side rendering with REST-based communication to the servic
 ### Personal UI
 - :heavy_check_mark: Show details of an order
 - :heavy_check_mark: Group finished/canceled orders by type/name
+- :x: Reorder Button, Reorders a specific item
+- :x: Close all open orders by type button e.g. close 5 drinks at once instead of 5times one
 
 ### New Features
 - :x: Product States -> hidden, disabled, etc.
@@ -110,6 +112,7 @@ Move all UI to client-side rendering with REST-based communication to the servic
 - :heavy_check_mark: Product Variations -> Wine (Red or White)
 - :x: PDF-Generator -> Generate PDF with stats per day or for all days incl. sold products, general load, details per station
 - :x: DHCP-Server -> All-in-one with DNS for resolving the domain in unconfigurable networks
+
 
 ## Authors 
 Michael Selinger<br>

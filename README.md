@@ -1,29 +1,12 @@
 # FestivalManager
 
-## Getting started
+## Getting started on dev
 
 Clone repository
 Open repository with MSV code
 Open terminal
 
 npm install 
-    express
-    express-session
-    express-validator
-    typeorm
-    body-parser
-    cookie-parser
-    dotenv
-    ejs
-    multer
-    mysqldump
-    pg
-    rand-token
-    reflect-metadata
-    @types/cookie-parser
-    @types/ejs
-    @types/express-session
-    @types/multer
 
 npm run devstart
 
@@ -38,13 +21,15 @@ A webbased ordering tool for small festivals ("festl" in austrian). It manages f
   - Tablets prefered, Laptops work too
 - Smartphones for service personal
   - Somewhat new (min. 6" recommended)
+  - Chrome Webbrowser (for app like state) or any up-to-date browser
 - Good WiFi coverage 
   - 2.4 GHz recommended, higher range/ penetration
+  - low latency is important
 - Secured and protected WLAN
   - Important first line of defence -> Access restriction
 
 ## Installation
-Download newest .exe from releases and start. Config file is passed via --env #PATH#. 
+Download newest .exe from releases and start. Config file is passed via --env #PATH#. </br>
 Access WebUI under localhost:3000 or IP-Address:3000
 
 ## Usage
@@ -56,24 +41,24 @@ For the Server Node.Js with Express is used, the database backend is provided by
 
 ## Finished UI Pages
 Move all UI to client-side rendering with REST-based communication to the service.
-- :x: Index
-- :x: Personal
-  - :x: Login
-  - :x: Overview
-- :x: Session
+- :heavy_check_mark: Index
+- :heavy_check_mark: Personal
+  - :heavy_check_mark: Login
+  - :heavy_check_mark: Overview
+- :arrows_counterclockwise: Session
   - :heavy_check_mark: New
-  - :x: Move
-  - :x: Overview (Ordering Page)
-  - :x: Bill (Billing Page)
+  - :heavy_check_mark: Move
+  - :arrows_counterclockwise: Overview (Ordering Page)
+  - :arrows_counterclockwise: Bill (Billing Page)
   - :heavy_check_mark: Bills (Overview of all Bills)
-  - :x: Order details
-- :x: Station
-  - :x: Login
-  - :x: Overview (Main Page)
-- :x: Admin
-  - :x: Login
-  - :x: Overview (Dashboard)
-  - :x: Statistics
+  - :heavy_check_mark: Order details
+- :heavy_check_mark: Station
+  - :heavy_check_mark: Login
+  - :heavy_check_mark: Overview (Main Page)
+- :arrows_counterclockwise: Admin
+  - :heavy_check_mark: Login
+  - :arrows_counterclockwise: Overview (Dashboard)
+  - :arrows_counterclockwise: Statistics
   - :heavy_check_mark: Data Insight
   - :x: Data Source
   - :heavy_check_mark: Configuration
@@ -87,29 +72,29 @@ Move all UI to client-side rendering with REST-based communication to the servic
 - :heavy_check_mark: Update all UI to Bootstrap 5
 - :arrows_counterclockwise: Move all requests to Ajax and REST
 - :x: Optional: DB Optimizations and DB side caching
-- :x: Error Messages everywhere
+- :arrows_counterclockwise: Error Messages everywhere
   - :x: Admin UI
   - :x: Personal UI
   - :x: Station UI
   - :x: Table UI
 - :heavy_check_mark: Backend Refactoring -> move to English
 - :heavy_check_mark: Fix: Notification for recieved order
-- :x: Versioning
+- :heavy_check_mark: Versioning
 - :heavy_check_mark: Payment system overhaul -> generate real bills inside the DB
 - :x: DB checks for consistancy
 - :x: Fix DB tools
-- :arrows_counterclockwise: Consistant express validation
-  - :x: Admin UI
-  - :x: Personal UI
-  - :x: Station UI
-  - :x: Table UI
+- :heavy_check_mark: Consistant express validation
+  - :heavy_check_mark: Admin UI
+  - :heavy_check_mark: Personal UI
+  - :heavy_check_mark: Station UI
+  - :heavy_check_mark: Table UI
 - :heavy_check_mark: Session Management improvement
 
 ### Admin UI
 - :x: Show state of the modules (DHCP, DNS, DB)
 - :arrows_counterclockwise: All source data (Stammdaten, in german) is editable via UI
   - :heavy_check_mark: Add
-  - :x: Remove
+  - :heavy_check_mark: Remove
   - :x: Modify
 - :arrows_counterclockwise: Insight to orders by personal and detailed info for a order
 - :x: DB config is read from file and editable via ui (IP,Port,User and PW)
@@ -121,15 +106,15 @@ Move all UI to client-side rendering with REST-based communication to the servic
 ### New Features
 - :x: Product States -> hidden, disabled, etc.
 - :heavy_check_mark: More order states
-- :x: Package-to-Executable -> .exe
-- :arrows_counterclockwise: Group by Product Categories for Personal -> (Alk, Anti, Grill, Kitchen)
+- :heavy_check_mark: Package-to-Executable -> .exe
+- :heavy_check_mark: Group by Product Categories for Personal -> (Alk, Anti, Grill, Kitchen)
 - :heavy_check_mark: Product Variations -> Wine (Red or White)
 - :x: PDF-Generator -> Generate PDF with stats per day or for all days incl. sold products, general load, details per station
 - :x: DHCP-Server -> All-in-one with DNS for resolving the domain in unconfigurable networks
 
 ## Authors 
 Michael Selinger<br>
-Julian Springer<br>
+~~Julian Springer~~<br>
 ~~Saul Ptrondl~~
 ## Contributors
 Thanks Hannah and Jojo for their knowledge and expertise during development.

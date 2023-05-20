@@ -12,6 +12,7 @@ const rand_token_1 = require("rand-token");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const process_1 = require("process");
 const fs = require('fs');
+const compression = require('compression');
 // Read command line arguments
 var argv = require('minimist')(process.argv.slice(2));
 if (!argv.env) {
@@ -38,6 +39,8 @@ const port = process.env.PORT;
 if (process.env.DEVELOPMENT == "true") {
     console.log("Starting Server in Development Mode!!");
 }
+// Enable Compression
+app.use(compression());
 // view engine setup (express js)
 app.set('views', path_1.default.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

@@ -10,6 +10,7 @@ import { Account } from 'entity/Account';
 import { Station } from 'entity/Station';
 import { exit } from 'process';
 const fs = require('fs');
+const compression = require('compression')
 
 
 // Read command line arguments
@@ -51,6 +52,9 @@ if (process.env.DEVELOPMENT == "true") {
   console.log("Starting Server in Development Mode!!");
 }
 
+// Enable Compression
+app.use(compression())
+
 // view engine setup (express js)
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -67,7 +71,7 @@ let setCache = function (req: Request, res: Response, next:any) {
   const period = 60 * 60 * 24 
 
   // Only cache images, js and css files
-  if (req.method == 'GET' && (req.url.includes("stylesheets") || req.url.includes("images") || req.url.includes("js") || req.url.includes("bs5") || req.url.includes("media"))) {
+  if (req.method == 'GET' && (req.url.includes("stylesheets") || req.url.includes("gicons")|| req.url.includes("images") || req.url.includes("js") || req.url.includes("bs5") || req.url.includes("media"))) {
     res.set('Cache-control', `max-age=${period}`)
   } else {
     // for the other requests set strict no caching parameters
@@ -103,6 +107,7 @@ const personalRouter = require('./routes/personal');
 const tableRouter = require('./routes/table');
 const stationRouter = require('./routes/station');
 const restRouter = require('./routes/rest');
+const webuiRouter = require('./routes/webui');
 
 // Send requests for these paths to respective routing files
 app.use('/', indexRouter);
@@ -111,6 +116,8 @@ app.use('/personal', personalRouter);
 app.use('/table', tableRouter);
 app.use('/station', stationRouter);
 app.use('/rest', restRouter);
+app.use('/webui', webuiRouter);
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

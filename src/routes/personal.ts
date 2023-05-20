@@ -61,7 +61,7 @@ router.post(
       return;
     }
     req.session.account = user;
-    res.redirect("/personal/overview");
+    res.redirect("/webui");
   }
 );
 

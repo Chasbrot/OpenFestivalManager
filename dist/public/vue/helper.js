@@ -83,6 +83,23 @@ export default {
         errorModal.show()
     },
 
+    /*
+    * Finds and delivers the current state of an object with states
+    */
+    async getCurrentState(session) {
+        if (!session) {
+            return;
+        }
+        let state = null;
+        session.states.forEach((s) => {
+            if (!s.history) {
+                state = s;
+            }
+
+        });
+        return state;
+    }
+
 
 
 }

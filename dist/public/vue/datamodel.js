@@ -283,5 +283,30 @@ export default {
         return await rest.fetchData(`/rest/billing/${sessionid}/closedbills`);
     },
 
+    async loadSessionById(sessionid) {
+        if (!sessionid) {
+            return;
+        }
+        return await rest.fetchData(`/rest/session/${sessionid}`);
+    },
+
+    async loadSessionsActive() {
+        return await rest.fetchData(`/rest/session/activeByUser`);
+    },
+    async loadSessionsInactive() {
+        return await rest.fetchData(`/rest/session/inactiveByUser`);
+    },
+
+    async loadOrdersFromSession(sid) {
+        return await rest.fetchData(`/rest/session/${sid}/orders`);
+    },
+
+    async moveSessionToOtherTable(sid, target_tid) {
+        return await rest.putData(`/rest/session/${sid}/move`,
+            JSON.stringify({
+                targetTid: target_tid
+            }));
+    },
+
 }
 

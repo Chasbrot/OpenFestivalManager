@@ -1,0 +1,104 @@
+<p v-if="!selectedsession" class="text-center">Bitte eine Sitzung auswählen!</p>
+
+<!-- Active / Inactive Sessions List -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="oc_sessions" aria-labelledby="oc_sessions_label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="oc_sessions_label">Sitzungen</h5>
+
+        <button class="btn btn-outline-primary" aria-label="Add" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#oc_newSession" aria-controls="oc_newSession">
+            <img src="/gicons/add.svg" alt="Add" width="25">
+        </button>
+        <button class="btn btn-outline-primary" aria-label="History">
+            <img src="/gicons/history.svg" alt="History" width="25">
+        </button>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div v-if="activesessions.length">
+            <div class="d-grid gap-2">
+                <template v-for="as in activesessions">
+                    <button class="btn btn-primary" type="button" @click='this.loadSessionById(as.id)' data-bs-dismiss=“offcanvas”>{{as.table.name}}</button>
+                </template>
+            </div>
+        </div>
+        <div v-else>
+            <p class="text-center">Keine aktiven Sitzungen</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- New Session -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="oc_newSession" aria-labelledby="oc_newSession_label">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasTopLabel" class>Neue Sitzung</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+        <h4>Gruppe</h4>
+        <template v-for="tg in tableGroups">
+            <input type="radio" class="btn-check " name="table_group" :id="tg.id" :value="tg.id" autocomplete="off"
+                v-model="currentTG">
+            <label class="btn btn-primary mt-2 me-2" :for="tg.id" style="min-width: 50px;">{{tg.name}}</label>
+        </template>
+        <p v-if="!tableGroups.length">Keine Tischgruppen definiert!</p>
+        <br>
+        <h4 class="pt-3">Tisch</h4>
+        <select v-if="tables.length" v-model="currentTable" class="form-select">
+            <option selected disabled :value="">Auswählen ...</option>
+            <template v-for="(t, index) in tables">
+                <option :value="t.id">{{t.name}}</option>
+            </template>
+        </select>
+        <p v-if="!tables.length">Keine Tische vorhanden!</p>
+        <div v-if="errorNewSession" class="alert alert-danger">
+            Sitzung konnte nicht erstellt werden.
+        </div>
+        <br>
+
+
+        <!-- New Table -->
+        <div class="text-center mb-2 d-grid gap-2">
+            <button class="btn btn-primary btn-lg mx-2" @click="createSession()">Start</button>
+        </div>
+    </div>
+</div>
+
+<!-- Move Session -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="oc_moveSession" aria-labelledby="oc_moveSession_label">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasTopLabel" class>Sitzung bewegen nach</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+        <h4>Zielgruppe</h4>
+        <template v-for="tg in tableGroups">
+            <input type="radio" class="btn-check " name="table_group" :id="tg.id" :value="tg.id" autocomplete="off"
+                v-model="currentTG">
+            <label class="btn btn-primary mt-2 me-2" :for="tg.id" style="min-width: 50px;">{{tg.name}}</label>
+        </template>
+        <p v-if="!tableGroups.length">Keine Tischgruppen definiert!</p>
+        <br>
+        <h4 class="pt-3">Zieltisch</h4>
+        <select v-if="tables.length" v-model="currentTable" class="form-select">
+            <option selected disabled :value="">Auswählen ...</option>
+            <template v-for="(t, index) in tables">
+                <option :value="t.id">{{t.name}}</option>
+            </template>
+        </select>
+        <p v-if="!tables.length">Keine Tische vorhanden!</p>
+        <div v-if="errorNewSession" class="alert alert-danger">
+            Sitzung konnte nicht bewegt werden.
+        </div>
+        <br>
+
+
+        <!-- New Table -->
+        <div class="text-center mb-2 d-grid gap-2">
+            <button class="btn btn-primary btn-lg mx-2" @click="moveSession()">Bewegen</button>
+        </div>
+    </div>
+</div>

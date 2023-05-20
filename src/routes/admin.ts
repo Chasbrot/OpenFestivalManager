@@ -72,11 +72,12 @@ router.get("/login", (req: Request, res: Response) => {
 /* POST login page */
 router.post(
   "/login",
-  body("username").isString(),
-  body("password").isString(),
+  body("username").isString().trim(),
+  body("password").isString().trim(),
   async (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
       return;
     }
 

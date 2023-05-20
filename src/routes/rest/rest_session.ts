@@ -124,6 +124,34 @@ router.get("/active", async (req: Request, res: Response) => {
   }
 });
 
+/* GET all active sessions from a user */
+router.get("/activeByUser", async (req: Request, res: Response) => {
+  
+  try {
+    let as = await db.getActiveSessionsFromAccount(req.session.account!);
+    res.json(as);
+    
+  } catch (e) {
+    console.log("rest/session/activeByUser GET: " + e);
+    res.sendStatus(500);
+    return;
+  }
+});
+
+/* GET all inactive sessions from a user */
+router.get("/inactiveByUser", async (req: Request, res: Response) => {
+  
+  try {
+    let as = await db.getInactiveSessionsFromAccount(req.session.account!);
+    res.json(as);
+    
+  } catch (e) {
+    console.log("rest/session/inactiveByUser GET: " + e);
+    res.sendStatus(500);
+    return;
+  }
+});
+
 /* GET session */
 router.get("/:sid", param("sid").isInt(), (req: Request, res: Response) => {
   if (!validationResult(req).isEmpty()) {
@@ -131,9 +159,10 @@ router.get("/:sid", param("sid").isInt(), (req: Request, res: Response) => {
     return;
   }
   AppDataSource.getRepository(Session)
-    .find({
+    .findOneOrFail({
       relations: {
         table: true,
+        states: true,
       },
       where: {
         id: Number(req.params.sid),
@@ -232,6 +261,76 @@ router.put(
     }
   }
 );
+
+/* POST move session to other table */
+router.put("/:sid/move", param("sid").isInt(), body("targetTid").isInt(), async function (req, res) {
+  const body = req.body;
+  if (!validationResult(req).isEmpty()) {
+    res.sendStatus(400);
+    return;
+  }
+  console.log(body);
+  try {
+    let s = await AppDataSource.getRepository(Session).findOneOrFail({
+      relations: {
+        table: true,
+        states: true,
+        bills: true,
+        orders: true,
+        servers: true,
+      },
+      where: {
+        id: req.params!.sid,
+      },
+    });
+    let table = await AppDataSource.getRepository(Table).findOneByOrFail({
+      id: body.table,
+    });
+    // Get target session
+    let target_session = await AppDataSource.getRepository(Session).findOne({
+      relations: {
+        table: true,
+        states: true,
+        bills: true,
+        orders: true,
+        servers: true,
+      },
+      where: {
+        table: {
+          id: req.body.targetTid,
+        },
+        states: {
+          history: false,
+          statetype: StateType.CREATED,
+        },
+      },
+    });
+
+    // Check if target table has a active session
+    if (target_session == null) {
+      s.table = table;
+      await AppDataSource.getRepository(Session).save(s);
+      console.log(
+        "table/moveSession: Moved session " + s.id + " to table " + table.id
+      );
+      res.json(s.id);
+    } else {
+      // Copy everything to target session
+      await db.mergeSession(s, target_session, req.session.account!);
+      console.log(
+        "table/moveSession: Merged session " +
+        s.id +
+        " with " +
+        target_session.id
+      );
+      res.json(target_session.id);
+    }
+    
+  } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+});
 
 
 

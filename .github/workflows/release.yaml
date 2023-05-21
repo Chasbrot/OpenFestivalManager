@@ -21,7 +21,7 @@ jobs:
         run: |
            npm install
            npm install -g pkg
-      # "--no-bytecode --public-packages "*" --public" workaround for https://github.com/vercel/pkg/issues/1663
+           # "--no-bytecode --public-packages "*" --public" workaround for https://github.com/vercel/pkg/issues/1663
            pkg package.json --no-bytecode --public-packages "*" --public
            mv festivalmanager-win-x64.exe festivalmanager-${{ github.ref_name }}.exe
            mv festivalmanager-linux-arm64.exe festivalmanager-${{ github.ref_name }}

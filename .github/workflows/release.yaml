@@ -21,8 +21,10 @@ jobs:
         run: |
            npm install
            npm install -g pkg
-           pkg package.json
-           mv festivalmanager.exe festivalmanager-${{ github.ref_name }}.exe
+      # "--no-bytecode --public-packages "*" --public" workaround for https://github.com/vercel/pkg/issues/1663
+           pkg package.json --no-bytecode --public-packages "*" --public
+           mv festivalmanager-win-x64.exe festivalmanager-${{ github.ref_name }}.exe
+           mv festivalmanager-linux-arm64.exe festivalmanager-${{ github.ref_name }}
         shell: bash
       # Create a github release
       - name: Create Release
@@ -37,12 +39,22 @@ jobs:
           draft: false
           prerelease: true
       # Upload .exe file to github release
-      - name: Upload binaries to release
+      - name: Upload windows x64 binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: festivalmanager-${{ github.ref_name }}.exe
           asset_name: festivalmanager-${{ github.ref_name }}.exe
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "This is the new release."
+      # Upload linux file to github release
+      - name: Upload arm linux binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: festivalmanager-${{ github.ref_name }}
+          asset_name: festivalmanager-${{ github.ref_name }}
           tag: ${{ github.ref }}
           overwrite: true
           body: "This is the new release."

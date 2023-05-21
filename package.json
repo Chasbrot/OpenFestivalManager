@@ -1,6 +1,6 @@
 {
     "name": "festivalmanager",
-    "version": "1.1.11",
+    "version": "1.1.12",
     "description": "A order management system for festivals",
     "main": "app.js",
     "bin": "dist/app.js",
@@ -26,9 +26,10 @@
             "dist/public/**/*"
         ],
         "targets": [
-            "node14-win-x64"
+            "node14-win-x64", "node14-linux-arm64"
         ],
-        "output": "releases/"
+        "output": "releases/",
+        "compress": "GZip"
     },
     "author": "",
     "license": "ISC",

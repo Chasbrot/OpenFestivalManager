@@ -1,0 +1,26 @@
+<!-- Move Session -->
+<div class="offcanvas offcanvas-top" tabindex="-1" id="oc_sessionInfo" aria-labelledby="oc_sessionInfo_label">
+    <div class="offcanvas-header">
+        <h5 id="oc_sessionInfo_label" class>Sitzungsinformationen</h5>
+        <h5 class="float-end" v-if="selectedSession" >ID: {{selectedSession.id}}</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" v-if="selectedSession!=null && selectedSessionState!=null">
+        <p class="mb-0" v-if="selectedSession.states[0].triggerer">
+            Erstellt von: <span class="float-end">{{selectedSession.states[0].triggerer.name}} um {{getTimeFromTimestamp(selectedSession.states[0].created)}}</span>
+        </p>
+        <p class="mb-0 text-danger" v-else>Keine Erstellerinformationen</p>
+        <p class="mb-0" v-if="selectedSessionState.statetype == 5 && selectedSessionState.triggerer">
+            Abgeschlossen von: <span class="float-end">{{selectedSessionState.triggerer.name}} um {{getTimeFromTimestamp(selectedSessionState.created)}}</span>
+        </p>
+        <p class="mb-0 text-danger" v-else>Keine Abschlussinformationen</p>
+        <p class="mb-0" v-if="selectedSession.servers">
+            Kellner/Innen: 
+            <span class="float-end">
+            <template v-for="s in selectedSession.servers">
+                {{s.name +" "}}
+            </template>
+        </span>
+        </p>
+    </div>
+</div>

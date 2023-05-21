@@ -34,27 +34,31 @@
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu">
-                    <li><button class="dropdown-item" :disabled="!selectedsession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Move" type="button"
+                    <li><button class="dropdown-item" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Move" type="button"
                             data-bs-toggle="offcanvas" data-bs-target="#oc_moveSession"
                             aria-controls="oc_moveSession">Bewegen</button>
                     </li>
-                    <li><button class="dropdown-item" :disabled="!selectedsession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Close Session"
+                    <li><button class="dropdown-item" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Close Session"
                             type="button" @click="this.closeCurrentSession()">Sitzung schließen</button>
                     </li>
-                    <li><button class="dropdown-item" :disabled="!selectedsession" href="#">Infos</button></li>
+                    <li><button class="dropdown-item" :disabled="!selectedSession" data-bs-toggle="offcanvas" data-bs-target="#oc_sessionInfo"
+                        aria-controls="oc_sessionInfo">Infos</button></li>
                     </li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
                     <li>
-                    <li><button class="dropdown-item text-danger"  href="#">Logout</button></li>
+                    <li>
+                        <form action="/personal/logout" method="POST">
+                            <button class="dropdown-item text-danger"  type="submit" >Logout</button></li>
+                          </form>
                     </li>
                 </ul>
             </div>
 
 
-            <div v-if="selectedsession !=null" class="navbar-brand float-right">
-                {{selectedsession.table.name}}
+            <div v-if="selectedSession != null" class="navbar-brand float-right">
+                {{selectedSession.table.name}}
             </div>
             <button v-if="selectedSessionState !=null && selectedSessionState.statetype != 5" class="btn btn-primary">
                 Kassieren
@@ -71,6 +75,10 @@
 
     <!-- Sessions -->
     <%-include('menu_sessions') %>
+
+    <!-- Session Information -->
+    <%-include('menu_session_info') %>
+
 
     <!-- Error Modal -->
     <%-include('../errorModal') %>
@@ -91,7 +99,7 @@
 
                         // Sessions
                         activesessions: [],
-                        selectedsession: null,
+                        selectedSession: null,
                         selectedSessionState: null,
                         pastsessions: [],
                         showPastSessions: false,
@@ -122,7 +130,7 @@
                     watch: {
                         // New Session Watch
                         currentTG: 'fetchTables',
-                        selectedsession: 'loadSessionData',
+                        selectedSession: 'loadSessionData',
 
                     },
 
@@ -130,10 +138,10 @@
                     methods: {
                         
                         async loadSessionData() {
-                            if(!this.selectedsession){
+                            if(!this.selectedSession){
                                 return;
                             }
-                            this.selectedSessionState = await hlp.getCurrentState(this.selectedsession)
+                            this.selectedSessionState = await hlp.getCurrentState(this.selectedSession)
                             // Close offcanvas
                             await hlp.closeOffcanvas("oc_sessions")
                             // Load orders
@@ -141,12 +149,12 @@
                         },
 
                         async fetchOrders() {
-                            if(!this.selectedsession){
+                            if(!this.selectedSession){
                                 return;
                             }
                             this.finishedOrders = [];
                             this.sortedOrders = [];
-                            this.orders = await dm.loadOrdersFromSession(this.selectedsession.id)
+                            this.orders = await dm.loadOrdersFromSession(this.selectedSession.id)
                             if (!this.orders.length) {
                                 return;
                             }
@@ -178,15 +186,15 @@
                         },
 
                         async loadSessionById(sid) {
-                            dm.loadSessionById(sid).then((r)=>this.selectedsession=r)
+                            dm.loadSessionById(sid).then((r)=>{
+                                this.selectedSession=r
+                                console.log(r)
+                            })
                         },
 
                         async fetchSessions() {
                             dm.loadSessionsActive().then((r)=>this.activesessions=r)
-                            dm.loadSessionsInactive().then((r)=>{
-                                this.pastsessions=r
-                                console.log(r)
-                            })
+                            dm.loadSessionsInactive().then((r)=>this.pastsessions=r)
                         },
                         async fetchTables() {
                             if(!this.currentTG){
@@ -211,7 +219,7 @@
                                     this.errorNewSession = true;
                                 } else {
                                     const data = await response.json();
-                                    this.selectedsession = await dm.loadSessionById(data.sid);
+                                    this.selectedSession = await dm.loadSessionById(data.sid);
                                     this.fetchSessions()
                                     hlp.closeOffcanvas("oc_newSession")
                                 }
@@ -220,11 +228,11 @@
                         },
                         
                         async moveSession(){
-                            if(!this.currentTable || !this.selectedsession){
+                            if(!this.currentTable || !this.selectedSession){
                                 return;
                             }
-                            let newSid = await dm.moveSessionToOtherTable(this.selectedsession.id, this.currentTable);
-                            this.selectedsession = await dm.loadSessionById(newSid);
+                            let newSid = await dm.moveSessionToOtherTable(this.selectedSession.id, this.currentTable);
+                            this.selectedSession = await dm.loadSessionById(newSid);
                             this.fetchSessions()
                             await hlp.closeOffcanvas("oc_moveSession")
                         },
@@ -235,9 +243,9 @@
                         },
 
                         async closeCurrentSession(){
-                            dm.closeSessionById(this.selectedsession.id).then(()=>{
+                            dm.closeSessionById(this.selectedSession.id).then(()=>{
                                 this.fetchSessions()
-                                this.selectedsession=null
+                                this.selectedSession=null
                                 hlp.openOffcanvas("oc_sessions")
                             })
                         },

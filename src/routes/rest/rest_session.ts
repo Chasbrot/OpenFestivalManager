@@ -20,9 +20,9 @@ import { MoreThan, Not } from "typeorm";
 
 /* Check session and accounttype*/
 router.use(function (req, res, next) {
-  if (
-    req.session.account!.accounttype == AccountType.ADMIN ||
-    req.session.account!.accounttype == AccountType.USER
+  if (req.session.account &&
+    (req.session.account.accounttype == AccountType.ADMIN ||
+    req.session.account.accounttype == AccountType.USER)
   ) {
     next();
   } else {
@@ -33,7 +33,7 @@ router.use(function (req, res, next) {
 
 /* PUT create new session on table */
 router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
+  if (!validationResult(req).isEmpty() || !req.session.account) {
     res.sendStatus(400);
     return;
   }
@@ -74,7 +74,7 @@ router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
       s = new Session(t);
       s.servers = [];
       s.servers.push(req.session.account!);
-      let state = new State(StateType.CREATED, req.session.account!);
+      let state = new State(StateType.CREATED, req.session.account);
       s.states = [];
       s.states.push(state);
       await AppDataSource.getRepository(State).save(state);
@@ -161,7 +161,10 @@ router.get("/:sid", param("sid").isInt(), (req: Request, res: Response) => {
     .findOneOrFail({
       relations: {
         table: true,
-        states: true,
+        states: {
+          triggerer: true
+        },
+        servers: true,
       },
       where: {
         id: Number(req.params.sid),

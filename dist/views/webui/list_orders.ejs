@@ -69,7 +69,7 @@
                                 <template v-for="o in finishedOrders">
                                     <div class="list-group-item p-0">
                                         <a class="btn btn-light text-start py-1 ps-4 w-100 "
-                                            :href="'orderdetails/'+o.id" style="background-color:white">
+                                            :href="'/table/orderdetails/'+o.id" style="background-color:white">
                                             <span class="pe-1">•</span>
                                             <!-- Status icons -->
                                             <img v-if="o.currentState.statetype == 0" src="/images/order.png"
@@ -108,6 +108,7 @@
 
     </div>
 </div>
-<div v-if="!finishedOrders.length && !sortedOrders.length && selectedsession" class="list-group-item py-0">
-    <p class="text-center">Keine Bestellungen</p>
+<div v-if="!finishedOrders.length && !sortedOrders.length && selectedSession" class="list-group-item py-0">
+    <br>
+    <h5 class="text-center">Keine Bestellungen</h5>
 </div>

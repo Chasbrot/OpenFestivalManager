@@ -5,3 +5,4 @@ uploads
 dist/entity
 dist/rest
 package-lock.json
+dist/routes

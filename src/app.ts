@@ -71,7 +71,7 @@ let setCache = function (req: Request, res: Response, next:any) {
   const period = 60 * 60 * 24 
 
   // Only cache images, js and css files
-  if (req.method == 'GET' && (req.url.includes("stylesheets") || req.url.includes("gicons")|| req.url.includes("images") || req.url.includes("js") || req.url.includes("bs5") || req.url.includes("media"))) {
+  if (req.method == 'GET' && (req.url.includes("stylesheets")|| req.url.includes("webui") || req.url.includes("gicons")|| req.url.includes("images") || req.url.includes("js") || req.url.includes("bs5") || req.url.includes("media"))) {
     res.set('Cache-control', `max-age=${period}`)
   } else {
     // for the other requests set strict no caching parameters

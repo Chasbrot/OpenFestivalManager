@@ -24,7 +24,7 @@ jobs:
            # s"--no-bytecode --public-packages "*" --public" workaround for https://github.com/vercel/pkg/issues/1663
            pkg package.json --no-bytecode --public-packages "*" --public
            mv festivalmanager-win-x64.exe festivalmanager-${{ github.ref_name }}.exe
-           mv festivalmanager-linux-arm64.exe festivalmanager-${{ github.ref_name }}
+           mv festivalmanager-linux-arm64 festivalmanager-${{ github.ref_name }}
         shell: bash
       # Create a github release
       - name: Create Release

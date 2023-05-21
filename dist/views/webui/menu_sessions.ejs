@@ -5,20 +5,32 @@
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="oc_sessions_label">Sitzungen</h5>
 
-        <button class="btn btn-outline-primary" aria-label="Add" type="button" data-bs-toggle="offcanvas"
+        <button class="btn btn-outline-success" aria-label="Add" type="button" data-bs-toggle="offcanvas"
             data-bs-target="#oc_newSession" aria-controls="oc_newSession">
             <img src="/gicons/add.svg" alt="Add" width="25">
         </button>
-        <button class="btn btn-outline-primary" aria-label="History">
-            <img src="/gicons/history.svg" alt="History" width="25">
-        </button>
+
+        <input type="checkbox" class="btn-check" v-model="showPastSessions" id="btncheck1" autocomplete="off">
+        <label class="btn btn-outline-secondary" for="btncheck1"><img src="/gicons/history.svg" alt="History"
+                width="25"></label>
+
+
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
         <div v-if="activesessions.length">
             <div class="d-grid gap-2">
-                <template v-for="as in activesessions">
-                    <button class="btn btn-primary" type="button" @click='this.loadSessionById(as.id)' data-bs-dismiss=“offcanvas”>{{as.table.name}}</button>
+                <template v-if="!showPastSessions" v-for="as in activesessions">
+                    <button class="btn btn-outline-primary" type="button" @click='this.loadSessionById(as.id)'
+                        data-bs-dismiss=“offcanvas”>{{as.table.name}}</button>
+                </template>
+                <template v-else v-for="ps in pastsessions">
+                    <button class="btn btn-outline-secondary" type="button" @click='this.loadSessionById(ps.id)'
+                        data-bs-dismiss=“offcanvas”>
+                    <span>{{ps.table.name}}</span>
+                    <span class="float-end">{{getTimeFromTimestamp(ps.states[0].created)}}</span>
+                    
+                    </button>
                 </template>
             </div>
         </div>
@@ -39,7 +51,7 @@
 
         <h4>Gruppe</h4>
         <template v-for="tg in tableGroups">
-            <input type="radio" class="btn-check " name="table_group" :id="tg.id" :value="tg.id" autocomplete="off"
+            <input type="radio" class="btn-check " name="table_group" :id="tg.id" :value="tg" autocomplete="off"
                 v-model="currentTG">
             <label class="btn btn-primary mt-2 me-2" :for="tg.id" style="min-width: 50px;">{{tg.name}}</label>
         </template>
@@ -76,7 +88,7 @@
 
         <h4>Zielgruppe</h4>
         <template v-for="tg in tableGroups">
-            <input type="radio" class="btn-check " name="table_group" :id="tg.id" :value="tg.id" autocomplete="off"
+            <input type="radio" class="btn-check " name="table_group" :id="tg.id" :value="tg" autocomplete="off"
                 v-model="currentTG">
             <label class="btn btn-primary mt-2 me-2" :for="tg.id" style="min-width: 50px;">{{tg.name}}</label>
         </template>

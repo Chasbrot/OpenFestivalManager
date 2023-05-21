@@ -98,7 +98,39 @@ export default {
 
         });
         return state;
-    }
+    },
+
+    getFirstState(session) {
+        if (!session) {
+            return;
+        }
+        return session.states[0];
+    },
+
+    getLastState(session) {
+        if (!session) {
+            return;
+        }
+        return session.states[session.states.length-1];
+    },
+
+    async closeOffcanvas(id) {
+        let myOffCanvas = document.getElementById(id);
+        if (!myOffCanvas) {
+            return;
+        }
+        let openedCanvas = bootstrap.Offcanvas.getInstance(myOffCanvas);
+        openedCanvas.hide();
+    },
+
+    async openOffcanvas(id) {
+        let myOffCanvas = document.getElementById(id);
+        if (!myOffCanvas) {
+            return;
+        }
+        let closedCanvas = bootstrap.Offcanvas.getInstance(myOffCanvas);
+        closedCanvas.show();
+    },
 
 
 

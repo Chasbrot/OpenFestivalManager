@@ -307,6 +307,22 @@ export default {
                 targetTid: target_tid
             }));
     },
+    async updateOrderState(oid, stateid) {
+        const requestOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                new: stateid
+            })
+        };
+        return await fetch(`/rest/order/${oid}/state`,requestOptions);
+    },
+
+    async closeSessionById(sid){
+        return await rest.postData(`/rest/session/${sid}/close`);
+    }
 
 }
 

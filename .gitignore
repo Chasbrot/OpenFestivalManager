@@ -4,4 +4,4 @@
 uploads
 dist/entity
 dist/rest
-dist/routes
+package-lock.json

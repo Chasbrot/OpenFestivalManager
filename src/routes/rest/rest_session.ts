@@ -100,23 +100,23 @@ router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
 
 /* GET all global active sessions */
 router.get("/active", async (req: Request, res: Response) => {
-  
+
   try {
     let s = await AppDataSource.getRepository(Session).find({
       relations: {
         states: true,
       },
-      where: 
-        {
-          // Which are NOT closed
-          states: {
-            history: false,
-            statetype: Not(StateType.CLOSED) ,
-          },
+      where:
+      {
+        // Which are NOT closed
+        states: {
+          history: false,
+          statetype: Not(StateType.CLOSED),
         },
+      },
     });
     res.json(s);
-    
+
   } catch (e) {
     console.log("rest/session/active GET: " + e);
     res.sendStatus(500);
@@ -126,11 +126,10 @@ router.get("/active", async (req: Request, res: Response) => {
 
 /* GET all active sessions from a user */
 router.get("/activeByUser", async (req: Request, res: Response) => {
-  
   try {
     let as = await db.getActiveSessionsFromAccount(req.session.account!);
     res.json(as);
-    
+
   } catch (e) {
     console.log("rest/session/activeByUser GET: " + e);
     res.sendStatus(500);
@@ -140,11 +139,11 @@ router.get("/activeByUser", async (req: Request, res: Response) => {
 
 /* GET all inactive sessions from a user */
 router.get("/inactiveByUser", async (req: Request, res: Response) => {
-  
+
   try {
     let as = await db.getInactiveSessionsFromAccount(req.session.account!);
     res.json(as);
-    
+
   } catch (e) {
     console.log("rest/session/inactiveByUser GET: " + e);
     res.sendStatus(500);
@@ -325,12 +324,41 @@ router.put("/:sid/move", param("sid").isInt(), body("targetTid").isInt(), async 
       );
       res.json(target_session.id);
     }
-    
+
   } catch (e) {
     console.log(e);
     res.sendStatus(500);
   }
 });
+
+/* GET orders from session */
+router.post(
+  "/:sid/close",
+  param("sid").isInt(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    try {
+      // Check if session can be closed
+      let sid = Number(req.params.sid)
+      if ((await db.getBillableOrders(sid)).length == 0 && (await db.getOutstandingOrderCount(sid)) == 0) {
+        // Session can be closed
+        let s = await AppDataSource.getRepository(Session).findOneByOrFail({ id: sid });
+        await db.setSessionStatus(s, StateType.CLOSED, req.session.account!);
+        res.sendStatus(200);
+      }else{
+        res.sendStatus(403);
+      }
+
+    } catch (e) {
+      console.log(e);
+      res.sendStatus(500);
+    }
+    
+  }
+);
 
 
 

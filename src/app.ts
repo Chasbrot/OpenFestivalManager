@@ -11,6 +11,7 @@ import { Station } from 'entity/Station';
 import { exit } from 'process';
 const fs = require('fs');
 const compression = require('compression')
+var os = require("os");
 
 
 // Read command line arguments
@@ -81,8 +82,11 @@ let setCache = function (req: Request, res: Response, next:any) {
   // remember to call next() to pass on the request
   next()
 }
-// Apply cache control header
-app.use(setCache);
+// Apply cache control header only if production
+if (process.env.DEVELOPMENT!="true") {
+  app.use(setCache);
+}
+
 
 // Use public directory as root for web files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -136,7 +140,7 @@ if (!ds.createADSFromFile()) {
 
 // Start express server
 app.listen(port, () => {
-  console.log(`[server]: Server is running at https://localhost:${port}`);
+  console.log(`[server]: Server is running at http://localhost:${port} or http://${os.hostname()}:3000`);
   console.log("[server]: Version " + process.env.VERSION);
 });
 

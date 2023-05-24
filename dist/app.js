@@ -13,6 +13,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const process_1 = require("process");
 const fs = require('fs');
 const compression = require('compression');
+var os = require("os");
 // Read command line arguments
 var argv = require('minimist')(process.argv.slice(2));
 if (!argv.env) {
@@ -63,8 +64,10 @@ let setCache = function (req, res, next) {
     // remember to call next() to pass on the request
     next();
 };
-// Apply cache control header
-app.use(setCache);
+// Apply cache control header only if production
+if (process.env.DEVELOPMENT != "true") {
+    app.use(setCache);
+}
 // Use public directory as root for web files
 app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
 // Session valid for 24h
@@ -108,6 +111,6 @@ if (!data_source_1.ds.createADSFromFile()) {
 }
 // Start express server
 app.listen(port, () => {
-    console.log(`[server]: Server is running at https://localhost:${port}`);
+    console.log(`[server]: Server is running at http://localhost:${port} or http://${os.hostname()}:3000`);
     console.log("[server]: Version " + process.env.VERSION);
 });

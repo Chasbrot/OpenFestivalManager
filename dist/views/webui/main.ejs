@@ -2,273 +2,388 @@
 <html lang="de">
 
 <head>
-    <title>Tisch</title>
-    <%- include('../header_common') %>
-    <style>
-        .card-body::-webkit-scrollbar {
-            display: none;
-        }
+  <title>Tisch</title>
+  <%- include('../header_common') %>
+  <style>
+    .card-body::-webkit-scrollbar {
+      display: none;
+    }
 
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .card-body {
-            -ms-overflow-style: none;
-            /* IE and Edge */
-            scrollbar-width: none;
-            /* Firefox */
-        }
-    </style>
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .card-body {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+  </style>
 </head>
 
 <body id="app">
-    <!-- Nav bar -->
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
+  <!-- Nav bar -->
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
 
-            <div class="btn-group">
-                <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" href="#oc_sessions"
-                    role="button" aria-controls="oc_sessions">
-                    Sitzungen
-                </button>
-                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="visually-hidden">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><button class="dropdown-item" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Move" type="button"
-                            data-bs-toggle="offcanvas" data-bs-target="#oc_moveSession"
-                            aria-controls="oc_moveSession">Bewegen</button>
-                    </li>
-                    <li><button class="dropdown-item" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Close Session"
-                            type="button" @click="this.closeCurrentSession()">Sitzung schließen</button>
-                    </li>
-                    <li><button class="dropdown-item" :disabled="!selectedSession" data-bs-toggle="offcanvas" data-bs-target="#oc_sessionInfo"
-                        aria-controls="oc_sessionInfo">Infos</button></li>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li>
-                    <li>
-                        <form action="/personal/logout" method="POST">
-                            <button class="dropdown-item text-danger"  type="submit" >Logout</button></li>
-                          </form>
-                    </li>
-                </ul>
-            </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" href="#oc_sessions" role="button" aria-controls="oc_sessions">
+          Sitzungen
+        </button>
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Move" type="button" data-bs-toggle="offcanvas" data-bs-target="#oc_moveSession" aria-controls="oc_moveSession">Bewegen</button>
+          </li>
+          <li><button class="dropdown-item" :disabled="!(selectedSession && (selectedSessionState && selectedSessionState.statetype != 5)  && sessionCloseable)" aria-label="Close Session" type="button" @click="this.closeCurrentSession()">Sitzung schließen</button>
+          </li>
+          <li><button class="dropdown-item" :disabled="!selectedSession" data-bs-toggle="offcanvas" data-bs-target="#oc_sessionInfo" aria-controls="oc_sessionInfo">Infos</button></li>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+          <li>
+            <form action="/personal/logout" method="POST">
+              <button class="dropdown-item text-danger" type="submit">Logout</button>
+          </li>
+          </form>
+          </li>
+        </ul>
+      </div>
 
 
-            <div v-if="selectedSession != null" class="navbar-brand float-right">
-                {{selectedSession.table.name}}
-            </div>
-            <button v-if="selectedSessionState !=null && selectedSessionState.statetype != 5" class="btn btn-primary">
-                Kassieren
-            </button>
-            <button v-else class="btn btn-primary">
-                Rechnungen
-            </button>
-        </div>
-    </nav>
+      <div v-if="selectedSession != null" class="navbar-brand float-right">
+        <img v-if="selectedSession && (selectedSessionState && selectedSessionState.statetype == 5)" alt="Session locked icon" src="/gicons/lock.svg" width="20" style="-webkit-filter: invert(1); filter: invert(1);" />
+        {{selectedSession.table.name}}
+      </div>
 
-    <!-- Bestellungen -->
-    <%-include('list_orders') %>
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" href="#oc_billing" role="button" aria-controls="oc_billing" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)">
+          Kassieren
+        </button>
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" :disabled="!selectedSession">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item" aria-label="Move" type="button" data-bs-toggle="offcanvas" data-bs-target="#oc_bills" aria-controls="oc_bills">Rechnungen</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-
-    <!-- Sessions -->
-    <%-include('menu_sessions') %>
-
-    <!-- Session Information -->
-    <%-include('menu_session_info') %>
-
-
-    <!-- Error Modal -->
-    <%-include('../errorModal') %>
+  <!-- Bestellungen -->
+  <%-include('list_orders') %>
 
 
-    <!-- Vue Js -->
-    <script type="module" type="text/javascript">
-        import dm from "/vue/datamodel.js";
-                import hlp from "/vue/helper.js";
+  <!-- Sessions -->
+  <%-include('menu_sessions') %>
 
-                const { createApp } = Vue;
+  <!-- Session Information -->
+  <%-include('menu_session_info') %>
 
-                let app = createApp({
-                    data: () => ({
-                        // Data
-                        sortedOrders: [],
-                        finishedOrders: [],
+  <!-- Billing Interface -->
+  <%-include('menu_billing') %>
 
-                        // Sessions
-                        activesessions: [],
-                        selectedSession: null,
-                        selectedSessionState: null,
-                        pastsessions: [],
-                        showPastSessions: false,
-
-                        // New Session
-                        tableGroups: [],
-                        tables: [],
-                        currentTable: "",
-                        currentTG: null,
-                        errorNewSession: null,
-                    }),
-
-                    // Execute at page load
-                    mounted() {
-                        // Load Tables and Tablegroups for New Session
-                        dm.loadTableGroups().then((r)=>{
-                            this.tableGroups=r
-                            this.currentTG = this.tableGroups[0]
-                        }).catch((err)=>{
-                            console.log(err)
-                        })
-                        
-                        // Load Sessions
-                        this.fetchSessions()
-
-                    },
-
-                    watch: {
-                        // New Session Watch
-                        currentTG: 'fetchTables',
-                        selectedSession: 'loadSessionData',
-
-                    },
-
-                    // Helper functions
-                    methods: {
-                        
-                        async loadSessionData() {
-                            if(!this.selectedSession){
-                                return;
-                            }
-                            this.selectedSessionState = await hlp.getCurrentState(this.selectedSession)
-                            // Close offcanvas
-                            await hlp.closeOffcanvas("oc_sessions")
-                            // Load orders
-                            await this.fetchOrders()
-                        },
-
-                        async fetchOrders() {
-                            if(!this.selectedSession){
-                                return;
-                            }
-                            this.finishedOrders = [];
-                            this.sortedOrders = [];
-                            this.orders = await dm.loadOrdersFromSession(this.selectedSession.id)
-                            if (!this.orders.length) {
-                                return;
-                            }
-
-                            // Generate sorted and grouped order lists
-                            this.orders.forEach((o) => {
-                                if (o.currentState.statetype == 3) {
-                                    this.finishedOrders.push(o);
-                                } else {
-                                    this.sortedOrders.push(o);
-                                }
-                            })
-                            // Sort lists
-                            // Finished orders latest first
-                            this.finishedOrders.sort(function (a, b) {
-                                return new Date(b.currentState.created).getTime() - new Date(a
-                                    .currentState.created).getTime();
-                            });
-
-                        },
-
-                        getTimeFromOrder(order) {
-                            return this.getTimeFromTimestamp(order.currentState.created)
-                        },
-
-                        getTimeFromTimestamp(ts) {
-                            return (new Date(ts).getHours() + "").padStart(2, '0') + ':' + (
-                                new Date(ts).getMinutes() + "").padStart(2, '0')
-                        },
-
-                        async loadSessionById(sid) {
-                            dm.loadSessionById(sid).then((r)=>{
-                                this.selectedSession=r
-                                console.log(r)
-                            })
-                        },
-
-                        async fetchSessions() {
-                            dm.loadSessionsActive().then((r)=>this.activesessions=r)
-                            dm.loadSessionsInactive().then((r)=>this.pastsessions=r)
-                        },
-                        async fetchTables() {
-                            if(!this.currentTG){
-                                return;
-                            }
-                            dm.loadTablesFromTableGroup(this.currentTG).then((r)=>this.tables=r)
-                        },
-                        async createSession() {
-                            if (this.currentTable && this.currentTG) {
-                                const requestOptions = {
-                                    method: "PUT",
-                                    headers: {
-                                        "Content-Type": "application/json"
-                                    },
-                                    body: JSON.stringify({
-                                        tid: this.currentTable
-                                    })
-                                };
-                                const response = await fetch("/rest/session",
-                                    requestOptions);
-                                if (response.status != 200) {
-                                    this.errorNewSession = true;
-                                } else {
-                                    const data = await response.json();
-                                    this.selectedSession = await dm.loadSessionById(data.sid);
-                                    this.fetchSessions()
-                                    hlp.closeOffcanvas("oc_newSession")
-                                }
-                            }
-
-                        },
-                        
-                        async moveSession(){
-                            if(!this.currentTable || !this.selectedSession){
-                                return;
-                            }
-                            let newSid = await dm.moveSessionToOtherTable(this.selectedSession.id, this.currentTable);
-                            this.selectedSession = await dm.loadSessionById(newSid);
-                            this.fetchSessions()
-                            await hlp.closeOffcanvas("oc_moveSession")
-                        },
-                        async updateOrderState(oid, stateid) {
-                            dm.updateOrderState(oid, stateid)
-                            .then(()=>this.fetchOrders())
-                            .catch((err)=>console.log("Update Order State failed: " +response.statusText))
-                        },
-
-                        async closeCurrentSession(){
-                            dm.closeSessionById(this.selectedSession.id).then(()=>{
-                                this.fetchSessions()
-                                this.selectedSession=null
-                                hlp.openOffcanvas("oc_sessions")
-                            })
-                        },
-
-                        getSessionTimespan(session){
-                            let ts1 = this.getTimeFromTimestamp( hlp.getFirstState(session).created)
-                            let ts2 = this.getTimeFromTimestamp( hlp.getLastState(session).created)
-                            return ts1 + " - " + ts2
-                        }
-
-                    }
-
-                });
-
-                app.config.errorHandler = (err, instance, info) => {
-                    console.log("Vue App Error", err, info)
-                    hlp.makeError("The application has generated an error.", info, err);
-                }
-                app.mount("#app");
+  <!-- Billing History -->
+  <%-include('menu_bills') %>
 
 
+  <!-- Error Modal -->
+  <%-include('../errorModal') %>
 
-            </script>
+
+  <!-- Vue Js -->
+  <script type="module" type="text/javascript">
+    import dm from "/vue/datamodel.js";
+    import hlp from "/vue/helper.js";
+
+    const {
+      createApp
+    } = Vue;
+
+    let app = createApp({
+      data: () => ({
+        // Data
+        sortedOrders: [],
+        finishedOrders: [],
+
+        // Sessions
+        activesessions: [],
+        selectedSession: null,
+        selectedSessionState: null,
+        pastsessions: [],
+        showPastSessions: false,
+
+        // New Session
+        tableGroups: [],
+        tables: [],
+        currentTable: "",
+        currentTG: null,
+        errorNewSession: null,
+
+        // Bills and Billing
+        billableOrders: [],
+        groupedOrders: [],
+        selectedOrders: null,
+        sessionCloseable: null,
+        paymentMethods: [],
+        selectedPaymentMethod:null,
+      }),
+
+      // Execute at page load
+      mounted() {
+        // Load Tables and Tablegroups for New Session
+        dm.loadTableGroups().then((r) => {
+          this.tableGroups = r
+          this.currentTG = this.tableGroups[0]
+        }).catch((err) => {
+          console.log(err)
+        })
+
+        // Load Sessions
+        this.fetchSessions()
+
+
+      },
+
+      watch: {
+        // New Session Watch
+        currentTG: 'fetchTables',
+        selectedSession: 'loadSessionData',
+
+      },
+
+      // Helper functions
+      methods: {
+
+        async loadSessionData() {
+          if (!this.selectedSession) {
+            return;
+          }
+          this.selectedSessionState = await hlp.getCurrentState(this.selectedSession)
+          // Close offcanvas
+          await hlp.closeOffcanvas("oc_sessions")
+          // Load orders
+          await this.fetchOrders()
+          // Load Unpayed orders
+          this.loadBillingData()
+        },
+
+        async loadBillingData() {
+          let r = await dm.isSessionCloseable(this.selectedSession.id)
+          this.sessionCloseable = r.closeable
+          console.log("session closeable: " + r.closeable)
+          if (!r.closeable) {
+            let result = await dm.getBillableOrders(this.selectedSession.id)
+            this.billableOrders = result
+            //console.log(result)
+            this.groupedOrders = await hlp.groupOrders(result);
+            //console.log(this.groupedOrders)
+            this.selectedOrders = new Map()
+            this.groupedOrders.forEach((k, v) => {
+              this.selectedOrders.set(v.id, [])
+            })
+          }
+          dm.loadPaymentMethods().then(async (r) => {
+            this.paymentMethods = r
+            this.selectedPaymentMethod = (await r.find((e)=>e.default))
+          })
+          console.log("Billing data load ok")
+        },
+
+        async fetchOrders() {
+          if (!this.selectedSession) {
+            return;
+          }
+          this.finishedOrders = [];
+          this.sortedOrders = [];
+          this.orders = await dm.loadOrdersFromSession(this.selectedSession.id)
+          if (!this.orders.length) {
+            return;
+          }
+
+          // Generate sorted and grouped order lists
+          this.orders.forEach((o) => {
+            if (o.currentState.statetype == 3) {
+              this.finishedOrders.push(o);
+            } else {
+              this.sortedOrders.push(o);
+            }
+          })
+          // Sort lists
+          // Finished orders latest first
+          this.finishedOrders.sort(function(a, b) {
+            return new Date(b.currentState.created).getTime() - new Date(a
+              .currentState.created).getTime();
+          });
+
+        },
+
+        getTimeFromOrder(order) {
+          return this.getTimeFromTimestamp(order.currentState.created)
+        },
+
+        getTimeFromTimestamp(ts) {
+          return (new Date(ts).getHours() + "").padStart(2, '0') + ':' + (
+            new Date(ts).getMinutes() + "").padStart(2, '0')
+        },
+
+        async loadSessionById(sid) {
+          dm.loadSessionById(sid).then((r) => {
+            this.selectedSession = r
+            console.log(r)
+          })
+        },
+
+        async fetchSessions() {
+          dm.loadSessionsActive().then((r) => this.activesessions = r)
+          dm.loadSessionsInactive().then((r) => this.pastsessions = r)
+        },
+        async fetchTables() {
+          if (!this.currentTG) {
+            return;
+          }
+          dm.loadTablesFromTableGroup(this.currentTG).then((r) => this.tables = r)
+        },
+        async createSession() {
+          if (this.currentTable && this.currentTG) {
+            const requestOptions = {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                tid: this.currentTable
+              })
+            };
+            const response = await fetch("/rest/session",
+              requestOptions);
+            if (response.status != 200) {
+              this.errorNewSession = true;
+            } else {
+              const data = await response.json();
+              this.selectedSession = await dm.loadSessionById(data.sid);
+              this.fetchSessions()
+              hlp.closeOffcanvas("oc_newSession")
+            }
+          }
+
+        },
+
+        async moveSession() {
+          if (!this.currentTable || !this.selectedSession) {
+            return;
+          }
+          let newSid = await dm.moveSessionToOtherTable(this.selectedSession.id, this.currentTable);
+          this.selectedSession = await dm.loadSessionById(newSid);
+          this.fetchSessions()
+          await hlp.closeOffcanvas("oc_moveSession")
+        },
+        async updateOrderState(oid, stateid) {
+          dm.updateOrderState(oid, stateid)
+            .then(() => this.fetchOrders())
+            .catch((err) => console.log("Update Order State failed: " + response.statusText))
+        },
+
+        async closeCurrentSession() {
+          dm.closeSessionById(this.selectedSession.id).then(() => {
+            this.fetchSessions()
+            this.selectedSession = null
+            hlp.openOffcanvas("oc_sessions")
+          })
+        },
+
+        getSessionTimespan(session) {
+          let ts1 = this.getTimeFromTimestamp(hlp.getFirstState(session).created)
+          let ts2 = this.getTimeFromTimestamp(hlp.getLastState(session).created)
+          return ts1 + " - " + ts2
+        },
+
+        billAddOrder(gid, pid) {
+          let so = this.selectedOrders.get(gid)
+          so.push(pid)
+        },
+
+        billRemoveOrder(gid) {
+          let so = this.selectedOrders.get(gid)
+          so.pop()
+        },
+
+        billAddAllOrdersFromGroup(gid, pids) {
+          let so = this.selectedOrders.get(gid)
+          for (let p of pids) {
+            if (so.indexOf(p) == -1) {
+              so.push(p)
+            }
+          }
+        },
+
+        billAddAllOrders() {
+          this.groupedOrders.forEach((v, k) => {
+            this.billAddAllOrdersFromGroup(k.id, v)
+          })
+        },
+
+        getNumMapEntries(m) {
+          if (!m) {
+            return 0
+          }
+          let s = 0
+          for (let e of m.entries()) {
+            s += e[1].length
+          }
+          return s
+        },
+
+        billGetSumSelectedOrders() {
+          if (!this.selectedOrders) {
+            return 0
+          }
+          let s = 0
+          for (let k of this.selectedOrders.keys()) {
+            let so = this.selectedOrders.get(k)
+            let bo = this.billableOrders.find((b) => b.id == k)
+            if(!bo){
+              return 0
+            }
+            if (bo.variation) {
+              s += bo.variation.price * so.length
+            } else {
+              s += bo.product.price * so.length
+            }
+          }
+          return s.toFixed(2)
+        },
+
+        billPay() {
+          if (!this.selectedOrders || !this.getNumMapEntries(this.selectedOrders) || !this.selectedPaymentMethod) {
+            return;
+          }
+          // Collect all order ids into one array, oh boi i hate js so much
+          let orders = []
+          for (let k of this.selectedOrders.keys()) {
+            let v = this.selectedOrders.get(k)
+            for (let o of v) {
+              orders.push(o)
+            }
+          }
+
+          // create a bill at the server and reload all data
+          dm.createBill(this.selectedSession.id,orders,this.selectedPaymentMethod.id).then((r) => {
+            this.loadBillingData()
+          })
+        }
+      }
+
+    });
+
+    app.config.errorHandler = (err, instance, info) => {
+      console.log("Vue App Error", err, info)
+      hlp.makeError("The application has generated an error.", info, err);
+    }
+    app.mount("#app");
+  </script>
 
 
 

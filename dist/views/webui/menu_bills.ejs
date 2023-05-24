@@ -1,0 +1,25 @@
+<!-- Billing interface -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="oc_createBill" aria-labelledby="oc_createBill_label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="oc_createBill_label">Sitzungen</h5>
+
+        <button class="btn btn-outline-success" aria-label="Add" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#oc_newSession" aria-controls="oc_newSession">
+            <img src="/gicons/add.svg" alt="Add" width="25">
+        </button>
+
+        <input type="checkbox" class="btn-check" v-model="showPastSessions" id="btncheck1" autocomplete="off">
+        <label class="btn btn-outline-secondary" for="btncheck1"><img src="/gicons/history.svg" alt="History"
+                width="25"></label>
+
+
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+        <div>
+            <p class="text-center">Rechnungen halt</p>
+        </div>
+
+    </div>
+</div>

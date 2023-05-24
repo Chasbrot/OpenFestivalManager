@@ -322,6 +322,39 @@ export default {
 
     async closeSessionById(sid){
         return await rest.postData(`/rest/session/${sid}/close`);
+    },
+
+    async getUnpayedOrders(sid) {
+        let result = await rest.fetchData(`/rest/billing/${sid}/unpayedOrdersGrouped`);
+        let map = new Map();
+        // Rebuild map because json sucks
+        for (let i = 0; i < result.length; i++) {
+            map.set(result[i].key, result[i].value)
+        }
+        return map
+    },
+
+    
+    async isSessionCloseable(sid) {
+        return await rest.fetchData(`/rest/billing/${sid}/closeable`);
+    },
+
+    async getBillableOrders(sid) {
+        return await rest.fetchData(`/rest/billing/${sid}/billableOrders`);
+    },
+
+    async createBill(sid, orders, paymentmethodid) {
+        const requestOptions = {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                pmid: paymentmethodid,
+                orderids: orders
+            })
+        };
+        return await fetch(`/rest/billing/${sid}/pay`,requestOptions);
     }
 
 }

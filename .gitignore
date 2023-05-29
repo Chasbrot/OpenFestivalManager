@@ -5,3 +5,5 @@ uploads
 dist/entity
 dist/rest
 package-lock.json
+cert.pem
+key.pem

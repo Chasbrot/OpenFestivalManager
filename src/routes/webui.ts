@@ -41,8 +41,6 @@ router.use(function (req, res, next) {
 
 /* GET new session */
 router.get("/", async function (_req, res) {
-
-
   res.render("webui/main");
 });
 

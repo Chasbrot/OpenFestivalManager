@@ -11,21 +11,22 @@
     <div class="list-group form-group pt-1">
       <template v-if="groupedOrders" v-for="[go, value] of groupedOrders.entries()">
         <div class="list-group-item py-0 ps-1 pe-0">
-          <span>{{selectedOrders.get(go.id).length}}</span>
-          /
-          <span>{{value.length}}&nbsp;</span>
-          <span v-if="go.variation">{{go.product.name}}, {{go.variation.attrname}}</span>
-          <span v-else>{{go.product.name}}</span>
+          <div class="float-start">
+            <span>{{selectedOrders.get(go.id).length}}/{{value.length}}&nbsp;</span>
+            <span v-if="go.variation">{{go.product.name}}, {{go.variation.attrname}}</span>
+            <span v-else>{{go.product.name}}</span>
+          </div>
+
           <div class="float-end">
             <span v-if="go.variation" class="pe-3">{{go.variation.price}}€</span>
             <span v-else class="pe-3">{{go.product.price}}€</span>
-            <button type="button" class="btn btn-secondary btn-sm float-right py-0 px-2 me-1" :disabled="selectedOrders.get(go.id).length<=0" @click="billRemoveOrder(go.id)">
+            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-1 me-1" :disabled="selectedOrders.get(go.id).length<=0" @click="billRemoveOrder(go.id)">
               <img src="/gicons/remove.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);" />
             </button>
-            <button type="button" class="btn btn-secondary btn-sm float-right py-0 px-2 me-1" :disabled="value.length<=selectedOrders.get(go.id).length" @click="billAddOrder(go.id,value[selectedOrders.get(go.id).length])">
+            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-1 me-1" :disabled="value.length<=selectedOrders.get(go.id).length" @click="billAddOrder(go.id,value[selectedOrders.get(go.id).length])">
               <img src="/gicons/add.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);"/>
             </button>
-            <button type="button" class="btn btn-secondary btn-sm float-right py-0 px-1 me-0" :disabled="value.length<=selectedOrders.get(go.id).length" @click="billAddAllOrdersFromGroup(go.id,value)">
+            <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-1 me-0" :disabled="value.length<=selectedOrders.get(go.id).length" @click="billAddAllOrdersFromGroup(go.id,value)">
               <img src="/gicons/done_all.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);"/>
             </button>
           </div>

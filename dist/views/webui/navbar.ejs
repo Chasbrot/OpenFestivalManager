@@ -1,0 +1,54 @@
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" href="#oc_sessions" role="button" aria-controls="oc_sessions">
+          Sitzungen
+        </button>
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Move" type="button" data-bs-toggle="offcanvas" data-bs-target="#oc_moveSession" aria-controls="oc_moveSession">Bewegen</button>
+          </li>
+          <li><button class="dropdown-item" :disabled="!(selectedSession && (selectedSessionState && selectedSessionState.statetype != 5)  && sessionCloseable)" aria-label="Close Session" type="button" @click="this.closeCurrentSession()">Sitzung schließen</button>
+          </li>
+          <li><button class="dropdown-item" :disabled="!selectedSession" data-bs-toggle="offcanvas" data-bs-target="#oc_sessionInfo" aria-controls="oc_sessionInfo">Infos</button></li>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+          <li>
+            <form action="/personal/logout" method="POST">
+              <button class="dropdown-item text-danger" type="submit">Logout</button>
+          </li>
+          </form>
+          </li>
+        </ul>
+      </div>
+
+
+      <div v-if="selectedSession != null" class="navbar-brand">
+        <img v-if="selectedSession && (selectedSessionState && selectedSessionState.statetype == 5)" alt="Session locked icon" src="/gicons/lock.svg" width="20" style="-webkit-filter: invert(1); filter: invert(1);" />
+        <span class="fs-4">{{selectedSession.table.name}}</span>
+      </div>
+      <div v-else class="navbar-brand">
+        <img alt="No Session selected" src="/gicons/remove.svg" width="20" style="-webkit-filter: invert(1); filter: invert(1);" />
+      </div>
+
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" href="#oc_billing" role="button" aria-controls="oc_billing" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)">
+          Kassieren
+        </button>
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" :disabled="!selectedSession">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item" aria-label="Bills" type="button" data-bs-toggle="offcanvas" data-bs-target="#oc_bills" aria-controls="oc_bills">Rechnungen</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>

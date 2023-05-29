@@ -1,25 +1,57 @@
-<!-- Billing interface -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="oc_createBill" aria-labelledby="oc_createBill_label">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="oc_createBill_label">Sitzungen</h5>
+<!-- Billing History interface (Bills) -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="oc_bills" aria-labelledby="oc_bills_label">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="oc_bills_label">Rechnungen</h5>
 
-        <button class="btn btn-outline-success" aria-label="Add" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#oc_newSession" aria-controls="oc_newSession">
-            <img src="/gicons/add.svg" alt="Add" width="25">
-        </button>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body py-0 px-1">
 
-        <input type="checkbox" class="btn-check" v-model="showPastSessions" id="btncheck1" autocomplete="off">
-        <label class="btn btn-outline-secondary" for="btncheck1"><img src="/gicons/history.svg" alt="History"
-                width="25"></label>
+    <!-- Bestellungen -->
+    <div class="accordion" id="accordionExample">
+      <div class="list-group">
+        <template v-for="b in bills">
+          <div class="list-group-item py-0 px-0">
+            <div class="accordion-item">
+              <h2 class="accordion-header" :id="'headeing'+b.id">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse'+b.id" aria-expanded="false" :aria-controls="'collapse'+b.id">
+                  <span class="btn-text-fill">{{billGetSumOfBill(b)}} €</span>
+                  <span class="float-end pe-1">
+                    {{getTimeFromTimestamp(b.paymentTime)}}
+                  </span>
+                </button>
+              </h2>
+            </div>
+            <div :id="'collapse'+b.id" class="accordion-collapse collapse" aria-labelledby="'headeing'+b.id" data-bs-parent="#accordionExample">
+              <div class="accordion-body px-2">
+                <span class="ps-1">Durch: {{b.cashier.name}}</span>
+                <span class="float-end pe-1">Zahlung: {{b.method.name}}</span>
+                <div class="list-group pt-1">
+                  <template v-for="o in b.orders">
+                    <div v-if="o.variation" class="list-group-item">
+                      <span>{{o.product.name}}, {{o.variation.attrname}}</span>
+                      <div class="float-end">
+                        <span>{{o.variation.price}}</span>
+                      </div>
+                    </div>
 
+                    <div v-else class="list-group-item">
+                      <span>{{o.product.name}}</span>
+                      <div class="float-end">
+                        <span>{{o.product.price}}</span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
 
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
     </div>
-    <div class="offcanvas-body">
+    <h4 v-if="!bills.length" class="text-center">Keine Rechnugen gefunden</h4>
 
-        <div>
-            <p class="text-center">Rechnungen halt</p>
-        </div>
-
-    </div>
+  </div>
 </div>

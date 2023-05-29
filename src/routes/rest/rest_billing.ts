@@ -170,9 +170,11 @@ router.get("/:sid/closeable", param("sid").isInt(), async function (req, res) {
     return;
   }
   // Count all outstanding orders
-  db.getOutstandingOrderCount(req.params!.sid).then((r) => {
-    res.json({
-      closeable: r == 0,
+  db.getOutstandingOrderCount(req.params!.sid).then((ooc) => {
+    db.getBillableOrders(req.params!.sid).then((bo) => {
+      res.json({
+        closeable: ooc == 0 && bo.length==0,
+      });
     });
   });
 });

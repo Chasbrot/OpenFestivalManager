@@ -215,7 +215,7 @@ router.get("/:sid/orders", (0, express_validator_1.param)("sid").isInt(), (req, 
     });
 });
 /* PUT create order */
-router.put("/:sid", (0, express_validator_1.param)("sid").isInt(), (0, express_validator_1.body)("vid").isInt(), (0, express_validator_1.body)("pid").isInt(), (0, express_validator_1.body)("note").isString(), async (req, res) => {
+router.put("/:sid", (0, express_validator_1.param)("sid").isInt(), (0, express_validator_1.body)("vid"), (0, express_validator_1.body)("pid").isInt(), (0, express_validator_1.body)("note"), async (req, res) => {
     // Request must have a product id
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);

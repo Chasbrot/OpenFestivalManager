@@ -317,10 +317,10 @@ export default {
                 new: stateid
             })
         };
-        return await fetch(`/rest/order/${oid}/state`,requestOptions);
+        return await fetch(`/rest/order/${oid}/state`, requestOptions);
     },
 
-    async closeSessionById(sid){
+    async closeSessionById(sid) {
         return await rest.postData(`/rest/session/${sid}/close`);
     },
 
@@ -334,7 +334,7 @@ export default {
         return map
     },
 
-    
+
     async isSessionCloseable(sid) {
         return await rest.fetchData(`/rest/billing/${sid}/closeable`);
     },
@@ -344,18 +344,39 @@ export default {
     },
 
     async createBill(sid, orders, paymentmethodid) {
-        const requestOptions = {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                pmid: paymentmethodid,
-                orderids: orders
-            })
-        };
-        return await fetch(`/rest/billing/${sid}/pay`,requestOptions);
+        return await rest.putData(`/rest/billing/${sid}/pay`,
+        JSON.stringify({
+            pmid: paymentmethodid,
+            orderids: orders
+        }));
+    },
+
+    async loadProductsByStation(sid) {
+        return await rest.fetchData(`/rest/station/${sid}/products`);
+    },
+    async loadProductsByCategory(cid) {
+        return await rest.fetchData(`/rest/category/${cid}/products`);
+    },
+
+    async orderProduct(sid, pid, vid, options, note) {
+        if (!sid || !pid) {
+            return;
+        }
+
+        return await rest.putData(`/rest/session/${sid}`,
+            JSON.stringify({
+                pid: pid,
+                vid: vid,
+                options: options,
+                note: note
+            }));
+    },
+
+    async loadSingleOrder(oid) {
+        return await rest.fetchData(`/rest/order/${oid}`)
     }
+
+
 
 }
 

@@ -1,0 +1,366 @@
+<script type="module" type="text/javascript">
+    import dm from "/vue/datamodel.js";
+    import hlp from "/vue/helper.js";
+
+    const {
+      createApp
+    } = Vue;
+
+    let app = createApp({
+      data: () => ({
+        // Data
+        sortedOrders: [],
+        finishedOrders: [],
+
+        // Sessions
+        activesessions: [],
+        selectedSession: null,
+        selectedSessionState: null,
+        pastsessions: [],
+        showPastSessions: false,
+
+        // New Session
+        tableGroups: [],
+        tables: [],
+        currentTable: "",
+        currentTG: null,
+        errorNewSession: null,
+
+        // Bills and Billing
+        billableOrders: [],
+        groupedOrders: [],
+        selectedOrders: null,
+        sessionCloseable: null,
+        paymentMethods: [],
+        selectedPaymentMethod: null,
+        bills: [],
+
+        // Ordering
+        categories: [],
+        stations: [],
+        products: [],
+      }),
+
+      // Execute at page load
+      mounted() {
+        // Load Tables and Tablegroups for New Session
+        dm.loadTableGroups().then((r) => {
+          this.tableGroups = r
+          this.currentTG = this.tableGroups[0]
+        }).catch((err) => {
+          console.log(err)
+        })
+
+        // Load Sessions
+        this.fetchSessions()
+
+        // Load Order Data
+        dm.loadProductCategories().then((r) => this.categories = r)
+        dm.loadStations().then((r) => this.stations = r)
+
+        // Load Payment Data
+        dm.loadPaymentMethods().then(async (r) => {
+          this.paymentMethods = r
+          this.selectedPaymentMethod = (await r.find((e) => e.default))
+        })
+
+      },
+
+      watch: {
+        // New Session Watch
+        currentTG: 'fetchTables',
+        selectedSession: 'loadSessionData',
+        billableOrders: 'billGroupOrders',
+      },
+
+      // Helper functions
+      methods: {
+
+        async loadSessionData() {
+          if (!this.selectedSession) {
+            return;
+          }
+          this.selectedSessionState = await hlp.getCurrentState(this.selectedSession)
+          // Close offcanvas
+          await hlp.closeOffcanvas("oc_sessions")
+          // Load orders
+          await this.fetchOrders()
+          // Load Unpayed orders
+          this.loadBillingData()
+        },
+
+        async fetchStationProducts(sid) {
+          dm.loadProductsByStation(sid).then((r) => this.products = r)
+        },
+        async fetchCategoryProducts(cid) {
+          dm.loadProductsByCategory(cid).then((r) => this.products = r)
+        },
+
+
+        async loadBillingData() {
+          let r = await dm.isSessionCloseable(this.selectedSession.id)
+          this.sessionCloseable = r.closeable
+          console.log("session closeable: " + r.closeable)
+          if (!r.closeable) {
+            dm.getBillableOrders(this.selectedSession.id).then((r) => this.billableOrders = r)
+          } else {
+            this.billableOrders = []
+          }
+
+          dm.loadBillsFromSessionId(this.selectedSession.id).then(async (r) => {
+            this.bills = r
+          })
+          console.log("Billing data load ok")
+        },
+
+        async billGroupOrders() {
+          if (this.billableOrders.length) {
+            // Generate Grouped Orders
+            this.groupedOrders = await hlp.groupOrders(this.billableOrders); 
+            // Generate Selected Orders map
+            this.selectedOrders = new Map()                             
+            this.groupedOrders.forEach((k, v) => {
+              this.selectedOrders.set(v.id, [])
+            })
+          } else {
+            // Empty all maps
+            this.groupedOrders = new Map()
+            this.selectedOrders = new Map()
+          }
+        },
+
+        async fetchOrders() {
+          if (!this.selectedSession) {
+            return;
+          }
+          this.finishedOrders = [];
+          this.sortedOrders = [];
+          this.orders = await dm.loadOrdersFromSession(this.selectedSession.id)
+          if (!this.orders.length) {
+            return;
+          }
+
+          // Generate sorted and grouped order lists
+          this.orders.forEach((o) => {
+            if (o.currentState.statetype == 3) {
+              this.finishedOrders.push(o);
+            } else {
+              this.sortedOrders.push(o);
+            }
+          })
+          // Sort lists
+          // Finished orders latest first
+          this.finishedOrders.sort(function(a, b) {
+            return new Date(b.currentState.created).getTime() - new Date(a
+              .currentState.created).getTime();
+          });
+
+        },
+
+        getTimeFromOrder(order) {
+          return this.getTimeFromTimestamp(order.currentState.created)
+        },
+
+        getTimeFromTimestamp(ts) {
+          return (new Date(ts).getHours() + "").padStart(2, '0') + ':' + (
+            new Date(ts).getMinutes() + "").padStart(2, '0')
+        },
+
+        async loadSessionById(sid) {
+          dm.loadSessionById(sid).then((r) => {
+            this.selectedSession = r
+            console.log(r)
+          })
+        },
+
+        async fetchSessions() {
+          dm.loadSessionsActive().then((r) => this.activesessions = r)
+          dm.loadSessionsInactive().then((r) => this.pastsessions = r)
+        },
+        async fetchTables() {
+          if (!this.currentTG) {
+            return;
+          }
+          dm.loadTablesFromTableGroup(this.currentTG).then((r) => this.tables = r)
+        },
+        async createSession() {
+          if (this.currentTable && this.currentTG) {
+            const requestOptions = {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                tid: this.currentTable
+              })
+            };
+            const response = await fetch("/rest/session",
+              requestOptions);
+            if (response.status != 200) {
+              this.errorNewSession = true;
+            } else {
+              const data = await response.json();
+              this.selectedSession = await dm.loadSessionById(data.sid);
+              this.fetchSessions()
+              hlp.closeOffcanvas("oc_newSession")
+            }
+          }
+
+        },
+
+        async moveSession() {
+          if (!this.currentTable || !this.selectedSession) {
+            return;
+          }
+          let newSid = await dm.moveSessionToOtherTable(this.selectedSession.id, this.currentTable);
+          this.selectedSession = await dm.loadSessionById(newSid);
+          this.fetchSessions()
+          await hlp.closeOffcanvas("oc_moveSession")
+        },
+        async updateOrderState(oid, stateid) {
+          dm.updateOrderState(oid, stateid)
+            .then(() => {
+              this.fetchOrders()
+              this.loadBillingData()
+            })
+            .catch((err) => console.log("Update Order State failed: " + response.statusText))
+        },
+
+        async closeCurrentSession() {
+          dm.closeSessionById(this.selectedSession.id).then(() => {
+            this.fetchSessions()
+            this.selectedSession = null
+            hlp.openOffcanvas("oc_sessions")
+          })
+        },
+
+        getSessionTimespan(session) {
+          let ts1 = this.getTimeFromTimestamp(hlp.getFirstState(session).created)
+          let ts2 = this.getTimeFromTimestamp(hlp.getLastState(session).created)
+          return ts1 + " - " + ts2
+        },
+
+        billAddOrder(gid, pid) {
+          let so = this.selectedOrders.get(gid)
+          so.push(pid)
+        },
+
+        billRemoveOrder(gid) {
+          let so = this.selectedOrders.get(gid)
+          so.pop()
+        },
+
+        billAddAllOrdersFromGroup(gid, pids) {
+          let so = this.selectedOrders.get(gid)
+          for (let p of pids) {
+            if (so.indexOf(p) == -1) {
+              so.push(p)
+            }
+          }
+        },
+
+        billAddAllOrders() {
+          this.groupedOrders.forEach((v, k) => {
+            this.billAddAllOrdersFromGroup(k.id, v)
+          })
+        },
+
+        getNumMapEntries(m) {
+          if (!m) {
+            return 0
+          }
+          let s = 0
+          for (let e of m.entries()) {
+            s += e[1].length
+          }
+          return s
+        },
+
+        billGetSumSelectedOrders() {
+          if (!this.selectedOrders) {
+            return 0
+          }
+          let s = 0
+          for (let k of this.selectedOrders.keys()) {
+            let so = this.selectedOrders.get(k)
+            let bo = this.billableOrders.find((b) => b.id == k)
+            if (!bo) {
+              return 0
+            }
+            if (bo.variation) {
+              s += bo.variation.price * so.length
+            } else {
+              s += bo.product.price * so.length
+            }
+          }
+          return s.toFixed(2)
+        },
+
+        billPay() {
+          if (!this.selectedOrders || !this.getNumMapEntries(this.selectedOrders) || !this.selectedPaymentMethod) {
+            return;
+          }
+          // Collect all order ids into one array, oh boi i hate js so much
+          let orders = []
+          for (let k of this.selectedOrders.keys()) {
+            let v = this.selectedOrders.get(k)
+            for (let o of v) {
+              orders.push(o)
+            }
+          }
+
+          // create a bill at the server and reload all data
+          dm.createBill(this.selectedSession.id, orders, this.selectedPaymentMethod.id).then((r) => {
+            console.log("Bill created")
+            this.loadBillingData()
+          })
+        },
+
+        billGetSumOfBill(bill) {
+          if (!bill) {
+            return 0
+          }
+          let s = 0
+          for (let o of bill.orders) {
+            if (o.variation) {
+              s += Number(o.variation.price)
+            } else {
+              s += Number(o.product.price)
+            }
+          }
+          return s.toFixed(2)
+        },
+
+        async orderProduct(pid, vid, complex) {
+          console.log("order: " + pid + " var: " + vid)
+          let options = [];
+          // Get selected options if present
+          if (complex) {
+            // load all checkboxes from this product
+            $("[id^=" + pid + "-option]").each(function(index, element) {
+              if (element.checked) {
+                // If selected save option id to array
+                options.push(element.value);
+              }
+            });
+          }
+          let note;
+          if ($("#" + pid + "note").length) {
+            note = $("#" + pid + "note")[0].value;
+          }
+          const response = await dm.orderProduct(this.selectedSession.id, pid, vid, complex ? options : null, note)
+          if (response.oid) {
+            this.fetchOrders()
+          }
+        },
+
+      }
+
+    });
+
+    app.config.errorHandler = (err, instance, info) => {
+      console.log("Vue App Error", err, info)
+      hlp.makeError("The application has generated an error.", info, err);
+    }
+    app.mount("#app");
+  </script>

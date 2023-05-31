@@ -234,9 +234,9 @@ router.get(
 router.put(
   "/:sid",
   param("sid").isInt(),
-  body("vid").isInt(),
+  body("vid"),
   body("pid").isInt(),
-  body("note").isString(),
+  body("note"),
   async (req: Request, res: Response) => {
     // Request must have a product id
     if (!validationResult(req).isEmpty()) {

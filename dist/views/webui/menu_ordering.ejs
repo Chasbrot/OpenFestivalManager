@@ -1,0 +1,127 @@
+<div v-if="selectedSession" class="card fixed-bottom" style="min-height: 40%">
+    <div class="card-header py-0">
+        Bestellen
+    </div>
+    <div class="card-body px-0 py-0">
+        <ul class="nav nav-tabs pl-1" id="nav-tab" role="tablist">
+            <!-- Generate Tabs for Categories -->
+            <template v-for="(c, index) in categories">
+                <li class="nav-item" role="presentation">
+                    <button v-if="index==0" class="nav-link px-2 active" :id="'cattab-'+c.id" type="button" role="tab"
+                        :aria-controls="'catnav-'+c.id" aria-selected="true" role="presentation"
+                        data-bs-toggle="tab" :data-bs-target="'#catnav-'+c.id" @click="fetchCategoryProducts(c.id)">
+                        {{c.name}}
+                    </button>
+                    <button v-else class="nav-link px-2" :id="'cattab-'+c.id" type="button" role="tab"
+                        :aria-controls="'catnav-'+c.id" aria-selected="false" role="presentation"
+                        data-bs-toggle="tab" :data-bs-target="'#catnav-'+c.id" @click="fetchCategoryProducts(c.id)">
+                        {{c.name}}
+                    </button>
+                </li>
+            </template>
+            <!-- Generate Tabs for Stations -->
+            <template v-for="s in stations">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-2" :id="'statab-'+s.id" type="button" role="tab"
+                        :aria-controls="'stanav-'+s.id" aria-selected="false" role="presentation"
+                        data-bs-toggle="tab" :data-bs-target="'#stanav-'+s.id" @click="fetchStationProducts(s.id)">
+                        {{s.name}}
+                    </button>
+                </li>
+            </template>
+        </ul>
+        <div class="tab-content" id="products">
+            <!-- Accordion for complex products and variations -->
+            <div class="accordion" id="accordionExample">
+                <!-- Generate Content from Productlist -->
+                <!-- Simple Products without any options or variations -->
+                <template v-for="p in products">
+                    <button v-if="!p.ingredients.length && !p.variations.length"
+                        class="btn btn-secondary py-2 px-3 mx-1 my-1"
+                        @click="orderProduct(p.id,null,false)">{{p.name}}</button>
+                </template>
+
+                <!-- Product with variations -->
+                <template v-for="p in products">
+                    <template v-if="!p.ingredients.length && p.variations.length">
+                        <div class="my-1">
+                            <div class="accordion-item">
+                                <!-- Accordion Header -->
+                                <div class="accordion-header card-header ps-0 pe-1 py-1" :id="'varheading-'+p.id">
+                                    <button class="btn text-start" type="button" style="width: 98%;"
+                                        data-bs-toggle="collapse" :data-bs-target="'#varcollapse-'+p.id"
+                                        aria-expanded="true" :aria-controls="'varcollapse-'+p.id">
+                                        {{p.name}}
+                                    </button>
+                                </div>
+                                <!-- Accordion Content -->
+                                <div :id="'varcollapse-'+p.id" class="accordion-collapse collapse"
+                                    :aria-labelledby="'varheading-'+p.id" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body py-1">
+                                        <template v-for="v in p.variations">
+                                            <button class="btn btn-secondary py-2 px-3 mx-2 my-1"
+                                                @click="orderProduct(p.id, v.id,false)">{{v.attrname}}</button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </template>
+                </template>
+
+                <!-- Complex Products with ingredients -->
+                <template v-for="p in products">
+                    <template v-if="p.ingredients.length && !p.variations.length">
+                        <div class="my-1">
+                            <!-- Accordion Header -->
+                            <div class="accordion-item">
+                                <div class="accordion-header card-header ps-0 pe-1" :id="'compheading-'+p.id">
+                                    <div class="row">
+                                        <button class="btn text-start col-9 ps-3" type="button"
+                                            data-bs-toggle="collapse" :data-bs-target="'#compcollapse-'+p.id"
+                                            aria-expanded="true" aria-controls="'compcollapse-'+p.id">
+                                            {{p.name}}
+                                        </button>
+                                        <!-- Bestellsteuerung -->
+                                        <div class="col-3">
+                                            <button class="btn btn-secondary ms-1 float-end" style="width:100%"
+                                                @click="orderProduct(p.id, null,true)">
+                                                <img src="/images/sent.png" style="height: 15px">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Accordion Content -->
+                                <div :id="'compcollapse-'+p.id" class="accordion-collapse collapse"
+                                    :aria-labelledby="'compheading-'+p.id" data-bs-parent="#accordionExample">
+                                    <div class="row row-cols-2 mt-1 px-1">
+                                        <!-- Optionen -->
+                                        <template v-for="o in p.ingredients">
+                                            <div class="col mb-1">
+                                                <input v-if="o.optional" type="checkbox" class="btn-check"
+                                                    :value="o.ingredient.id" name="option"
+                                                    :id="p.id+'-option-'+o.ingredient.id">
+                                                <input v-else type="checkbox" class="btn-check"
+                                                    :value="o.ingredient.id" name="option"
+                                                    :id="p.id+'-option-'+o.ingredient.id" checked>
+                                                <label class="btn btn-outline-primary" style="width:100%"
+                                                    :for="p.id+'-option-'+o.ingredient.id">
+                                                    {{o.ingredient.name}}
+                                                </label>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Notiz" :id="p.id+'note'"
+                                        autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+                <p v-if="!products.length">Keine Produke gefunden</p>
+            </div>
+
+        </div>
+    </div>
+</div>

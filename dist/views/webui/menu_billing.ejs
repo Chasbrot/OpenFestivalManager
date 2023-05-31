@@ -1,5 +1,5 @@
 <!-- Billing interface -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="oc_billing" aria-labelledby="oc_billing_label">
+<div v-if="selectedOrders" class="offcanvas offcanvas-end" tabindex="-1" id="oc_billing" aria-labelledby="oc_billing_label">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="oc_billing_label">Zahlen</h5>
 
@@ -24,10 +24,10 @@
               <img src="/gicons/remove.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);" />
             </button>
             <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-1 me-1" :disabled="value.length<=selectedOrders.get(go.id).length" @click="billAddOrder(go.id,value[selectedOrders.get(go.id).length])">
-              <img src="/gicons/add.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);"/>
+              <img src="/gicons/add.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);" />
             </button>
             <button type="button" class="btn btn-secondary btn-sm float-right py-1 px-1 me-0" :disabled="value.length<=selectedOrders.get(go.id).length" @click="billAddAllOrdersFromGroup(go.id,value)">
-              <img src="/gicons/done_all.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);"/>
+              <img src="/gicons/done_all.svg" width="25" style="-webkit-filter: invert(1); filter: invert(1);" />
             </button>
           </div>
         </div>
@@ -42,18 +42,16 @@
       <!-- Controls -->
       <div class="row">
         <div class="col-8">
-          <select v-model="selectedPaymentMethod" class="form-control"> 
+          <select v-model="selectedPaymentMethod" class="form-control">
             <template v-for="pm in paymentMethods">
-                <option :value="pm">{{pm.name}}</option>
+              <option :value="pm">{{pm.name}}</option>
             </template>
           </select>
-          
+
         </div>
         <div class="col-4">
           <div class="d-grid gap-2">
-            <button class="btn btn-warning" 
-            :disabled="getNumMapEntries(selectedOrders)>0 && getNumMapEntries(selectedOrders)==getNumMapEntries(groupedOrders)" 
-            @click="billAddAllOrders()">
+            <button class="btn btn-warning" :disabled="getNumMapEntries(selectedOrders)>0 && getNumMapEntries(selectedOrders)==getNumMapEntries(groupedOrders)" @click="billAddAllOrders()">
               Alles
             </button>
           </div>
@@ -86,7 +84,4 @@
   </div>
 
 
-</div>
-
-</div>
 </div>

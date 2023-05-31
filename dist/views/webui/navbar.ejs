@@ -11,7 +11,7 @@
         <ul class="dropdown-menu">
           <li><button class="dropdown-item" :disabled="!selectedSession || (selectedSessionState && selectedSessionState.statetype == 5)" aria-label="Move" type="button" data-bs-toggle="offcanvas" data-bs-target="#oc_moveSession" aria-controls="oc_moveSession">Bewegen</button>
           </li>
-          <li><button class="dropdown-item" :disabled="!(selectedSession && (selectedSessionState && selectedSessionState.statetype != 5)  && sessionCloseable)" aria-label="Close Session" type="button" @click="this.closeCurrentSession()">Sitzung schließen</button>
+          <li><button class="dropdown-item" :disabled="!(selectedSession && sessionCloseable)" aria-label="Close Session" type="button" @click="this.closeCurrentSession()">Sitzung schließen</button>
           </li>
           <li><button class="dropdown-item" :disabled="!selectedSession" data-bs-toggle="offcanvas" data-bs-target="#oc_sessionInfo" aria-controls="oc_sessionInfo">Infos</button></li>
           </li>

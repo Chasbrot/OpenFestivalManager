@@ -3,7 +3,6 @@ Welcome to the OpenFestivalManager! <br> <br>
 This software is intended to help service personal at small festivals (in austrian "festl") where they serve a variaty of foods and drinks. It is a digital ordering system that manages all foods and drinks and sends requests for meals to the assigned stations where they are presented as tickets. It tracks every order and generates digital bills for the service personal. This should drastically reduce the workload of the personal, improve customer satisfaction and generate visibility to the "management" what goes well. 
 
 ## Requirements
-- Postgres Database (maybe i switch sometime to  integrated sqlite)
 - Server (Laptop or Desktop PC)
   -  Preferably connected via Ethernet (Cable) to the Network
 - Interfaces for the stations

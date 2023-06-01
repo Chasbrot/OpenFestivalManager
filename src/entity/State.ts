@@ -36,7 +36,7 @@ export class State {
   history: boolean;
 
   @Column({
-    type: "enum",
+    type: "simple-enum",
     enum: StateType,
   })
   statetype: StateType;

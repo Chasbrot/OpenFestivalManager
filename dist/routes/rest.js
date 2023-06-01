@@ -98,4 +98,9 @@ router.get("/registrationactive", (_req, res) => {
         registrationactive: global.registrationActive,
     });
 });
+/* PUT registration active*/
+router.put("/registrationactive", (req, res) => {
+    global.registrationActive = Boolean(req.body.registrationActive);
+    res.sendStatus(200);
+});
 module.exports = router;

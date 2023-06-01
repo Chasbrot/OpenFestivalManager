@@ -233,9 +233,9 @@ router.get(
 /* PUT create order */
 router.put(
   "/:sid",
-  param("sid").isInt(),
+  param("sid").isInt().exists(),
   body("vid"),
-  body("pid").isInt(),
+  body("pid").isInt().exists(),
   body("note"),
   async (req: Request, res: Response) => {
     // Request must have a product id

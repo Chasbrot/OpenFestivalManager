@@ -63,6 +63,45 @@ class ds {
         }
         return true;
     }
+    static async createADSSQLite(dbfile) {
+        try {
+            console.log("Loading database file from: " + __dirname + dbfile);
+            exports.AppDataSource = new typeorm_1.DataSource({
+                type: "sqlite",
+                database: __dirname + dbfile,
+                entities: [
+                    Account_1.Account,
+                    Station_1.Station,
+                    Alert_1.Alert,
+                    AlertType_1.AlertType,
+                    Table_1.Table,
+                    TableGroup_1.TableGroup,
+                    Category_1.Category,
+                    Product_1.Product,
+                    Variation_1.Variation,
+                    Ingredient_1.Ingredient,
+                    Bill_1.Bill,
+                    Order_1.Order,
+                    PaymentMethod_1.PaymentMethod,
+                    Session_1.Session,
+                    State_1.State,
+                    ProductIngredient_1.ProductIngredient,
+                ],
+                synchronize: true,
+                logging: false,
+            });
+            await exports.AppDataSource.initialize()
+                .then(() => {
+                // here you can start to work with your database
+                console.log("[server]: Database initialized");
+            });
+        }
+        catch (err) {
+            console.log("[server]: Create DataSource failed, " + err);
+            return false;
+        }
+        return true;
+    }
     static async createADSFromFile() {
         return ds.createADS(process.env.DB_HOST, process.env.DB_PORT, process.env.DB_USER, process.env.DB_PASSWORD, process.env.DB_SCHEMA);
     }

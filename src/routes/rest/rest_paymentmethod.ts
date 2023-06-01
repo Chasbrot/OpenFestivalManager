@@ -100,7 +100,7 @@ router.put(
       return;
     }
     const body = req.body;
-    console.log("create new paymentmethod request");
+    console.log("set new default paymentmethod request");
     console.log(body);
     // Create Payment Method
     try {
@@ -109,10 +109,13 @@ router.put(
       ).findOneByOrFail({ id: body.pmid });
       let old_default = await AppDataSource.getRepository(
         PaymentMethod
-      ).findOneByOrFail({ default: true });
-      old_default.default = false;
+      ).findOneBy({ default: true });
+      if (old_default) {
+        old_default.default = false;
+        await AppDataSource.getRepository(PaymentMethod).save(old_default);
+      }
+      
       new_default.default = true;
-      await AppDataSource.getRepository(PaymentMethod).save(old_default);
       await AppDataSource.getRepository(PaymentMethod).save(new_default);
     } catch (e) {
       console.log("rest/paymentmethod/default PUT new: Error" + e);

@@ -15,27 +15,24 @@
                 <div class="col-2" style="max-width: 200px">
                     <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist"
                         aria-orientation="vertical">
-                        <button class="nav-link active" id="v-pills-database-tab" data-bs-toggle="pill"
-                            data-bs-target="#v-pills-database" type="button" role="tab" aria-controls="v-pills-database"
-                            aria-selected="true">Datenbank</button>
-                        <button class="nav-link" id="v-pills-tables-tab" data-bs-toggle="pill"
+                        <button class="nav-link active" id="v-pills-tables-tab" data-bs-toggle="pill"
                             data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
-                            aria-selected="true" :disabled="!dbconfig.connected">Tische</button>
+                            aria-selected="true" >Tische</button>
                         <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
                             data-bs-target="#v-pills-organization" type="button" role="tab"
                             aria-controls="v-pills-organization" aria-selected="true"
-                            :disabled="!dbconfig.connected">Organisation</button>
+                            >Organisation</button>
                         <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
                             data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
-                            aria-selected="true" :disabled="!dbconfig.connected">Produkte</button>
+                            aria-selected="true" >Produkte</button>
                         <button class="nav-link" id="v-pills-users-tab" data-bs-toggle="pill"
                             data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-users"
-                            aria-selected="true" :disabled="!dbconfig.connected">Benutzer</button>
+                            aria-selected="true" >Benutzer</button>
                     </div>
                 </div>
                 <div class="col-10">
                     <div class="tab-content" id="v-pills-tabContent">
-                        <div class="tab-pane fade" id="v-pills-tables" role="tabpanel"
+                        <div class="tab-pane fade show active" id="v-pills-tables" role="tabpanel"
                             aria-labelledby="v-pills-tables-tab">
                             <div class="card">
                                 <div class="card-header">
@@ -327,8 +324,8 @@
                                         {{products.length}}
                                     </div>
                                 </div>
-                                <div class="card-body" v-if="products.length !== 0">
-                                    <table class="table">
+                                <div class="card-body">
+                                    <table class="table" v-if="products.length !== 0">
                                         <thead>
                                             <tr>
                                                 <th scope="col">#</th>
@@ -506,89 +503,6 @@
                                 </div>
                             </div>
                             <br>
-                        </div>
-                        <div class="tab-pane fade show active" id="v-pills-database" role="tabpanel"
-                            aria-labelledby="v-pills-database-tab">
-                            <div class="card">
-                                <div class="card-header">
-                                    Datenbankverbindung
-                                    <div class="float-end">
-                                        <span v-if="dbconfig.connected" class="text-success">Verbunden</span>
-                                        <span v-else class="text-danger">Nicht Verbunden</span>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3 row">
-                                        <label for="dbhost" class="col-sm-2 col-form-label">Host</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" v-model="dbconfig.host" required
-                                                pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" minlength="8" maxlength="16">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label for="dbport" class="col-sm-2 col-form-label">Port</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control" v-model="dbconfig.port"
-                                                maxlength="5" minlength="4">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label for="dbport" class="col-sm-2 col-form-label">User</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" v-model="dbconfig.user">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label for="dbport" class="col-sm-2 col-form-label">Password</label>
-                                        <div class="col-sm-10">
-                                            <input type="password" class="form-control" v-model="dbconfig.password">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label for="dbport" class="col-sm-2 col-form-label">Schema Name</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" v-model="dbconfig.dbname">
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                                <div class="card-footer">
-                                    <span class="text-success" v-if="dbtestresult==true">
-                                        Datenbank erfolgreich getestet!
-                                    </span>
-                                    <span class="text-danger" v-if="dbtestresult==false">
-                                        Datenbank Test fehlgeschlagen!
-                                    </span>
-                                    <div class="float-end">
-                                        <button type="button" class="btn btn-primary me-2"
-                                            @click="dbTestSettings()">Test</button>
-                                        <button type="button" class="btn btn-primary"
-                                            :disabled="dbtestresult!=true || true"
-                                            @click="dbSaveSettings()">Save</button>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <br>
-                            <div class="card">
-                                <div class="card-header">
-                                    Datenbankwerkzeuge
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-danger">WARNING: The following tools can and will DELETE data from
-                                        the
-                                        database. Proceed with caution!</p>
-                                    <div>
-                                        <button class="btn btn-danger me-2" data-toggle="tooltip" data-placement="top"
-                                            title="USE WITH CAUTION! Deletes all dynamic content from the Database. All sessions, personal, orders and necessery mapping data">Reset
-                                            Dynamic Data</button>
-                                        <button class="btn btn-danger" data-toggle="tooltip" data-placement="top"
-                                            title="DELETES ALL DATA! Clears all user generated data for a fresh start">Reset
-                                            Database</button>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -876,17 +790,16 @@
 
         methods: {
             async loadData() {
-                this.tableGroups = await dm.loadTableGroups();
-                this.tables = await dm.loadTablesFromTableGroup();
-                this.stations = await dm.loadStations();
-                this.alertTypes = await dm.loadAlertTypes();
-                this.productCategories = await dm.loadProductCategories();
-                this.paymentMethods = await dm.loadPaymentMethods();
-                this.ingredients = await dm.loadIngredients();
-                this.products = await dm.loadProducts();
-                this.accounts = await dm.loadAccounts();
-                this.registrationActive = await dm.loadRegActive();
-                this.dbconfig = await dm.loadDBConfig();
+                dm.loadTableGroups().then(r=>this.tableGroups=r);
+                dm.loadStations().then(r=>this.stations=r);
+                dm.loadAlertTypes().then(r=>this.alertTypes=r);
+                dm.loadProductCategories().then(r=>this.productCategories=r);
+                dm.loadPaymentMethods().then(r=>this.paymentMethods=r);
+                dm.loadIngredients().then(r=>this.ingredients=r);
+                dm.loadProducts().then(r=>this.products=r);
+                dm.loadAccounts().then(r=>this.accounts=r);
+                dm.loadRegActive().then(r=>this.registrationActive=r.registrationactive);
+                dm.loadDefaultPM().then(r=>this.defaultMethod=r.id);
             },
 
             async createTableGroup() {
@@ -1041,6 +954,7 @@
                     this.products = await dm.loadProducts();
                 } else {
                     let res = await rest.putData(`/rest/product`, JSON.stringify(product));
+                    if(!res){return} // Invalid request
                     this.products = await dm.loadProducts();
                     console.log(res.id)
                     this.productDetailModal = await this.products.find(element => element.id == res.id);
@@ -1138,7 +1052,7 @@
                 await rest.putData("/rest/registrationactive", JSON.stringify({
                     registrationActive: this.registrationActive
                 }));
-                this.registrationActive = await dm.loadRegActive();
+                this.registrationActive = (await dm.loadRegActive()).registrationactive;
             },
 
             async dbTestSettings() {

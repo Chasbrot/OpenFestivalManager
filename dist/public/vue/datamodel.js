@@ -130,6 +130,10 @@ export default {
         );
     },
 
+    async loadDefaultPM() {
+        return await rest.fetchData("/rest/paymentmethod/default");
+    },
+
     async removePM(id) {
         await rest.deleteData(`/rest/paymentmethod/${id}`, "");
     },

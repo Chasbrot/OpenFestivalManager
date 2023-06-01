@@ -45,7 +45,7 @@ __decorate([
 ], State.prototype, "history", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        type: "enum",
+        type: "simple-enum",
         enum: StateType,
     }),
     __metadata("design:type", Number)

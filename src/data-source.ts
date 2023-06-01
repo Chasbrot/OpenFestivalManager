@@ -69,7 +69,52 @@ export class ds {
       return false;
     }
     return true;
+  }
+  
+
+  static async createADSSQLite(
+    dbfile: string
+  ): Promise<Boolean> {
+    try {
+      console.log("Loading database file from: "+__dirname + dbfile)
+      AppDataSource = new DataSource({
+        type: "sqlite",
+        database: __dirname + dbfile,
+        entities: [
+          Account,
+          Station,
+          Alert,
+          AlertType,
+          Table,
+          TableGroup,
+          Category,
+          Product,
+          Variation,
+          Ingredient,
+          Bill,
+          Order,
+          PaymentMethod,
+          Session,
+          State,
+          ProductIngredient,
+        ],
+        synchronize: true,
+        logging: false,
+      });
+
+      await AppDataSource.initialize()
+        .then(() => {
+          // here you can start to work with your database
+          console.log("[server]: Database initialized");
+        })
+    } catch (err) {
+      console.log("[server]: Create DataSource failed, " + err);
+      return false;
     }
+    return true;
+  }
+
+
     static async createADSFromFile():Promise<Boolean> {
         return ds.createADS(process.env.DB_HOST, process.env.DB_PORT, process.env.DB_USER, process.env.DB_PASSWORD, process.env.DB_SCHEMA)
     }

@@ -22,7 +22,7 @@
         <div v-if="activesessions.length">
             <div class="d-grid gap-2">
                 <template v-if="!showPastSessions" v-for="as in activesessions">
-                    <button class="btn btn-outline-primary" type="button" @click='this.loadSessionById(as.id)'
+                    <button class="btn btn-lg btn-outline-primary" type="button" @click='this.loadSessionById(as.id)'
                         data-bs-dismiss=“offcanvas”>{{as.table.name}}</button>
                 </template>
                 <template v-else v-for="ps in pastsessions">

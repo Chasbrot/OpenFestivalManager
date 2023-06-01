@@ -34,7 +34,7 @@ router.use(function (req, res, next) {
 /* GET all dates where a order was placed*/
 router.get("/dates", async (req: Request, res: Response) => {
   AppDataSource.createQueryBuilder()
-    .select("DATE_TRUNC('day',created) AS day")
+    .select("datetime(strftime('%Y-%m-%d',created)) AS day")
     .from(State, "state")
     .distinct()
     .orderBy({day: "DESC"})

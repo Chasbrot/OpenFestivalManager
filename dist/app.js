@@ -11,13 +11,13 @@ const express_session_1 = __importDefault(require("express-session"));
 const rand_token_1 = require("rand-token");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const compression = require("compression");
-// -- OS System 
+// -- OS System
 const process_1 = require("process");
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const fs = require("fs");
 var os = require("os");
-// Security Imports
+// -- Security Imports
 const helmet_1 = __importDefault(require("helmet"));
 const https = require("https");
 // Read command line arguments
@@ -125,7 +125,8 @@ app.use("/webui", webuiRouter);
 // and "synchronize" database schema, call "initialize()" method of a newly created database
 // once in your application bootstrap
 // Create DataSource from file
-if (!data_source_1.ds.createADSFromFile()) {
+if (!data_source_1.ds.createADSSQLite(process.env.DB_FILE)) {
+    console.log("[server]: Failed to start database backend driver");
     (0, process_1.exit)();
 }
 try {
@@ -134,26 +135,21 @@ try {
         fs.existsSync(__dirname + "../../key.pem") &&
         fs.existsSync(__dirname + "../../key.pem")) {
         // Start express server with HTTPS
-        try {
-            https
-                .createServer(
-            // Provide the private and public key to the server by reading each
-            // file's content with the readFileSync() method.
-            {
-                key: fs.readFileSync(__dirname + "../../key.pem"),
-                cert: fs.readFileSync(__dirname + "../../cert.pem"),
-            }, app)
-                .listen(port, () => {
-                console.log(`[server]: Server is running at https://localhost:${port} or https://${os.hostname()}:${port} `);
-                console.log("[server]: Version " + process.env.VERSION);
-            });
-        }
-        catch (err) {
-            console.log(`[server]: Couldn't start server! ${err}`);
-        }
+        https
+            .createServer(
+        // Provide the private and public key to the server by reading each
+        // file's content with the readFileSync() method.
+        {
+            key: fs.readFileSync(__dirname + "../../key.pem"),
+            cert: fs.readFileSync(__dirname + "../../cert.pem"),
+        }, app)
+            .listen(port, () => {
+            console.log(`[server]: Secure Server is running at https://localhost:${port} or https://${os.hostname()}:${port} `);
+            console.log("[server]: Version " + process.env.VERSION);
+        });
     }
     else {
-        console.log("[Server] SSL key and certificate found!");
+        console.log("[Server] SSL key and certificate not found!");
         // Start express server with HTTP Only
         app.listen(port, () => {
             console.log(`[server]: Server is running at http://localhost:${port} or http://${os.hostname()}:${port} `);
@@ -162,6 +158,5 @@ try {
     }
 }
 catch (err) {
-    console.log(`[server]: Error with certificate management ${err}`);
-    (0, process_1.exit)();
+    console.log(`[server]: Couldn't start server! ${err}`);
 }

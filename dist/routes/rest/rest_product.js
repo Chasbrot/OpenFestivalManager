@@ -132,7 +132,7 @@ router.use(function (req, res, next) {
     }
 });
 /* CREATE product */
-router.put("/", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("price").isFloat(), (0, express_validator_1.body)("deliverable").isBoolean(), async (req, res) => {
+router.put("/", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("price").isFloat(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;
@@ -142,7 +142,7 @@ router.put("/", (0, express_validator_1.body)("name").isString(), (0, express_va
     let tmp;
     try {
         // Create new product required
-        tmp = new Product_1.Product(body.name, Number(body.price), Boolean(body.deliverable));
+        tmp = new Product_1.Product(body.name, Number(body.price), Boolean(body.deliverable) ? true : false);
         // Get producing station Required
         tmp.producer = await data_source_1.AppDataSource.getRepository(Station_1.Station).findOneByOrFail({
             id: Number(body.producer.id),

@@ -79,15 +79,17 @@ router.put("/default", (0, express_validator_1.body)("pmid").isInt(), async (req
         return;
     }
     const body = req.body;
-    console.log("create new paymentmethod request");
+    console.log("set new default paymentmethod request");
     console.log(body);
     // Create Payment Method
     try {
         let new_default = await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).findOneByOrFail({ id: body.pmid });
-        let old_default = await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).findOneByOrFail({ default: true });
-        old_default.default = false;
+        let old_default = await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).findOneBy({ default: true });
+        if (old_default) {
+            old_default.default = false;
+            await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).save(old_default);
+        }
         new_default.default = true;
-        await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).save(old_default);
         await data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod).save(new_default);
     }
     catch (e) {

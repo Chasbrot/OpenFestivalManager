@@ -7,3 +7,4 @@ dist/rest
 package-lock.json
 cert.pem
 key.pem
+distofm_data.db

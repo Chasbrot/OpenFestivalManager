@@ -35,7 +35,8 @@ If you want to modify the source:
 The webserver should start.
 
 ## Usage
-Please refer to the wiki.
+Please refer to the wiki.<br>
+[Wiki Link](https://github.com/Chasbrot/OpenFestivalManager/wiki)
 
 ## Authors 
 Michael Selinger<br>

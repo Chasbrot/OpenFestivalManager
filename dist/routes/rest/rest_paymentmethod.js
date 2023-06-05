@@ -28,7 +28,7 @@ router.get("/", (_req, res) => {
 /* GET default paymentmethod */
 router.get("/default", (_req, res) => {
     data_source_1.AppDataSource.getRepository(PaymentMethod_1.PaymentMethod)
-        .findOneByOrFail({ default: true })
+        .findOneBy({ default: true })
         .then((result) => {
         if (_req.session.account.accounttype != Account_1.AccountType.ADMIN) {
             res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);

@@ -99,26 +99,28 @@
                                             </template>
                                         </tbody>
                                     </table>
-                                    <span v-else>Keine Daten gefunden!</span>
+                                    <h5 class="text-center">Keine Daten</h5>
                                 </div>
                             </div>
                             <br />
                         </div>
                         <div class="tab-pane fade" id="v-pills-orders" role="tabpanel"
                             aria-labelledby="v-pills-orders-tab">
+                            <div class="alert alert-danger">Warning: Unfinished</div>
                             <div class="card">
                                 <div class="card-header">Bestellung suchen</div>
                                 <div class="card-body">
                                     <div class="form-group">
                                         <label for="sessionid">Sitzungs ID:</label>
-                                        <input type="number" class="form-control" id="sessionid" />
+                                        <input type="number" class="form-control" :value="sessionid"/>
                                     </div>
+                                    <br>
                                     <button class="btn btn-primary form-control" onclick="loadOrders()">
                                         Suche
                                     </button>
                                 </div>
 
-                                <div class="card-body">
+                                <div class="card-body" v-if="orders.length">
                                     Bestellungen der Sitzung:
                                     <div class="card" style="max-height: 200px">
                                         <div class="card-body overflow-auto pt-0 px-1">
@@ -126,6 +128,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <h5 v-else-if="!sessionid" class="text-center">Keine Daten</h5>
                             </div>
                             <br />
                         </div>
@@ -154,6 +157,8 @@
             tables: [],
             selectedTable: "",
             sessions: "",
+            orders:[],
+            sessionid:"",
         }),
 
         // Execute at page load

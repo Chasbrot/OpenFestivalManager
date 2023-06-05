@@ -430,15 +430,15 @@
                                     <br>
                                     <div class="input-group">
                                         <span class="input-group-text">Neuer Benutzer:</span>
-                                        <input type="text" class="form-control" v-model="newAccount.name"
-                                            placeholder="Name">
-                                        <input type="password" class="form-control" v-model="newAccount.password"
-                                            placeholder="Passwort">
                                         <select class="form-select" v-model="newAccount.accounttype">
                                             <option value="0">Admin</option>
                                             <option value="1">Normal</option>
-                                            <option value="2">Station</option>
+                                            <option value="2" disabled>Station</option>
                                         </select>
+                                        <input type="text" class="form-control" v-model="newAccount.name"
+                                            placeholder="Name">
+                                        <input type="password" class="form-control" v-model="newAccount.password"  v-if="newAccount.accounttype == 0"
+                                            placeholder="Passwort">
                                         <span class="input-group-text">Aktiv?:</span>
                                         <div class="input-group-text">
                                             <input type="checkbox" class="form-check-input"
@@ -821,18 +821,13 @@
                 if (!this.selectedTableGroup || !this.newTableNumber) {
                     return;
                 }
-                await rest.putData("/rest/table",
-                    JSON.stringify({
-                        name: this.newTableNumber,
-                        tgid: this.selectedTableGroup.id
-                    })
-                );
+                await dm.createTable(this.selectedTableGroup.id, this.newTableNumber)
                 this.tables = await dm.loadTablesFromTableGroup(this.selectedTableGroup);
                 this.newTableNumber = "";
             },
 
             async removeTable(id) {
-                await rest.deleteData(`/rest/table/${id}`, "");
+                await dm.removeTable(id)
                 this.tables = await dm.loadTablesFromTableGroup(this.selectedTableGroup);
             },
 
@@ -840,18 +835,13 @@
                 if (!this.newStationName) {
                     return;
                 }
-                await rest.putData("/rest/station",
-                    JSON.stringify({
-                        name: this.newStationName
-                    })
-                );
-                console.log("test")
+                await dm.createStation(this.newStationName)
                 this.stations = await dm.loadStations();
                 this.newStationName = "";
             },
 
             async removeStation(id) {
-                await rest.deleteData(`/rest/station/${id}`, "");
+                await dm.removeStation(id)
                 this.stations = await dm.loadStations();
             },
 
@@ -859,11 +849,7 @@
                 if (!this.newAlertTypeName) {
                     return;
                 }
-                await rest.putData("/rest/alerttypes",
-                    JSON.stringify({
-                        name: this.newAlertTypeName
-                    })
-                );
+                await dm.createAlertType(this.newAlertTypeName)
                 this.newAlertTypeName = "";
                 this.alertTypes = await dm.loadAlertTypes();
             },

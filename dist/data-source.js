@@ -63,12 +63,12 @@ class ds {
         }
         return true;
     }
-    static async createADSSQLite(dbfile) {
+    static async createADSSQLite(dbpath) {
         try {
-            console.log("Loading database file from: " + __dirname + dbfile);
+            console.log("Loading database file from: " + dbpath);
             exports.AppDataSource = new typeorm_1.DataSource({
                 type: "sqlite",
-                database: __dirname + dbfile,
+                database: dbpath,
                 entities: [
                     Account_1.Account,
                     Station_1.Station,

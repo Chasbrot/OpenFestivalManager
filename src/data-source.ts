@@ -18,6 +18,7 @@ import { PaymentMethod } from "./entity/PaymentMethod";
 import { Session } from "./entity/Session";
 import { State } from "./entity/State";
 import { ProductIngredient } from "./entity/ProductIngredient";
+import path from "path";
 
 export let AppDataSource: DataSource;
 
@@ -73,13 +74,13 @@ export class ds {
   
 
   static async createADSSQLite(
-    dbfile: string
+    dbpath: string
   ): Promise<Boolean> {
     try {
-      console.log("Loading database file from: "+__dirname + dbfile)
+      console.log("Loading database file from: "+ dbpath)
       AppDataSource = new DataSource({
         type: "sqlite",
-        database: __dirname + dbfile,
+        database: dbpath,
         entities: [
           Account,
           Station,

@@ -21,23 +21,18 @@ var os = require("os");
 import helmet from "helmet";
 const https = require("https");
 
-// Read command line arguments
-var argv = require("minimist")(process.argv.slice(2));
-if (!argv.env) {
-  console.log("Using default env");
-  let ret = dotenv.config({ path: __dirname + "/../.env" });
-  if (ret.error) {
-    console.log("Config parsing failed");
-    process.exit(1);
-  }
-} else {
-  // Load data from .env config file
-  let ret = dotenv.config({ path: argv.env });
-  if (ret.error) {
-    console.log("Config parsing failed");
-    process.exit(1);
-  }
+// Read Command Line and setup configuration
+let serverConfig = readCommandLineOptions();
+
+if (!serverConfig) {
+  printHelpText();
+  process.exit(0);
 }
+if (serverConfig.DEV) {
+  console.log("Active server configuration:")
+  console.log(serverConfig)
+}
+
 
 // Add account data to session
 declare module "express-session" {
@@ -50,11 +45,8 @@ declare module "express-session" {
 // Create express app
 const app: Express = express();
 
-// Set port
-const port = process.env.PORT;
-
 // Development enviroment variable
-if (process.env.DEVELOPMENT == "true") {
+if (serverConfig.DEV) {
   console.log("Starting Server in Development Mode!!");
 }
 
@@ -62,11 +54,14 @@ if (process.env.DEVELOPMENT == "true") {
 app.use(compression());
 
 // Use Helmet Security Headers
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-  })
-);
+if (serverConfig.SECURE) {
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  );
+}
+
 
 // view engine setup (express js)
 app.set("views", path.join(__dirname, "views"));
@@ -105,7 +100,7 @@ let setCache = function (req: Request, res: Response, next: any) {
 };
 
 // Apply cache control header only if production
-if (process.env.DEVELOPMENT != "true") {
+if (!serverConfig.DEV) {
   app.use(setCache);
 }
 
@@ -117,12 +112,12 @@ const oneDay = 1000 * 60 * 60 * 24;
 // Set session parameters
 app.use(
   sessions({
-    name: process.env.HTTPS == "true" ? "__Host-sid" : "sid", // Only accept secure cookies with "secure flag" and https
+    name: serverConfig.SECURE && serverConfig.HTTPS ? "__Host-sid" : "sid", // Only accept secure cookies with "secure flag" and https
     secret: uid(32), // Unique session token random generated
     saveUninitialized: true,
     cookie: {
       maxAge: oneDay,
-      secure: process.env.HTTPS == "true", // Only set secure flag during production with https
+      secure: serverConfig.HTTPS, // Only set secure flag during production with https
       sameSite: true,
     },
     resave: false,
@@ -157,26 +152,30 @@ app.use("/webui", webuiRouter);
 // once in your application bootstrap
 
 // Create DataSource from file
-if (!ds.createADSSQLite(process.env.DB_FILE!)) {
+if (!ds.createADSSQLite(serverConfig.DB_PATH)) {
   console.log("[server]: Failed to start database backend driver");
-  exit();
+  process.exit(1)
 }
 
 try {
+  let port = serverConfig.PORT
+  let version = serverConfig.VERSION
   // Check HTTPS
   if (
-    process.env.HTTPS == "true" &&
-    fs.existsSync(__dirname + "../../key.pem") &&
-    fs.existsSync(__dirname + "../../key.pem")
+    serverConfig.HTTPS
   ) {
+    if (!fs.existsSync(serverConfig.KEY) || !fs.existsSync(serverConfig.CERT)) {
+      console.log("[Server] SSL key and certificate not found!");
+      process.exit(1);
+    }
     // Start express server with HTTPS
     https
       .createServer(
         // Provide the private and public key to the server by reading each
         // file's content with the readFileSync() method.
         {
-          key: fs.readFileSync(__dirname + "../../key.pem"),
-          cert: fs.readFileSync(__dirname + "../../cert.pem"),
+          key: fs.readFileSync(serverConfig.KEY),
+          cert: fs.readFileSync(serverConfig.CERT),
         },
         app
       )
@@ -184,18 +183,121 @@ try {
         console.log(
           `[server]: Secure Server is running at https://localhost:${port} or https://${os.hostname()}:${port} `
         );
-        console.log("[server]: Version " + process.env.VERSION);
+        console.log("[server]: Version " + version);
       });
   } else {
-    console.log("[Server] SSL key and certificate not found!");
     // Start express server with HTTP Only
     app.listen(port, () => {
       console.log(
         `[server]: Server is running at http://localhost:${port} or http://${os.hostname()}:${port} `
       );
-      console.log("[server]: Version " + process.env.VERSION);
+      console.log("[server]: Version " + version);
     });
   }
 } catch (err) {
   console.log(`[server]: Couldn't start server! ${err}`);
+}
+
+
+//// Functions
+
+
+function printHelpText() {
+  console.log("useage: festivalmanager [options] --dbpath PATH_TO_DB_FILE")
+  console.log("  options:")
+  console.log("    -p --port         Port the server listens to")
+  console.log("    --rest_cache_time The time (in s) rest requests are cached by the client")
+  console.log("    -s --secure       Enables security headers")
+  console.log("    --key             Key required for HTTPS")
+  console.log("    --cert            Certificate required for HTTPS")
+  console.log("    --dbpath          Path to the database")
+  console.log("    ")
+}
+
+function readCommandLineOptions() {
+  let defaultConfig = {
+    PORT: 8080,
+    DEV: false,
+    REST_CACHE_TIME: 3600,
+    SECURE: false,
+    HTTPS: false,
+    KEY: "",
+    CERT: "",
+    DB_PATH: "",
+    VERSION: "1.1.12"
+  };
+  // Read command line arguments
+  let argv = require("minimist")(process.argv.slice(2));
+  if (argv.h || argv.help) {
+    return null
+  }
+  if (argv.env) {
+    // Load data from .env config file
+    let ret = dotenv.config({ path: argv.env.replace(/[?%*'|"<>]/g, '') });
+    if (ret.error) {
+      console.log("Config parsing failed");
+      console.log(ret.error)
+      return null
+    }
+    try {
+      defaultConfig.PORT = Number(process.env.PORT);
+      defaultConfig.DEV = Boolean(process.env.DEVELOPMENT);
+      defaultConfig.REST_CACHE_TIME = Number(process.env.REST_CACHE_TIME);
+      defaultConfig.SECURE = Boolean(process.env.SECURE);
+      // Why do i need to do this? How thought this was a good idea? Fuck JS
+      if (process.env.KEY) {
+        defaultConfig.KEY = String(process.env.KEY);
+      } else {
+        defaultConfig.KEY = ""
+      }
+      if (process.env.CERT) {
+        defaultConfig.CERT = String(process.env.CERT);
+      } else {
+        defaultConfig.CERT = ""
+      }
+      
+      defaultConfig.DB_PATH = String(process.env.DB_PATH);
+    } catch (err) {
+      console.log("Invalid coniguration data");
+      console.log(err)
+      return null
+    }
+  } else {
+    // Parse all cmd options
+    try {
+      if (argv.port || argv.p) {
+        defaultConfig.PORT = Number(argv.port);
+      }
+      if (argv.dev) {
+        defaultConfig.DEV = Boolean(argv.dev);
+      }
+      if (argv.rest_cache_time) {
+        defaultConfig.REST_CACHE_TIME = Number(argv.rest_cache_time);
+      }
+      if (argv.secure || argv.s) {
+        defaultConfig.SECURE = Boolean(argv.secure);
+      }
+      if (argv.key || argv.cert) {
+        if (!(argv.key && argv.cert)) {
+          console.log("Key and Certificate needed for HTTPS")
+          return null
+        }
+        defaultConfig.KEY = String(argv.key).replace(/[?%*'|"<>]/g, '');
+        defaultConfig.CERT = String(argv.cert).replace(/[?%*'|"<>]/g, '');
+        defaultConfig.HTTPS = true
+      }
+      if (argv.dbpath) {
+        defaultConfig.DB_PATH = String(argv.dbpath).replace(/[?%*'|"<>]/g, '');
+      } else {
+        console.log("Path to Database required --dbpath")
+        return null
+      }
+    } catch (err) {
+      console.log("Invalid coniguration data");
+      console.log(err)
+      return null
+    }
+    
+  }
+  return defaultConfig;
 }

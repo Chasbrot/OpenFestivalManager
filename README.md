@@ -17,7 +17,17 @@ This software is intended to help service personal at small festivals (in austri
   - Important first line of defence -> Access restriction
 
 ## Installation
-Download newest .exe from releases and start. Config file is passed via --env #PATH#. </br>
+Download newest .exe from releases and start. </br>
+
+    usage: festivalmanager [options] --dbpath PATH_TO_DB_FILE
+      options:
+        -p --port         Port the server listens to
+        --rest_cache_time The time (in s) rest requests are cached by the client
+        -s --secure       Enables security headers
+        --key             Key required for HTTPS
+        --cert            Certificate required for HTTPS
+        --dbpath          Path to the database
+    
 Access WebUI under localhost:3000 or IP-Address:3000 <br>
 You can save the login page to your home screen which enables a webapp like state with no address bar. This enhances the experiance. 
 [HowTo](https://android.gadgethacks.com/how-to/google-chrome-101-save-webpages-pwas-your-home-screen-for-instant-access-0184470/)

@@ -39,6 +39,7 @@
         categories: [],
         stations: [],
         products: [],
+        orderSuccess: false,
       }),
 
       // Execute at page load
@@ -133,14 +134,17 @@
           if (!this.selectedSession) {
             return;
           }
-          this.finishedOrders = [];
-          this.sortedOrders = [];
+
           this.orders = await dm.loadOrdersFromSession(this.selectedSession.id)
           if (!this.orders.length) {
+            this.finishedOrders = [];
+            this.sortedOrders = [];
             return;
           }
 
           // Generate sorted and grouped order lists
+          this.finishedOrders = [];
+          this.sortedOrders = [];
           this.orders.forEach((o) => {
             if (o.currentState.statetype == 3) {
               this.finishedOrders.push(o);
@@ -220,8 +224,14 @@
         async updateOrderState(oid, stateid) {
           dm.updateOrderState(oid, stateid)
             .then(() => {
-              this.fetchOrders()
+              if(stateid==4){// Order Canceled
+                // Only remove from local list
+                this.sortedOrders= this.sortedOrders.filter(o => o.id != oid)
+              }else{
+                this.fetchOrders()
+              }
               this.loadBillingData()
+              
             })
             .catch((err) => console.log("Update Order State failed: " + response.statusText))
         },
@@ -351,6 +361,9 @@
           const response = await dm.orderProduct(this.selectedSession.id, pid, vid, complex ? options : null, note)
           if (response.oid) {
             this.fetchOrders()
+            this.sessionCloseable=false
+            this.orderSuccess=true
+            setTimeout(()=>this.orderSuccess=false, 2000)
           }
         },
 

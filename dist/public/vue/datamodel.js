@@ -35,14 +35,14 @@ export default {
         return await rest.fetchData(`/rest/tablegroup/${selectedTableGroup.id}/tables`);
     },
 
-    async createTable(tablegroup, newTableNumber) {
-        if (!TableGroup || !newTableNumber) {
+    async createTable(tgid, newTableNumber) {
+        if (!newTableNumber) {
             return;
         }
         await rest.putData("/rest/table",
             JSON.stringify({
                 name: newTableNumber,
-                tgid: tableGroup.id
+                tgid: tgid
             })
         );
     },

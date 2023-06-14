@@ -14,7 +14,11 @@ const TableGroup_1 = require("../../entity/TableGroup");
 /* GET all tablegroups */
 router.get("/", (_req, res) => {
     data_source_1.AppDataSource.getRepository(TableGroup_1.TableGroup)
-        .find()
+        .find({
+        relations: {
+            tables: true
+        }
+    })
         .then((result) => {
         if (_req.session.account.accounttype != Account_1.AccountType.ADMIN) {
             res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);

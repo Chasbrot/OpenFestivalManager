@@ -64,9 +64,10 @@ router.get("/login", (req, res) => {
     }
 });
 /* POST login page */
-router.post("/login", (0, express_validator_1.body)("username").isString(), (0, express_validator_1.body)("password").isString(), async (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
+router.post("/login", (0, express_validator_1.body)("username").isString().trim(), (0, express_validator_1.body)("password").isString().trim(), async (req, res) => {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
         return;
     }
     // Check if there are admin users in the db
@@ -110,7 +111,7 @@ router.get("/statistics", async (_req, res) => {
 });
 /* GET configuration page */
 router.get("/configuration", async (req, res) => {
-    res.render("admin/admin_configuration.ejs");
+    res.render("admin/configuration/admin_configuration.ejs");
 });
 /* GET orderdata page */
 router.get("/orderdata", async function (_req, res) {

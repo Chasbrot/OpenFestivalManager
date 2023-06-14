@@ -121,4 +121,10 @@ router.get("/registrationactive", (_req: Request, res: Response) => {
   });
 });
 
+/* PUT registration active*/
+router.put("/registrationactive", (req: Request, res: Response) => {
+  global.registrationActive = Boolean(req.body.registrationActive)
+  res.sendStatus(200);
+});
+
 module.exports = router;

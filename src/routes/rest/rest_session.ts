@@ -20,9 +20,9 @@ import { MoreThan, Not } from "typeorm";
 
 /* Check session and accounttype*/
 router.use(function (req, res, next) {
-  if (
-    req.session.account!.accounttype == AccountType.ADMIN ||
-    req.session.account!.accounttype == AccountType.USER
+  if (req.session.account &&
+    (req.session.account.accounttype == AccountType.ADMIN ||
+    req.session.account.accounttype == AccountType.USER)
   ) {
     next();
   } else {
@@ -33,7 +33,7 @@ router.use(function (req, res, next) {
 
 /* PUT create new session on table */
 router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
-  if (!validationResult(req).isEmpty()) {
+  if (!validationResult(req).isEmpty() || !req.session.account) {
     res.sendStatus(400);
     return;
   }
@@ -74,7 +74,7 @@ router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
       s = new Session(t);
       s.servers = [];
       s.servers.push(req.session.account!);
-      let state = new State(StateType.CREATED, req.session.account!);
+      let state = new State(StateType.CREATED, req.session.account);
       s.states = [];
       s.states.push(state);
       await AppDataSource.getRepository(State).save(state);
@@ -100,25 +100,52 @@ router.put("/", body("tid").isInt(), async (req: Request, res: Response) => {
 
 /* GET all global active sessions */
 router.get("/active", async (req: Request, res: Response) => {
-  
+
   try {
     let s = await AppDataSource.getRepository(Session).find({
       relations: {
         states: true,
       },
-      where: 
-        {
-          // Which are NOT closed
-          states: {
-            history: false,
-            statetype: Not(StateType.CLOSED) ,
-          },
+      where:
+      {
+        // Which are NOT closed
+        states: {
+          history: false,
+          statetype: Not(StateType.CLOSED),
         },
+      },
     });
     res.json(s);
-    
+
   } catch (e) {
     console.log("rest/session/active GET: " + e);
+    res.sendStatus(500);
+    return;
+  }
+});
+
+/* GET all active sessions from a user */
+router.get("/activeByUser", async (req: Request, res: Response) => {
+  try {
+    let as = await db.getActiveSessionsFromAccount(req.session.account!);
+    res.json(as);
+
+  } catch (e) {
+    console.log("rest/session/activeByUser GET: " + e);
+    res.sendStatus(500);
+    return;
+  }
+});
+
+/* GET all inactive sessions from a user */
+router.get("/inactiveByUser", async (req: Request, res: Response) => {
+
+  try {
+    let as = await db.getInactiveSessionsFromAccount(req.session.account!);
+    res.json(as);
+
+  } catch (e) {
+    console.log("rest/session/inactiveByUser GET: " + e);
     res.sendStatus(500);
     return;
   }
@@ -131,9 +158,13 @@ router.get("/:sid", param("sid").isInt(), (req: Request, res: Response) => {
     return;
   }
   AppDataSource.getRepository(Session)
-    .find({
+    .findOneOrFail({
       relations: {
         table: true,
+        states: {
+          triggerer: true
+        },
+        servers: true,
       },
       where: {
         id: Number(req.params.sid),
@@ -202,10 +233,10 @@ router.get(
 /* PUT create order */
 router.put(
   "/:sid",
-  param("sid").isInt(),
-  body("vid").isInt(),
-  body("pid").isInt(),
-  body("note").isString(),
+  param("sid").isInt().exists(),
+  body("vid"),
+  body("pid").isInt().exists(),
+  body("note"),
   async (req: Request, res: Response) => {
     // Request must have a product id
     if (!validationResult(req).isEmpty()) {
@@ -230,6 +261,105 @@ router.put(
       console.log("rest/session/order PUT: " + e);
       res.sendStatus(500);
     }
+  }
+);
+
+/* POST move session to other table */
+router.put("/:sid/move", param("sid").isInt(), body("targetTid").isInt(), async function (req, res) {
+  const body = req.body;
+  if (!validationResult(req).isEmpty()) {
+    res.sendStatus(400);
+    return;
+  }
+  console.log(body);
+  try {
+    let s = await AppDataSource.getRepository(Session).findOneOrFail({
+      relations: {
+        table: true,
+        states: true,
+        bills: true,
+        orders: true,
+        servers: true,
+      },
+      where: {
+        id: req.params!.sid,
+      },
+    });
+    let table = await AppDataSource.getRepository(Table).findOneByOrFail({
+      id: body.table,
+    });
+    // Get target session
+    let target_session = await AppDataSource.getRepository(Session).findOne({
+      relations: {
+        table: true,
+        states: true,
+        bills: true,
+        orders: true,
+        servers: true,
+      },
+      where: {
+        table: {
+          id: req.body.targetTid,
+        },
+        states: {
+          history: false,
+          statetype: StateType.CREATED,
+        },
+      },
+    });
+
+    // Check if target table has a active session
+    if (target_session == null) {
+      s.table = table;
+      await AppDataSource.getRepository(Session).save(s);
+      console.log(
+        "table/moveSession: Moved session " + s.id + " to table " + table.id
+      );
+      res.json(s.id);
+    } else {
+      // Copy everything to target session
+      await db.mergeSession(s, target_session, req.session.account!);
+      console.log(
+        "table/moveSession: Merged session " +
+        s.id +
+        " with " +
+        target_session.id
+      );
+      res.json(target_session.id);
+    }
+
+  } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+});
+
+/* GET orders from session */
+router.post(
+  "/:sid/close",
+  param("sid").isInt(),
+  async (req: Request, res: Response) => {
+    if (!validationResult(req).isEmpty()) {
+      res.sendStatus(400);
+      return;
+    }
+    try {
+      // Check if session can be closed
+      let sid = Number(req.params.sid)
+      if ((await db.getBillableOrders(sid)).length == 0 && (await db.getOutstandingOrderCount(sid)) == 0) {
+        // Session can be closed
+        let s = await AppDataSource.getRepository(Session).findOneByOrFail({ id: sid });
+        await db.setSessionStatus(s, StateType.CLOSED, req.session.account!);
+        res.sendStatus(200);
+      }else{
+        res.sendStatus(403);
+      }
+
+    } catch (e) {
+      console.log(e);
+      res.sendStatus(500);
+    }
+    
   }
 );
 

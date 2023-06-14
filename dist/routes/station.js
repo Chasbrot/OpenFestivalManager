@@ -85,8 +85,9 @@ router.get("/:sid", (0, express_validator_1.param)("sid").isInt(), async functio
 });
 /* GET station overview */
 router.post("/:sid", async function (req, res) {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
         console.log("session/overview: Input validation failed");
         return;
     }

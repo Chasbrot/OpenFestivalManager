@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <title>Tisch</title>
+  <%- include('../header_common') %>
+  <style>
+    .card-body::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .card-body {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+  </style>
+  <link href="/swal2_icons.css" rel="stylesheet"  type="text/css" >
+</head>
+
+<body id="app">
+
+  <!-- Nav bar -->
+  <%-include('navbar') %>
+
+  <!-- Bestellungen -->
+  <%-include('list_orders') %>
+
+  <!-- Sessions -->
+  <%-include('menu_sessions') %>
+
+  <!-- Session Information -->
+  <%-include('menu_session_info') %>
+
+  <!-- Billing Interface -->
+  <%-include('menu_billing') %>
+
+  <!-- Billing History -->
+  <%-include('menu_bills') %>
+
+  <!-- Ordering -->
+  <%-include('menu_ordering') %>
+
+
+  <!-- Error Modal -->
+  <%-include('../errorModal') %>
+
+  <!-- Vue Js -->
+  <%-include('webui_vue') %>
+
+</body>
+
+</html>

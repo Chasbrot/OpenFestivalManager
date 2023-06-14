@@ -83,6 +83,97 @@ export default {
         errorModal.show()
     },
 
+    /*
+    * Finds and delivers the current state of an object with states
+    */
+    async getCurrentState(session) {
+        if (!session) {
+            return;
+        }
+        let state = null;
+        session.states.forEach((s) => {
+            if (!s.history) {
+                state = s;
+            }
+
+        });
+        return state;
+    },
+
+    getFirstState(session) {
+        if (!session) {
+            return;
+        }
+        return session.states[0];
+    },
+
+    getLastState(session) {
+        if (!session) {
+            return;
+        }
+        return session.states[session.states.length - 1];
+    },
+
+    async closeOffcanvas(id) {
+        let myOffCanvas = document.getElementById(id);
+        if (!myOffCanvas) {
+            return;
+        }
+        let openedCanvas = bootstrap.Offcanvas.getInstance(myOffCanvas);
+        openedCanvas.hide();
+    },
+
+    async openOffcanvas(id) {
+        let myOffCanvas = document.getElementById(id);
+        if (!myOffCanvas) {
+            return;
+        }
+        let closedCanvas = bootstrap.Offcanvas.getInstance(myOffCanvas);
+        closedCanvas.show();
+    },
+
+    async groupOrders(orders) {
+        // Group orders to map
+        let orderMap = new Map();
+        // For each order try to sort into the map
+        await orders.forEach((oe) => {
+            //console.log("New order")
+            //console.log(oe)
+            // Check if the same product/variation combination exists already in the map
+            let inserted = false;
+
+            orderMap.forEach((value, key) => {
+                //console.log(value)
+                //console.log(oe.product.id + " - " + key.product.id)
+                //console.log(( oe.variation != null).valueOf() + " - " + (oe.variation != null).valueOf());
+                // Check if same product
+                if (key.product.id == oe.product.id) {
+                    // Check if either no variations or both the same
+                    if ((oe.variation == null && key.variation == null)) {
+                        // no variations, same product ++
+                        //console.log(value)
+                        value.push(oe.id)
+                        orderMap.set(key, value);
+                        inserted = true;
+                    } else if (oe.variation != null && key.variation != null && oe.variation.id == key.variation.id) {
+                        // same variations, same product ++
+                        //console.log(value)
+                        value.push(oe.id)
+                        orderMap.set(key, value);
+                        inserted = true;
+                    }
+                }
+            });
+            //console.log(orderMap)
+            if (!inserted) {
+                orderMap.set(oe, [oe.id]);
+            }
+            //console.log(orderMap)
+        })
+        
+        return orderMap;
+    }
+
 
 
 }

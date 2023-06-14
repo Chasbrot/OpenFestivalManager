@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <title>Admin Konsole</title>
+    <%- include('../../header_common') %>
+</head>
+
+<body>
+
+    <%- include('../admin_navbar') %>
+        <br>
+        <div id="app">
+            <div class="row px-2 d-flex align-items-start">
+                <div class="col-2" style="max-width: 200px">
+                    <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist"
+                        aria-orientation="vertical">
+                        <button class="nav-link active" id="v-pills-tables-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
+                            aria-selected="true" >Tische</button>
+                        <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-organization" type="button" role="tab"
+                            aria-controls="v-pills-organization" aria-selected="true"
+                            >Organisation</button>
+                        <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
+                            aria-selected="true" >Produkte</button>
+                        <button class="nav-link" id="v-pills-users-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-users"
+                            aria-selected="true" >Benutzer</button>
+                    </div>
+                </div>
+                <div class="col-10">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <%- include('tab_tables') %>
+                        <%- include('tab_organisation') %>
+                        <%- include('tab_products') %>
+                        <%- include('tab_users') %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Detail Modal -->
+            <%- include('modal_productdetail') %>
+
+
+        </div>
+
+        <!-- Error Modal -->
+        <%- include('../../errorModal') %>
+
+            <script>
+                // Initialize all tooltips at load
+                $(document).ready(function () {
+                    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
+                        tooltipTriggerEl))
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
+            </script>
+
+</body>
+
+<!-- Vue Js -->
+<script type="module" type="text/javascript">
+    import dm from "/vue/datamodel.js";
+    import hlp from "/vue/helper.js";
+    import rest from "/vue/rest.js";
+
+    const {
+        createApp
+    } = Vue
+
+    let app = createApp({
+        mixins: [dm],
+        data: () => ({
+            // TableGroups
+            tableGroups: [],
+            newTableGroupName: "",
+            // Tables
+            selectedTableGroup: "",
+            tables: [],
+            newTableNumber: "",
+            // Stations
+            stations: [],
+            newStationName: "",
+            // Alerts
+            alertTypes: [],
+            newAlertTypeName: "",
+            // Product Categories
+            productCategories: [],
+            newPCName: "",
+            // Payment Methods
+            paymentMethods: [],
+            newPMName: "",
+            defaultMethod: "",
+            // Ingredients
+            ingredients: [],
+            newIngredientName: "",
+            // Products
+            products: [],
+            productDetailModal: "",
+            pDnewIngredient: {
+                ingredient: "",
+                standard: true
+            },
+            pDnewVariation: {
+                attrname: "",
+                price: 0
+            },
+            newProduct: {
+                ingredients: [],
+                variations: []
+            },
+            // Users
+            accounts: [],
+            newAccount: {
+                name: "",
+                password: "",
+                accounttype: 1,
+                loginAllowed: true
+            },
+            registrationActive: "",
+            // Database settings
+            dbconfig: {
+                connected: false,
+                host: "",
+                port: "",
+                user: "",
+                password: "",
+                dbname: ""
+            },
+            dbtestresult: undefined,
+        }),
+
+        created() {
+            this.loadData()
+        },
+
+        // Update data on changes
+        watch: {
+            async selectedTableGroup(nTG, oTG) {
+                this.tables = await dm.loadTablesFromTableGroup(
+                    this.selectedTableGroup
+                );
+            },
+        },
+
+        methods: {
+            async loadData() {
+                dm.loadTableGroups().then(r=>this.tableGroups=r);
+                dm.loadStations().then(r=>this.stations=r);
+                dm.loadAlertTypes().then(r=>this.alertTypes=r);
+                dm.loadProductCategories().then(r=>this.productCategories=r);
+                dm.loadPaymentMethods().then(r=>this.paymentMethods=r);
+                dm.loadIngredients().then(r=>this.ingredients=r);
+                dm.loadProducts().then(r=>this.products=r);
+                dm.loadAccounts().then(r=>this.accounts=r);
+                dm.loadRegActive().then(r=>this.registrationActive=r.registrationactive);
+                dm.loadDefaultPM().then(r=>this.defaultMethod=r.id);
+            },
+
+            async createTableGroup() {
+                if (!this.newTableGroupName) {
+                    return;
+                }
+                await dm.createTableGroup(this.newTableGroupName);
+                this.tableGroups = await dm.loadTableGroups();
+                this.newTableGroupName = "";
+            },
+
+            async removeTableGroup(id) {
+                await dm.removeTableGroup(id)
+                this.tableGroups = await dm.loadTableGroups();
+            },
+
+
+            async createTable(id) {
+                if (!this.newTableNumber) {
+                    return;
+                }
+                if(id!=-1){
+                    await dm.createTable(id, this.newTableNumber)
+                }else{
+                    await dm.createTable(this.selectedTableGroup.id, this.newTableNumber)
+                }
+                
+                this.tables = await dm.loadTablesFromTableGroup(this.selectedTableGroup);
+                this.newTableNumber = "";
+                dm.loadTableGroups().then(r=>this.tableGroups=r);
+            },
+
+            async removeTable(id) {
+                await dm.removeTable(id)
+                this.tables = await dm.loadTablesFromTableGroup(this.selectedTableGroup);
+            },
+
+            async createStation() {
+                if (!this.newStationName) {
+                    return;
+                }
+                await dm.createStation(this.newStationName)
+                this.stations = await dm.loadStations();
+                this.newStationName = "";
+            },
+
+            async removeStation(id) {
+                await dm.removeStation(id)
+                this.stations = await dm.loadStations();
+            },
+
+            async createAlertType() {
+                if (!this.newAlertTypeName) {
+                    return;
+                }
+                await dm.createAlertType(this.newAlertTypeName)
+                this.newAlertTypeName = "";
+                this.alertTypes = await dm.loadAlertTypes();
+            },
+
+            async createProductCategory() {
+                if (!this.newPCName) {
+                    return;
+                }
+                await rest.putData("/rest/category",
+                    JSON.stringify({
+                        name: this.newPCName
+                    })
+                );
+                this.newPCName = "";
+                this.productCategories = await dm.loadProductCategories();
+            },
+
+            async createPaymentMethod() {
+                if (!this.newPMName) {
+                    return;
+                }
+                await rest.putData("/rest/paymentmethod",
+                    JSON.stringify({
+                        name: this.newPMName
+                    })
+                );
+                this.newPCName = "";
+                this.paymentMethods = await  dm.loadPaymentMethods();
+            },
+
+            async updateDefaultPM() {
+                if (!this.defaultMethod) {
+                    return;
+                }
+                await rest.putData("/rest/paymentmethod/default",
+                    JSON.stringify({
+                        pmid: this.defaultMethod
+                    })
+                );
+            },
+
+            async removePM(id) {
+                await rest.deleteData(`/rest/paymentmethod/${id}`, "");
+                this.paymentMethods = await dm.loadPaymentMethods();
+            },
+
+            async removePC(id) {
+                await rest.deleteData(`/rest/category/${id}`, "");
+                this.productCategories = await dm.loadProductCategories();
+            },
+
+            async removeAT(id) {
+                await rest.deleteData(`/rest/alerttypes/${id}`, "");
+                this.alertTypes = await dm.loadAlertTypes();
+            },
+
+            async createIngredient() {
+                if (!this.newIngredientName) {
+                    return;
+                }
+                await rest.putData("/rest/ingredient",
+                    JSON.stringify({
+                        name: this.newIngredientName
+                    })
+                );
+                this.newIngredientName = "";
+                this.ingredients = await dm.loadIngredients();
+            },
+
+            async removeIngredient(id) {
+                await rest.deleteData(`/rest/ingredient/${id}`, "");
+                this.ingredients = await dm.loadIngredients();
+            },
+
+            async showProductDetails(product) {
+                this.productDetailModal = product
+                var pdm = new bootstrap.Modal(document.getElementById('productDetailModal'))
+                pdm.show()
+            },
+
+            async updateProduct(product) {
+                if (!product) {
+                    return null;
+                }
+                console.log(product)
+                if (product.id) {
+                    await rest.putData(`/rest/product/${product.id}`, JSON.stringify(product));
+                    this.products = await dm.loadProducts();
+                } else {
+                    let res = await rest.putData(`/rest/product`, JSON.stringify(product));
+                    if(!res){return} // Invalid request
+                    this.products = await dm.loadProducts();
+                    console.log(res.id)
+                    this.productDetailModal = await this.products.find(element => element.id == res.id);
+                    console.log(this.productDetailModal);
+                    newProduct: {
+                        ingredients: []; variations: []
+                    }
+                }
+            },
+
+            async removeProduct(id) {
+                await rest.deleteData(`/rest/product/${id}`, "");
+                this.products = await dm.loadProducts();
+            },
+
+            async createVariation(product) {
+                if (!this.pDnewVariation || !product) {
+                    return;
+                }
+                await rest.putData(`/rest/product/${product.id}/variation`,
+                    JSON.stringify(this.pDnewVariation)
+                );
+                pDnewVariation: {
+                    attrname: ""; price: 0
+                }
+                await this.updateVariationsFromProduct(product);
+            },
+
+            async updateVariationsFromProduct(product) {
+                if (!product || !product.id) {
+                    return null;
+                }
+                product.variations = await rest.fetchData(`/rest/product/${product.id}/variations`);
+            },
+
+            async removeVariation(p, v) {
+                if (!v) {
+                    return null;
+                }
+                await rest.deleteData(`/rest/variation/${v.id}`);
+                this.updateVariationsFromProduct(p);
+            },
+
+
+            async mapProductIngredient(product) {
+                if (!this.pDnewIngredient || !product) {
+                    return;
+                }
+                await rest.putData(`/rest/product/${product.id}/ingredients`,
+                    JSON.stringify(this.pDnewIngredient)
+                );
+                pDnewIngredient: {
+                    ingredient: ""; standard: true
+                };
+                await this.updateIngredientsFromProduct(product);
+            },
+
+            async updateIngredientsFromProduct(product) {
+                if (!product || !product.id) {
+                    return null;
+                }
+                console.log(product)
+                product.ingredients = await rest.fetchData(`/rest/product/${product.id}/ingredients`);
+            },
+
+            async removeProductIngredient(pi) {
+                if (!pi) {
+                    return null;
+                }
+                await rest.deleteData(`/rest/product/ingredient/${pi.id}`);
+                await this.updateIngredientsFromProduct(this.productDetailModal);
+            },
+
+            async removeAccount(a) {
+                console.log(a)
+                await rest.deleteData(`/rest/account/${a.id}`);
+                this.accounts = await dm.loadAccounts();
+            },
+
+            async updateAccount(a) {
+                await rest.putData(`/rest/account/${a.id}`, JSON.stringify(a));
+                this.accounts = await dm.loadAccounts();
+            },
+
+            async createAccount() {
+                await rest.putData(`/rest/account`, JSON.stringify(this.newAccount));
+                newAccount: {
+                    name: ""; password: ""; accounttype: 1; loginAllowed: true
+                };
+                this.accounts = await dm.loadAccounts();
+            },
+
+
+            async updateRegActive() {
+                await rest.putData("/rest/registrationactive", JSON.stringify({
+                    registrationActive: this.registrationActive
+                }));
+                this.registrationActive = (await dm.loadRegActive()).registrationactive;
+            },
+
+            async dbTestSettings() {
+                let tmp = await rest.postData("/rest/system/database/test", JSON.stringify(this.dbconfig));
+                this.dbtestresult = tmp.test_result;
+            }
+
+
+
+
+        },
+    });
+
+    app.config.errorHandler = (err, instance, info) => {
+        console.log("Error", err, info)
+        hlp.makeError("The application has generated an error.", info, err);
+    }
+    app.mount("#app");
+</script>
+
+
+
+</html>

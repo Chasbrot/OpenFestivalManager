@@ -1,0 +1,114 @@
+<!-- Bestellungen -->
+<div v-if="finishedOrders.length || sortedOrders.length" class="card" style="max-height: 65vh">
+    <div class="card-body overflow-auto pt-0 px-1">
+        <div class="list-group pt-0">
+            <!-- Orders sorted by state -->
+            <template v-for="o in sortedOrders">
+                <div class="list-group-item py-0 ps-0">
+                    <div class="row">
+                        <div class="col-8 d-grid pe-0">
+                            <a class="btn btn-light text-start py-1 " :href="'/table/orderdetails/'+o.id"
+                                style="background-color:white">
+                                <!-- Status icons -->
+                                <img v-if="o.currentState.statetype == 0" src="/images/order.png" style="width:15px">
+                                <img v-else-if="o.currentState.statetype == 1" src="/images/loading.gif"
+                                    style="width:15px">
+                                <img v-else-if="o.currentState.statetype == 2" src="/images/outbox.png"
+                                    style="width:15px">
+                                <img v-else-if="o.currentState.statetype == 3" src="/images/check.png"
+                                    style="width:15px">
+                                <img v-else-if="o.currentState.statetype == 4" src="/images/canceled.png"
+                                    style="width:15px">
+
+                                <!-- Order Data -->
+                                <span v-if="o.variation != null" class="ps-2">{{o.product.name}},
+                                    {{o.variation.attrname}}</span>
+                                <span v-else class="ps-2">{{o.product.name}}</span>
+                                <span class="float-end">
+
+                                </span>
+                            </a>
+                        </div>
+                        <!-- Buttons -->
+                        <div class="col-2 d-grid px-0 py-0">
+                            <button v-if="o.currentState.statetype == 0 && ! o.product.deliverable"
+                                class="btn btn-success py-0" @click="this.updateOrderState(o.id, 3)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
+                                    class="bi bi-check2" viewBox="0 0 16 16">
+                                    <path
+                                        d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="col-2 d-grid px-0">
+                            <button v-if="o.currentState.statetype != 4 && o.currentState.statetype != 3"
+                                class="btn btn-danger py-0" @click="this.updateOrderState(o.id, 4)">x
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Finished Orders grouped-->
+            <div v-if="finishedOrders.length" class="accordion" id="gOaccordion">
+                <div class="list-group-item py-0 ps-0 pe-0">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="gOheading">
+                            <button class="accordion-button collapsed py-2 ps-2" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#gOcollapse" aria-expanded="false" aria-controls="gOcollapse">
+                                <!-- Status icons -->
+                                <img class="ms-1" src="/images/check.png" style="width:15px">
+                                <!-- Product and Variation Data -->
+                                <span class="ps-2">{{finishedOrders.length}}x Abgeschlossen</span>
+                            </button>
+                        </h2>
+                        <div id="gOcollapse" class="accordion-collapse collapse" aria-labelledby="gOheading"
+                            data-bs-parent="#gOaccordion">
+
+                            <div class0="list-group">
+                                <template v-for="o in finishedOrders">
+                                    <div class="list-group-item p-0">
+                                        <a class="btn btn-light text-start py-1 ps-4 w-100 "
+                                            :href="'/table/orderdetails/'+o.id" style="background-color:white">
+                                            <span class="pe-1">•</span>
+                                            <!-- Status icons -->
+                                            <img v-if="o.currentState.statetype == 0" src="/images/order.png"
+                                                style="width:15px">
+                                            <img v-else-if="o.currentState.statetype == 1" src="/images/loading.gif"
+                                                style="width:15px">
+                                            <img v-else-if="o.currentState.statetype == 2" src="/images/outbox.png"
+                                                style="width:15px">
+                                            <img v-else-if="o.currentState.statetype == 3" src="/images/check.png"
+                                                style="width:15px">
+                                            <img v-else-if="o.currentState.statetype == 4" src="/images/canceled.png"
+                                                style="width:15px">
+
+                                            <!-- Order Data -->
+                                            <span v-if="o.variation != null" class="ps-2">{{o.product.name}},
+                                                {{o.variation.attrname}}</span>
+                                            <span v-else class="ps-2">{{o.product.name}}</span>
+                                            <span class="float-end">
+                                                {{this.getTimeFromOrder(o)}}
+                                            </span>
+                                        </a>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div v-if="!finishedOrders.length && !sortedOrders.length && selectedSession" class="list-group-item py-0">
+    <br>
+    <h5 class="text-center">Keine Bestellungen</h5>
+</div>

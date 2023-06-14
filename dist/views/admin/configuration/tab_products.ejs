@@ -1,0 +1,134 @@
+<div class="tab-pane fade" id="v-pills-products" role="tabpanel"
+                            aria-labelledby="v-pills-products-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    Optionen
+                                    <div class="float-end" v-if="ingredients">
+                                        {{ingredients.length}}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="basic-addon1">Neue Zutat:</span>
+                                        </div>
+                                        <input type="text" class="form-control" id="new_option" name="new_option"
+                                            placeholder="Name der Zutat" v-model="newIngredientName" required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary"
+                                                @click="this.createIngredient()">Anlegen</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group overflow-auto" style="max-height: 150px" id="ingredients">
+                                        <template v-for="i in ingredients">
+                                            <div class="list-group-item">
+                                                {{i.name}}
+                                                <div class="float-end">
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="this.removeIngredient(i.id)">
+                                                        X
+                                                    </button>
+                                                </div>
+                                        </template>
+                                        <div v-if="ingredients.length===0" class="list-group-item">
+                                            Keine Zutaten vorhanden
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    Produkte
+                                    <div class="float-end" v-if="products && products.length !== 0">
+                                        {{products.length}}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table" v-if="products.length !== 0">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Station</th>
+                                                <th scope="col">Kategorie</th>
+                                                <th scope="col">
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Produkt wird durch Helfer zugestellt">
+                                                        <img src="/images/shipping.png" width="20" height="20">
+                                                    </span>
+                                                </th>
+                                                <th scope="col">Preis</th>
+                                                <th scope="col">
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Priorisierung in der Bestellliste">
+                                                        <img src="/images/list.png" width="20" height="20">
+                                                    </span>
+                                                </th>
+                                                <th scope="col">
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Sicht-/Bestellbarkeit eingeschränkt">
+                                                        <img src="/images/lock.png" width="20" height="20">
+                                                    </span>
+                                                </th>
+                                                <th scope="col">
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Anzahl der Variationen des Produktes">
+                                                        <img src="/images/alternate.png" width="20" height="20">
+                                                    </span>
+                                                </th>
+                                                <th scope="col">
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        title="Anzahl der Optionen des Produktes">
+                                                        <img src="/images/options.png" width="20" height="20">
+                                                    </span>
+                                                </th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template v-for="p in products">
+                                                <tr>
+                                                    <th scope="row">{{p.id}}</th>
+                                                    <td>{{p.name}}</td>
+                                                    <td>{{p.producer.name}}</td>
+                                                    <td v-if="p.category">{{p.category.name}}</td>
+                                                    <td v-else>-</td>
+                                                    <td v-if="p.deliverable"><img src="/images/check.png" width="20"
+                                                            height="20"></td>
+                                                    <td v-else><img src="/images/canceled.png" width="20" height="20">
+                                                    </td>
+                                                    <td>{{p.price}} €</td>
+                                                    <td>{{p.list_priority}}</td>
+                                                    <td><span v-if="p.productLock==0">-</span>
+                                                        <img v-else-if="p.productLock==1"
+                                                            src="/images/production_warning.png" width="20" height="20">
+                                                        <img v-else-if="p.productLock==2" src="/images/lock.png"
+                                                            width="20" height="20">
+                                                        <img v-else-if="p.productLock==3" src="/images/hidden.png"
+                                                            width="20" height="20">
+                                                        <span v-else>{{p.productLock}}</span>
+                                                    </td>
+                                                    <td>{{p.variations.length}}</td>
+                                                    <td>{{p.ingredients.length}}</td>
+                                                    <td>
+                                                        <button class="btn btn-secondary btn-sm"
+                                                            @click="showProductDetails(p)">?</button>
+                                                        <button class="btn btn-danger btn-sm"
+                                                            @click="removeProduct(p.id)">X</button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" type="button"
+                                            @click="this.showProductDetails(this.newProduct)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                        </div>

@@ -4,4 +4,8 @@
 uploads
 dist/entity
 dist/rest
-dist/routes
+package-lock.json
+cert.pem
+key.pem
+distofm_data.db
+ofm_data.db

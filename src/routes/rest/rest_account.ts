@@ -54,17 +54,17 @@ router.get("/", (req: Request, res: Response) => {
 /* PUT create user account */
 router.put(
   "/",
-  body("name").isString(),
-  body("password").isString(),
+  body("name").isString().trim(),
+  body("password").isString().trim().isStrongPassword(),
   body("accounttype").isInt(),
   body("loginAllowed").isBoolean(),
   async (req: Request, res: Response) => {
-    if (!validationResult(req).isEmpty()) {
-      res.sendStatus(400);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
       return;
     }
     const body = req.body;
-    console.log(body);
     let a = new Account();
     a.name = req.body.name;
     // Hash password
@@ -111,7 +111,7 @@ router.get("/:id", param("id").isInt(), async (req: Request, res: Response) => {
 router.put(
   "/:aid",
   body("name").isString(),
-  body("password").isString(),
+  body("password"),
   body("accounttype").isInt(),
   body("loginAllowed").isBoolean(),
   async (req: Request, res: Response) => {

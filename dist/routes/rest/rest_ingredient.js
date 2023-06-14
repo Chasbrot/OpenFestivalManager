@@ -37,8 +37,9 @@ router.use(function (req, res, next) {
 });
 /* PUT create ingredient*/
 router.put("/", (0, express_validator_1.body)("name").isString(), async (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
         return;
     }
     const body = req.body;

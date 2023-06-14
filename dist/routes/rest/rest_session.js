@@ -16,8 +16,9 @@ const State_1 = require("../../entity/State");
 const typeorm_1 = require("typeorm");
 /* Check session and accounttype*/
 router.use(function (req, res, next) {
-    if (req.session.account.accounttype == Account_1.AccountType.ADMIN ||
-        req.session.account.accounttype == Account_1.AccountType.USER) {
+    if (req.session.account &&
+        (req.session.account.accounttype == Account_1.AccountType.ADMIN ||
+            req.session.account.accounttype == Account_1.AccountType.USER)) {
         next();
     }
     else {
@@ -27,7 +28,7 @@ router.use(function (req, res, next) {
 });
 /* PUT create new session on table */
 router.put("/", (0, express_validator_1.body)("tid").isInt(), async (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty() || !req.session.account) {
         res.sendStatus(400);
         return;
     }
@@ -115,6 +116,30 @@ router.get("/active", async (req, res) => {
         return;
     }
 });
+/* GET all active sessions from a user */
+router.get("/activeByUser", async (req, res) => {
+    try {
+        let as = await database_1.db.getActiveSessionsFromAccount(req.session.account);
+        res.json(as);
+    }
+    catch (e) {
+        console.log("rest/session/activeByUser GET: " + e);
+        res.sendStatus(500);
+        return;
+    }
+});
+/* GET all inactive sessions from a user */
+router.get("/inactiveByUser", async (req, res) => {
+    try {
+        let as = await database_1.db.getInactiveSessionsFromAccount(req.session.account);
+        res.json(as);
+    }
+    catch (e) {
+        console.log("rest/session/inactiveByUser GET: " + e);
+        res.sendStatus(500);
+        return;
+    }
+});
 /* GET session */
 router.get("/:sid", (0, express_validator_1.param)("sid").isInt(), (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
@@ -122,9 +147,13 @@ router.get("/:sid", (0, express_validator_1.param)("sid").isInt(), (req, res) =>
         return;
     }
     data_source_1.AppDataSource.getRepository(Session_1.Session)
-        .find({
+        .findOneOrFail({
         relations: {
             table: true,
+            states: {
+                triggerer: true
+            },
+            servers: true,
         },
         where: {
             id: Number(req.params.sid),
@@ -186,7 +215,7 @@ router.get("/:sid/orders", (0, express_validator_1.param)("sid").isInt(), (req, 
     });
 });
 /* PUT create order */
-router.put("/:sid", (0, express_validator_1.param)("sid").isInt(), (0, express_validator_1.body)("vid").isInt(), (0, express_validator_1.body)("pid").isInt(), (0, express_validator_1.body)("note").isString(), async (req, res) => {
+router.put("/:sid", (0, express_validator_1.param)("sid").isInt().exists(), (0, express_validator_1.body)("vid"), (0, express_validator_1.body)("pid").isInt().exists(), (0, express_validator_1.body)("note"), async (req, res) => {
     // Request must have a product id
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
@@ -201,6 +230,95 @@ router.put("/:sid", (0, express_validator_1.param)("sid").isInt(), (0, express_v
     }
     catch (e) {
         console.log("rest/session/order PUT: " + e);
+        res.sendStatus(500);
+    }
+});
+/* POST move session to other table */
+router.put("/:sid/move", (0, express_validator_1.param)("sid").isInt(), (0, express_validator_1.body)("targetTid").isInt(), async function (req, res) {
+    const body = req.body;
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    console.log(body);
+    try {
+        let s = await data_source_1.AppDataSource.getRepository(Session_1.Session).findOneOrFail({
+            relations: {
+                table: true,
+                states: true,
+                bills: true,
+                orders: true,
+                servers: true,
+            },
+            where: {
+                id: req.params.sid,
+            },
+        });
+        let table = await data_source_1.AppDataSource.getRepository(Table_1.Table).findOneByOrFail({
+            id: body.table,
+        });
+        // Get target session
+        let target_session = await data_source_1.AppDataSource.getRepository(Session_1.Session).findOne({
+            relations: {
+                table: true,
+                states: true,
+                bills: true,
+                orders: true,
+                servers: true,
+            },
+            where: {
+                table: {
+                    id: req.body.targetTid,
+                },
+                states: {
+                    history: false,
+                    statetype: State_1.StateType.CREATED,
+                },
+            },
+        });
+        // Check if target table has a active session
+        if (target_session == null) {
+            s.table = table;
+            await data_source_1.AppDataSource.getRepository(Session_1.Session).save(s);
+            console.log("table/moveSession: Moved session " + s.id + " to table " + table.id);
+            res.json(s.id);
+        }
+        else {
+            // Copy everything to target session
+            await database_1.db.mergeSession(s, target_session, req.session.account);
+            console.log("table/moveSession: Merged session " +
+                s.id +
+                " with " +
+                target_session.id);
+            res.json(target_session.id);
+        }
+    }
+    catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+});
+/* GET orders from session */
+router.post("/:sid/close", (0, express_validator_1.param)("sid").isInt(), async (req, res) => {
+    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
+        res.sendStatus(400);
+        return;
+    }
+    try {
+        // Check if session can be closed
+        let sid = Number(req.params.sid);
+        if ((await database_1.db.getBillableOrders(sid)).length == 0 && (await database_1.db.getOutstandingOrderCount(sid)) == 0) {
+            // Session can be closed
+            let s = await data_source_1.AppDataSource.getRepository(Session_1.Session).findOneByOrFail({ id: sid });
+            await database_1.db.setSessionStatus(s, State_1.StateType.CLOSED, req.session.account);
+            res.sendStatus(200);
+        }
+        else {
+            res.sendStatus(403);
+        }
+    }
+    catch (e) {
+        console.log(e);
         res.sendStatus(500);
     }
 });

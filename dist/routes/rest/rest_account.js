@@ -38,13 +38,13 @@ router.get("/", (req, res) => {
     });
 });
 /* PUT create user account */
-router.put("/", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("password").isString(), (0, express_validator_1.body)("accounttype").isInt(), (0, express_validator_1.body)("loginAllowed").isBoolean(), async (req, res) => {
-    if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
-        res.sendStatus(400);
+router.put("/", (0, express_validator_1.body)("name").isString().trim(), (0, express_validator_1.body)("password").isString().trim().isStrongPassword(), (0, express_validator_1.body)("accounttype").isInt(), (0, express_validator_1.body)("loginAllowed").isBoolean(), async (req, res) => {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
         return;
     }
     const body = req.body;
-    console.log(body);
     let a = new Account_1.Account();
     a.name = req.body.name;
     // Hash password
@@ -86,7 +86,7 @@ router.get("/:id", (0, express_validator_1.param)("id").isInt(), async (req, res
     });
 });
 /* PUT update account */
-router.put("/:aid", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("password").isString(), (0, express_validator_1.body)("accounttype").isInt(), (0, express_validator_1.body)("loginAllowed").isBoolean(), async (req, res) => {
+router.put("/:aid", (0, express_validator_1.body)("name").isString(), (0, express_validator_1.body)("password"), (0, express_validator_1.body)("accounttype").isInt(), (0, express_validator_1.body)("loginAllowed").isBoolean(), async (req, res) => {
     if (!(0, express_validator_1.validationResult)(req).isEmpty()) {
         res.sendStatus(400);
         return;

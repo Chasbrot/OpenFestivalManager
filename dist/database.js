@@ -896,7 +896,7 @@ class db {
         });
     }
     /**
-     * Get active sessions for a account
+     * Get inactive sessions for a account
      * @param  {Account} Account to search for
      */
     static getInactiveSessionsFromAccount(a) {
@@ -922,6 +922,11 @@ class db {
                     },
                 },
             ],
+            order: {
+                states: {
+                    created: "DESC"
+                }
+            }
         });
     }
     /**

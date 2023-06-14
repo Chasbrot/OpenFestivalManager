@@ -27,7 +27,7 @@ export default {
         const response = await fetch(url,
             requestOptions);
         if (response.status != 200) {
-            hlp.makeError("Anfrage fehlerhaft.", "PUT " + url + data, response.statusText);
+            hlp.makeError("Anfrage fehlerhaft.", "PUT " + url +" " + data, response.statusText);
             return false;
         }
         // Catch non json answer

@@ -36,7 +36,7 @@ export class Account {
   hash: string;
 
   @Column({
-    type: "enum",
+    type: "simple-enum",
     enum: AccountType,
   })
   accounttype: AccountType;

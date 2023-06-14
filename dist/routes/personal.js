@@ -52,7 +52,7 @@ router.post("/login", (0, express_validator_1.body)("username").isAlphanumeric()
         return;
     }
     req.session.account = user;
-    res.redirect("/personal/overview");
+    res.redirect("/webui");
 });
 /* Personal Overview */
 router.get("/overview", async function (req, res) {
@@ -76,6 +76,18 @@ router.get("/overview", async function (req, res) {
         act_sessions: activeSessions,
         past_sessions: inactiveSessions,
     });
+});
+router.post("/logout", function (req, res) {
+    // Logout request
+    req.session.destroy(function (err) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log("session destroyed");
+        }
+    });
+    res.redirect("/personal/login");
 });
 router.post("/overview", function (req, res) {
     // Logout request

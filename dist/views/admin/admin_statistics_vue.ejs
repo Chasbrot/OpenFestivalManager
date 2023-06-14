@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
     <title>Admin Konsole</title>
@@ -36,7 +36,7 @@
                     <div class="card-header">
                         Auslastung Stationen
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" v-if="orderDates.length">
                         Datum:
                         <select class="form-control" v-model="selectedDayChart">
                             <option value=""></option>
@@ -46,13 +46,16 @@
                         </select>
                         <canvas id="lineChart"></canvas>
                     </div>
+                    <div class="card-body" v-else>
+                        <h5 class="text-center">Keine Daten</h5>
+                    </div>
                 </div>
                 <br>
                 <div class="card">
                     <div class="card-header">
                         Verkaufszahlen
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" v-if="orderDates.length">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">Datum:</span>
@@ -76,9 +79,14 @@
                                 </option>
                             </select>
                         </div>
+                        
                     </div>
-                    <br>
-                    <div class="container">
+                    <br v-if="orderDates.length">
+                    <div class="card-body" v-else>
+                        <h5 class="text-center">Keine Daten</h5>
+                    </div>
+                    
+                    <div class="container" v-if="orderDates.length">
                         <table class="table" v-if="soldProducts != null">
                             <thead>
                                 <tr>
@@ -98,6 +106,7 @@
                         <span v-else>Keine Daten gefunden!</span>
                     </div>
                 </div>
+                
                 <br>
 
             </div>

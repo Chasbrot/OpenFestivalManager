@@ -35,14 +35,14 @@ export default {
         return await rest.fetchData(`/rest/tablegroup/${selectedTableGroup.id}/tables`);
     },
 
-    async createTable(tablegroup, newTableNumber) {
-        if (!TableGroup || !newTableNumber) {
+    async createTable(tgid, newTableNumber) {
+        if (!newTableNumber) {
             return;
         }
         await rest.putData("/rest/table",
             JSON.stringify({
                 name: newTableNumber,
-                tgid: tableGroup.id
+                tgid: tgid
             })
         );
     },
@@ -128,6 +128,10 @@ export default {
                 pmid: defaultMethod
             })
         );
+    },
+
+    async loadDefaultPM() {
+        return await rest.fetchData("/rest/paymentmethod/default");
     },
 
     async removePM(id) {
@@ -282,6 +286,101 @@ export default {
         }
         return await rest.fetchData(`/rest/billing/${sessionid}/closedbills`);
     },
+
+    async loadSessionById(sessionid) {
+        if (!sessionid) {
+            return;
+        }
+        return await rest.fetchData(`/rest/session/${sessionid}`);
+    },
+
+    async loadSessionsActive() {
+        return await rest.fetchData(`/rest/session/activeByUser`);
+    },
+    async loadSessionsInactive() {
+        return await rest.fetchData(`/rest/session/inactiveByUser`);
+    },
+
+    async loadOrdersFromSession(sid) {
+        return await rest.fetchData(`/rest/session/${sid}/orders`);
+    },
+
+    async moveSessionToOtherTable(sid, target_tid) {
+        return await rest.putData(`/rest/session/${sid}/move`,
+            JSON.stringify({
+                targetTid: target_tid
+            }));
+    },
+    async updateOrderState(oid, stateid) {
+        const requestOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                new: stateid
+            })
+        };
+        return await fetch(`/rest/order/${oid}/state`, requestOptions);
+    },
+
+    async closeSessionById(sid) {
+        return await rest.postData(`/rest/session/${sid}/close`);
+    },
+
+    async getUnpayedOrders(sid) {
+        let result = await rest.fetchData(`/rest/billing/${sid}/unpayedOrdersGrouped`);
+        let map = new Map();
+        // Rebuild map because json sucks
+        for (let i = 0; i < result.length; i++) {
+            map.set(result[i].key, result[i].value)
+        }
+        return map
+    },
+
+
+    async isSessionCloseable(sid) {
+        return await rest.fetchData(`/rest/billing/${sid}/closeable`);
+    },
+
+    async getBillableOrders(sid) {
+        return await rest.fetchData(`/rest/billing/${sid}/billableOrders`);
+    },
+
+    async createBill(sid, orders, paymentmethodid) {
+        return await rest.putData(`/rest/billing/${sid}/pay`,
+        JSON.stringify({
+            pmid: paymentmethodid,
+            orderids: orders
+        }));
+    },
+
+    async loadProductsByStation(sid) {
+        return await rest.fetchData(`/rest/station/${sid}/products`);
+    },
+    async loadProductsByCategory(cid) {
+        return await rest.fetchData(`/rest/category/${cid}/products`);
+    },
+
+    async orderProduct(sid, pid, vid, options, note) {
+        if (!sid || !pid) {
+            return;
+        }
+
+        return await rest.putData(`/rest/session/${sid}`,
+            JSON.stringify({
+                pid: pid,
+                vid: vid,
+                options: options,
+                note: note
+            }));
+    },
+
+    async loadSingleOrder(oid) {
+        return await rest.fetchData(`/rest/order/${oid}`)
+    }
+
+
 
 }
 

@@ -39,7 +39,7 @@ router.get("/", (_req: Request, res: Response) => {
 /* GET default paymentmethod */
 router.get("/default", (_req: Request, res: Response) => {
   AppDataSource.getRepository(PaymentMethod)
-    .findOneByOrFail({ default: true })
+    .findOneBy({ default: true })
     .then((result) => {
       if (_req.session.account!.accounttype != AccountType.ADMIN) {
         res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
@@ -100,7 +100,7 @@ router.put(
       return;
     }
     const body = req.body;
-    console.log("create new paymentmethod request");
+    console.log("set new default paymentmethod request");
     console.log(body);
     // Create Payment Method
     try {
@@ -109,10 +109,13 @@ router.put(
       ).findOneByOrFail({ id: body.pmid });
       let old_default = await AppDataSource.getRepository(
         PaymentMethod
-      ).findOneByOrFail({ default: true });
-      old_default.default = false;
+      ).findOneBy({ default: true });
+      if (old_default) {
+        old_default.default = false;
+        await AppDataSource.getRepository(PaymentMethod).save(old_default);
+      }
+      
       new_default.default = true;
-      await AppDataSource.getRepository(PaymentMethod).save(old_default);
       await AppDataSource.getRepository(PaymentMethod).save(new_default);
     } catch (e) {
       console.log("rest/paymentmethod/default PUT new: Error" + e);

@@ -158,21 +158,24 @@ router.put(
   "/",
   body("name").isString(),
   body("price").isFloat(),
-  body("deliverable").isBoolean(),
   async (req: Request, res: Response) => {
     if (!validationResult(req).isEmpty()) {
       res.sendStatus(400);
       return;
     }
     const body = req.body;
-    console.log(req.body);
+    if (global.dev) {
+      console.log("create new product request")
+      console.log(req.body);
+    }
+    
     let tmp;
     try {
       // Create new product required
       tmp = new Product(
         body.name,
         Number(body.price),
-        Boolean(body.deliverable)
+        Boolean(body.deliverable) ? true : false
       );
       // Get producing station Required
       tmp.producer = await AppDataSource.getRepository(Station).findOneByOrFail(

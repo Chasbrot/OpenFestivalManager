@@ -25,7 +25,11 @@ router.get(
     "/",
     (_req: Request, res: Response) => {
       AppDataSource.getRepository(TableGroup)
-        .find()
+        .find({
+          relations: {
+            tables: true
+          }
+        })
         .then((result) => {
           if (_req.session.account!.accounttype != AccountType.ADMIN) {
             res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);

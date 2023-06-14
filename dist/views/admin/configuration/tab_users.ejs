@@ -1,0 +1,95 @@
+<div class="tab-pane fade" id="v-pills-users" role="tabpanel"
+                            aria-labelledby="v-pills-users-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    Benutzer
+                                    <div class="float-end" v-if="accounts">
+                                        {{accounts.length}}
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Globale Registrierung:</span>
+                                        <div class="input-group-text">
+                                            <input type="checkbox" class="form-check-input" v-model="registrationActive"
+                                                @change="updateRegActive()">
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Neuer Benutzer:</span>
+                                        <select class="form-select" v-model="newAccount.accounttype">
+                                            <option value="0">Admin</option>
+                                            <option value="1">Normal</option>
+                                            <option value="2" disabled>Station</option>
+                                        </select>
+                                        <input type="text" class="form-control" v-model="newAccount.name"
+                                            placeholder="Name">
+                                        <input type="password" class="form-control" v-model="newAccount.password"  v-if="newAccount.accounttype == 0"
+                                            placeholder="Passwort">
+                                        <span class="input-group-text">Aktiv?:</span>
+                                        <div class="input-group-text">
+                                            <input type="checkbox" class="form-check-input"
+                                                v-model="newAccount.loginAllowed">
+                                        </div>
+                                        <button class="btn btn-primary btn-sm" @click="createAccount()">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="card-body" v-if="accounts.length !== 0">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Recht</th>
+                                                <th scope="col">Zugriff</th>
+                                                <th scope="col">Neues Passwort</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template v-for="a in accounts">
+                                                <tr>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text" v-if="!a.loginAllowed"><img
+                                                                    src="/images/lock.png" height="15"
+                                                                    width="15"></span>
+                                                            <input type="text" class="form-control" v-model="a.name"
+                                                                @change="updateAccount(a)">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select" v-model="a.accounttype"
+                                                            @change="updateAccount(a)">
+                                                            <option value="0">Admin</option>
+                                                            <option value="1">Normal</option>
+                                                            <option value="2">Station</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="checkbox" class="form-check-input"
+                                                            v-model="a.loginAllowed" @change="updateAccount(a)">
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                v-model="a.password">
+                                                            <button class="btn btn-primary btn-sm"
+                                                                @click="removeAccount(a)">+</button>
+                                                        </div>
+
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-danger btn-sm"
+                                                            @click="removeAccount(a)">X</button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <br>
+                        </div>

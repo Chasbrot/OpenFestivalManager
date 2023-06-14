@@ -61,7 +61,7 @@ router.post(
       return;
     }
     req.session.account = user;
-    res.redirect("/personal/overview");
+    res.redirect("/webui");
   }
 );
 
@@ -70,8 +70,12 @@ router.get("/overview", async function (req, res) {
   let activeSessions, inactiveSessions;
   try {
     // Get active sessions
-    activeSessions = await db.getActiveSessionsFromAccount(req.session.account!);
-    inactiveSessions = await db.getInactiveSessionsFromAccount(req.session.account!);
+    activeSessions = await db.getActiveSessionsFromAccount(
+      req.session.account!
+    );
+    inactiveSessions = await db.getInactiveSessionsFromAccount(
+      req.session.account!
+    );
   } catch (e) {
     console.log("personal/overview: " + e);
     res.render("personal/personal_overview", {
@@ -87,6 +91,18 @@ router.get("/overview", async function (req, res) {
     act_sessions: activeSessions,
     past_sessions: inactiveSessions,
   });
+});
+
+router.post("/logout", function (req, res) {
+  // Logout request
+  req.session.destroy(function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("session destroyed");
+    }
+  });
+  res.redirect("/personal/login");
 });
 
 router.post("/overview", function (req, res) {

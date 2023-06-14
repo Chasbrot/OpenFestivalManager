@@ -179,7 +179,7 @@ function readCommandLineOptions() {
         KEY: "",
         CERT: "",
         DB_PATH: "",
-        VERSION: "1.1.12"
+        VERSION: "2.0.0"
     };
     // Read command line arguments
     let argv = require("minimist")(process.argv.slice(2));

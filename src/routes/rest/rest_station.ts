@@ -140,8 +140,10 @@ router.put(
       return;
     }
     const body = req.body;
-    console.log("create new station request");
-    console.log(body);
+    if (global.dev) {
+      console.log("create new station request");
+      console.log(body); 
+    }
     // Create Table
     let tg;
     try {
@@ -165,8 +167,9 @@ router.delete(
       res.sendStatus(400);
       return;
     }
-    const body = req.body;
-    console.log("delete station request " + req.params.sid);
+    if (global.dev) {
+      console.log("delete station request " + req.params.sid)
+    }
     // Create Payment Method
     try {
       let tmp = await AppDataSource.getRepository(Station).findOneOrFail({

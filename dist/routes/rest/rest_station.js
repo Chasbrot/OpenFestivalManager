@@ -114,8 +114,10 @@ router.put("/", (0, express_validator_1.body)("name").isString(), async (req, re
         return;
     }
     const body = req.body;
-    console.log("create new station request");
-    console.log(body);
+    if (global.dev) {
+        console.log("create new station request");
+        console.log(body);
+    }
     // Create Table
     let tg;
     try {
@@ -135,8 +137,9 @@ router.delete("/:sid", (0, express_validator_1.param)("sid").isInt(), async (req
         res.sendStatus(400);
         return;
     }
-    const body = req.body;
-    console.log("delete station request " + req.params.sid);
+    if (global.dev) {
+        console.log("delete station request " + req.params.sid);
+    }
     // Create Payment Method
     try {
         let tmp = await data_source_1.AppDataSource.getRepository(Station_1.Station).findOneOrFail({

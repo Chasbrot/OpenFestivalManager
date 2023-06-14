@@ -28,6 +28,7 @@ if (!serverConfig) {
   printHelpText();
   process.exit(0);
 }
+
 if (serverConfig.DEV) {
   console.log("Active server configuration:")
   console.log(serverConfig)
@@ -47,7 +48,10 @@ const app: Express = express();
 
 // Development enviroment variable
 if (serverConfig.DEV) {
+  global.dev = true;
   console.log("Starting Server in Development Mode!!");
+} else {
+  global.dev = false;
 }
 
 // Enable Compression

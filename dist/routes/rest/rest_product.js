@@ -138,7 +138,10 @@ router.put("/", (0, express_validator_1.body)("name").isString(), (0, express_va
         return;
     }
     const body = req.body;
-    console.log(req.body);
+    if (global.dev) {
+        console.log("create new product request");
+        console.log(req.body);
+    }
     let tmp;
     try {
         // Create new product required

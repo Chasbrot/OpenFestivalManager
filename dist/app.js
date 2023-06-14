@@ -32,7 +32,11 @@ if (serverConfig.DEV) {
 const app = (0, express_1.default)();
 // Development enviroment variable
 if (serverConfig.DEV) {
+    global.dev = true;
     console.log("Starting Server in Development Mode!!");
+}
+else {
+    global.dev = false;
 }
 // Enable Compression
 app.use(compression());

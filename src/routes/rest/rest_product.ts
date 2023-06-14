@@ -164,7 +164,11 @@ router.put(
       return;
     }
     const body = req.body;
-    console.log(req.body);
+    if (global.dev) {
+      console.log("create new product request")
+      console.log(req.body);
+    }
+    
     let tmp;
     try {
       // Create new product required

@@ -111,7 +111,7 @@ router.get("/statistics", async (_req, res) => {
 });
 /* GET configuration page */
 router.get("/configuration", async (req, res) => {
-    res.render("admin/admin_configuration.ejs");
+    res.render("admin/configuration/admin_configuration.ejs");
 });
 /* GET orderdata page */
 router.get("/orderdata", async function (_req, res) {

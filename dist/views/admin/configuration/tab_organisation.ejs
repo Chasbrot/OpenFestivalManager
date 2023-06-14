@@ -1,0 +1,157 @@
+<div class="tab-pane fade" id="v-pills-organization" role="tabpanel"
+                            aria-labelledby="v-pills-organization-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    Stationen
+                                    <div class="float-end" v-if="stations">
+                                        {{stations.length}}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="basic-addon1">Neue Station:</span>
+                                        </div>
+                                        <input type="text" class="form-control" name="new_station"
+                                            placeholder="Name der neuen Station" v-model="newStationName" required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary"
+                                                @click="this.createStation()">Anlegen</button>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="list-group overflow-auto" style="max-height: 150px" id="stations">
+                                        <template v-for="s in stations">
+                                            <div class="list-group-item">
+                                                {{s.name}}
+                                                <div class="float-end">
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="removeStation(s.id)">X</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div class="list-group-item" v-if="stations.length===0">
+                                            Keine Stationen gefunden
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="card">
+                                <div class="card-header">
+                                    Alarm Typen
+                                    <div class="float-end" v-if="alertTypes">
+                                        {{alertTypes.length}}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="basic-addon1">Neuer Alarmtyp:</span>
+                                        </div>
+                                        <input type="text" class="form-control" name="newAlertType"
+                                            placeholder="Name des Alarm Typen" v-model="newAlertTypeName" required>
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary"
+                                                @click="this.createAlertType()">Anlegen</button>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="list-group overflow-auto" id="alerttypes" style="max-height: 200px">
+                                        <template v-for="at in alertTypes">
+                                            <div class="list-group-item">
+                                                {{at.name}}
+                                                <div class="float-end">
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="removeAT(at.id)">X</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div class="list-group-item" v-if="alertTypes.length===0">
+                                            Keine AlarmTypen gefunden
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="card">
+                                <div class="card-header">
+                                    Produktkategorien
+                                    <div class="float-end" v-if="productCategories">
+                                        {{productCategories.length}}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="basic-addon1">Neue Kategorie:</span>
+                                        </div>
+                                        <input type="text" class="form-control" name="newCategory"
+                                            placeholder="Name der Kategorie" v-model="newPCName" required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary"
+                                                @click="this.createProductCategory()">Anlegen</button>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="list-group overflow-auto" id="categories" style="max-height: 200px">
+                                        <template v-for="pc in productCategories">
+                                            <div class="list-group-item">
+                                                {{pc.name}}
+                                                <div class="float-end">
+                                                    <button class="btn btn-danger btn-sm"
+                                                        @click="removePC(pc.id)">X</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div class="list-group-item" v-if="productCategories.length===0">
+                                            Keine Produktkategorien gefunden
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="card">
+                                <div class="card-header">
+                                    Bezahloptionen
+                                    <div class="float-end" v-if="paymentMethods">
+                                        {{paymentMethods.length}}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="basic-addon1">Neue Option:</span>
+                                        </div>
+                                        <input type="text" class="form-control" name="newPaymentMethod"
+                                            placeholder="Name der Bezahloption" v-model="newPMName" required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary"
+                                                @click="this.createPaymentMethod()">Anlegen</button>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="list-group overflow-auto form-check" id="paymentmethods"
+                                        style="max-height: 200px">
+                                        <template v-for="pm in paymentMethods">
+                                            <div class="list-group-item">
+                                                {{pm.name}}
+                                                <div class="float-end">
+                                                    <input type="radio" class="btn-check" name="defaultPM" :id="pm.id"
+                                                        v-model="defaultMethod" :value="pm.id" autocomplete="off"
+                                                        @change="this.updateDefaultPM()">
+                                                    <label class="btn btn-outline-secondary btn-sm"
+                                                        :for="pm.id">Standard</label>
+                                                    <button class="btn btn-danger btn-sm" @click="removePM(pm.id)"
+                                                        :disabled="pm.id === defaultMethod">X</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div class="list-group-item" v-if="paymentMethods.length===0">
+                                            Keine Bezahloptionen gefunden
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                        </div>

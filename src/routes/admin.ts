@@ -7,13 +7,10 @@ import express, { Request, Response } from "express";
 import { body, validationResult } from "express-validator";
 import { Account } from "../entity/Account";
 import { createHash } from "crypto";
-import mysqldump from "mysqldump";
-import multer from "multer";
 import { db }  from "../database";
 import { Order } from "../entity/Order";
 import { State } from "../entity/State";
 import { Table } from "../entity/Table";
-let upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
 /* Check session and accounttype*/

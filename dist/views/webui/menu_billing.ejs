@@ -65,7 +65,7 @@
       </div>
       <br>
       <div class="d-grid gap-2">
-        <button v-if="sessionCloseable && !groupedOrders.size" class="btn btn-success btn-lg">
+        <button v-if="sessionCloseable && !groupedOrders.size" class="btn btn-success btn-lg" @click="closeCurrentSession() ">
           Sitzung beenden
         </button>
         <button v-if="!sessionCloseable && groupedOrders.size" @click="billPay()" :disabled="!getNumMapEntries(selectedOrders)" class="btn btn-primary btn-lg">

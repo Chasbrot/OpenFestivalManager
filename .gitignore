@@ -1,5 +1,4 @@
-﻿node_modules
-.vscode
+﻿.vscode
 .env
 uploads
 dist/entity
@@ -11,3 +10,17 @@ distofm_data.db
 ofm_data.db
 festivalmanager-linux-arm64
 .env
+node_modules/@*
+node_modules/[a-r,t-z]*
+node_modules/.bin
+node_modules/s[a-p,r-z]*
+node_modules/sql-formatter
+node_modules/sqlstring
+node_modules/sqlite3/deps
+node_modules/sqlite3/src
+node_modules/sqlite3/lib/[s,t]*
+node_modules/sqlite3/binding.gyp
+node_modules/sqlite3/LICENSE
+node_modules/sqlite3/package.json
+node_modules/sqlite3/README.md
+node_modules/.package-lock.json

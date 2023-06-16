@@ -180,6 +180,9 @@ router.post(
       res.sendStatus(400);
       return;
     }
+    console.log(req.body)
+    console.log(req.params.oid)
+    console.log(req.session.account)
     try {
       let order = await AppDataSource.getRepository(Order).findOneByOrFail({
         id: Number(req.params.oid),

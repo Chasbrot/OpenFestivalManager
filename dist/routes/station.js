@@ -51,10 +51,31 @@ router.post("/login", (0, express_validator_1.body)("username").isAlphanumeric()
         res.render("station/login_station", { err: "Cannot find station" });
         return;
     }
-    req.session.account = new Account_2.Account();
-    req.session.account.id = station.id;
-    req.session.account.accounttype = Account_1.AccountType.STATION;
+    // Check if station has an account
+    let sa = await data_source_1.AppDataSource.getRepository(Account_2.Account).findOneBy({
+        name: req.body.username,
+        accounttype: Account_1.AccountType.STATION,
+    });
+    // if no account found create new one
+    if (sa == null) {
+        console.log("station/login_station/createStationUser Creating missing station user");
+        sa = new Account_2.Account();
+        sa.name = station.name;
+        sa.accounttype = Account_1.AccountType.STATION;
+        sa.responsiblefor = [];
+        sa.responsiblefor.push(station);
+        try {
+            await data_source_1.AppDataSource.getRepository(Account_2.Account).insert(sa);
+        }
+        catch (err) {
+            console.log("station/login_station/createStationUser " + err);
+            res.render("station/login_station", { err: "Error creating user" });
+            return;
+        }
+    }
+    // Set session data
     req.session.station = station;
+    req.session.account = sa;
     res.redirect("/station/" + station.id);
 });
 /* GET station overview */

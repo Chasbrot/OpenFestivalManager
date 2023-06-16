@@ -41,8 +41,9 @@
                                     <table class="table">
                                         <thead>
                                             <tr>
+                                                <th scope="col">#</th>
                                                 <th scope="col">Name</th>
-                                                <th scope="col">Recht</th>
+                                                <th scope="col">Rolle</th>
                                                 <th scope="col">Zugriff</th>
                                                 <th scope="col">Neues Passwort</th>
                                                 <th scope="col"></th>
@@ -51,6 +52,9 @@
                                         <tbody>
                                             <template v-for="a in accounts">
                                                 <tr>
+                                                    <th scope="row">
+                                                        <span>{{a.id}}</span>
+                                                    </th>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text" v-if="!a.loginAllowed"><img
@@ -62,18 +66,19 @@
                                                     </td>
                                                     <td>
                                                         <select class="form-select" v-model="a.accounttype"
-                                                            @change="updateAccount(a)">
+                                                            @change="updateAccount(a)" :disabled="a.accounttype==2">
                                                             <option value="0">Admin</option>
                                                             <option value="1">Normal</option>
-                                                            <option value="2">Station</option>
+                                                            <option value="2" :disabled="true">Station</option>
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="checkbox" class="form-check-input"
-                                                            v-model="a.loginAllowed" @change="updateAccount(a)">
-                                                    </td>
+                                                            <input type="checkbox" class="btn-check" :id="'btn-login'+a.id" autocomplete="off" v-model="a.loginAllowed" @change="updateAccount(a)" :disabled="a.accounttype==2">
+                                                            <label v-if="a.loginAllowed" class="btn btn-success form-control" :for="'btn-login'+a.id">Aktiv</label>
+                                                            <label v-else class="btn btn-danger form-control" :for="'btn-login'+a.id">Gesperrt</label>
+                                                        </td>
                                                     <td>
-                                                        <div class="input-group">
+                                                        <div class="input-group" v-if="a.accounttype!=2">
                                                             <input type="text" class="form-control"
                                                                 v-model="a.password">
                                                             <button class="btn btn-primary btn-sm"
@@ -82,8 +87,8 @@
 
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-danger btn-sm"
-                                                            @click="removeAccount(a)">X</button>
+                                                        <button class="btn btn-danger form-control"
+                                                            @click="removeAccount(a)" :disabled="a.accounttype==2">X</button>
                                                     </td>
                                                 </tr>
                                             </template>

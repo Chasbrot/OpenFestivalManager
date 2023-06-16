@@ -197,6 +197,7 @@ export class db {
         // Create first initial state and save
         let state = new State(StateType.CREATED, a);
         state.order = order;
+        state.triggerer = a;
         AppDataSource.getRepository(State).save(state);
         // Save all ordered options to the order
         if (options) {
@@ -252,14 +253,20 @@ export class db {
     return new Promise<State>(async (resolve, reject) => {
       let n;
       try {
+        console.log("new Status: "+status)
         let old: State = await this.getOrderStatus(order);
+        console.log("old Status: "+old.statetype)
         if (old.statetype == status) {
           return reject("db/setOrderStatus: Order has already state " + status);
         }
         old.history = true;
         n = new State(status, _trigger);
         n.order = order;
+        console.log(old)
+        console.log(n)
+        console.log("saving updated old state")
         await AppDataSource.getRepository(State).save(old);
+        console.log("saving new state")
         await AppDataSource.getRepository(State).save(n);
       } catch (e) {
         return reject("db/setOrderStatus: Failed to query" + e);

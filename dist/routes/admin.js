@@ -9,8 +9,6 @@ const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
 const Account_2 = require("../entity/Account");
 const crypto_1 = require("crypto");
-const multer_1 = __importDefault(require("multer"));
-let upload = (0, multer_1.default)({ dest: "uploads/" });
 const router = express_1.default.Router();
 /* Check session and accounttype*/
 router.use(function (req, res, next) {

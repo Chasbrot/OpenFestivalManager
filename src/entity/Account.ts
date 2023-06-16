@@ -46,7 +46,7 @@ export class Account {
   })
   loginAllowed: boolean;
 
-  @OneToMany(() => Station, (station) => station.id)
+  @OneToMany(() => Account, (station) => station.id)
   responsiblefor: Station[];
 
   @OneToMany(() => Account, (order) => order.id)

@@ -45,7 +45,7 @@ router.use(function (req, res, next) {
 router.get("/login", function (req, res) {
   if (req.session.account?.accounttype == AccountType.STATION) {
     // Redirect tp mainpage if station session exists
-    res.redirect("/station/"+req.session.station!.id);
+    res.redirect("/station/" + req.session.station!.id);
   } else {
     res.render("station/login_station", { err: "" });
   }
@@ -67,14 +67,34 @@ router.post(
       res.render("station/login_station", { err: "Cannot find station" });
       return;
     }
-    req.session.account = new Account();
-    req.session.account.id = station.id;
-    req.session.account.accounttype = AccountType.STATION;
+    // Check if station has an account
+    let sa = await AppDataSource.getRepository(Account).findOneBy({
+      name: req.body.username,
+      accounttype: AccountType.STATION,
+    });
+    // if no account found create new one
+    if (sa == null) {
+      console.log("station/login_station/createStationUser Creating missing station user")
+      sa = new Account();
+      sa.name = station.name
+      sa.accounttype = AccountType.STATION;
+      sa.responsiblefor=[]
+      sa.responsiblefor.push(station)
+      try {
+        await AppDataSource.getRepository(Account).insert(sa)
+      } catch (err) {
+        console.log("station/login_station/createStationUser " + err)
+        res.render("station/login_station", { err: "Error creating user" });
+        return;
+      }
+    }
+    // Set session data
     req.session.station = station;
+    req.session.account = sa;
+
     res.redirect("/station/" + station.id);
   }
 );
-
 
 /* GET station overview */
 router.get("/:sid", param("sid").isInt(), async function (req, res) {

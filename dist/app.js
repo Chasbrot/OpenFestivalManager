@@ -24,19 +24,21 @@ if (!serverConfig) {
     printHelpText();
     process.exit(0);
 }
+// Development enviroment variable
 if (serverConfig.DEV) {
+    global.dev = true;
+    console.log("Starting Server in Development Mode!!");
     console.log("Active server configuration:");
     console.log(serverConfig);
+}
+else {
+    global.dev = false;
 }
 // Create express app
 const app = (0, express_1.default)();
 // Development enviroment variable
 if (serverConfig.DEV) {
-    global.dev = true;
     console.log("Starting Server in Development Mode!!");
-}
-else {
-    global.dev = false;
 }
 // Enable Compression
 app.use(compression());
@@ -119,10 +121,12 @@ app.use("/webui", webuiRouter);
 // and "synchronize" database schema, call "initialize()" method of a newly created database
 // once in your application bootstrap
 // Create DataSource from file
-if (!data_source_1.ds.createADSSQLite(serverConfig.DB_PATH)) {
-    console.log("[server]: Failed to start database backend driver");
-    process.exit(1);
-}
+data_source_1.ds.createADSSQLite(serverConfig.DB_PATH).then((e) => {
+    if (!e) {
+        console.log("[server]: Failed to start database backend driver");
+        process.exit(1);
+    }
+});
 try {
     let port = serverConfig.PORT;
     let version = serverConfig.VERSION;
@@ -159,7 +163,7 @@ catch (err) {
 }
 //// Functions
 function printHelpText() {
-    console.log("useage: festivalmanager [options] --dbpath PATH_TO_DB_FILE");
+    console.log("usage: festivalmanager [options] --dbpath PATH_TO_DB_FILE");
     console.log("  options:");
     console.log("    -p --port         Port the server listens to");
     console.log("    --rest_cache_time The time (in s) rest requests are cached by the client");
@@ -179,7 +183,7 @@ function readCommandLineOptions() {
         KEY: "",
         CERT: "",
         DB_PATH: "",
-        VERSION: "2.0.0"
+        VERSION: "2.0.1"
     };
     // Read command line arguments
     let argv = require("minimist")(process.argv.slice(2));
@@ -196,9 +200,10 @@ function readCommandLineOptions() {
         }
         try {
             defaultConfig.PORT = Number(process.env.PORT);
-            defaultConfig.DEV = Boolean(process.env.DEVELOPMENT);
+            /// WHY JS?? Are we in kindergarden or what?
+            defaultConfig.DEV = process.env.DEVELOPMENT == "false" ? false : true;
             defaultConfig.REST_CACHE_TIME = Number(process.env.REST_CACHE_TIME);
-            defaultConfig.SECURE = Boolean(process.env.SECURE);
+            defaultConfig.SECURE = process.env.SECURE == "false" ? false : true;
             // Why do i need to do this? How thought this was a good idea? Fuck JS
             if (process.env.KEY) {
                 defaultConfig.KEY = String(process.env.KEY);

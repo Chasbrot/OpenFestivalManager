@@ -12,7 +12,6 @@ var Account_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Account = exports.AccountType = void 0;
 const typeorm_1 = require("typeorm");
-const Station_1 = require("./Station");
 const State_1 = require("./State");
 const Bill_1 = require("./Bill");
 const Session_1 = require("./Session");
@@ -56,7 +55,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Account.prototype, "loginAllowed", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Station_1.Station, (station) => station.id),
+    (0, typeorm_1.OneToMany)(() => Account_1, (station) => station.id),
     __metadata("design:type", Array)
 ], Account.prototype, "responsiblefor", void 0);
 __decorate([

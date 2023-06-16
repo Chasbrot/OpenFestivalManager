@@ -157,6 +157,9 @@ router.post("/:oid/state", (0, express_validator_1.param)("oid").isInt(), (0, ex
         res.sendStatus(400);
         return;
     }
+    console.log(req.body);
+    console.log(req.params.oid);
+    console.log(req.session.account);
     try {
         let order = await data_source_1.AppDataSource.getRepository(Order_1.Order).findOneByOrFail({
             id: Number(req.params.oid),

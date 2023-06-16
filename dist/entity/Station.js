@@ -29,7 +29,7 @@ __decorate([
     __metadata("design:type", String)
 ], Station.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Station_1, (station) => station.responsible),
+    (0, typeorm_1.ManyToOne)(() => Account_1.Account, (account) => account.responsiblefor),
     __metadata("design:type", Account_1.Account)
 ], Station.prototype, "responsible", void 0);
 __decorate([

@@ -252,9 +252,10 @@ function readCommandLineOptions() {
     }
     try {
       defaultConfig.PORT = Number(process.env.PORT);
-      defaultConfig.DEV = Boolean(process.env.DEVELOPMENT);
+      /// WHY JS?? Are we in kindergarden or what?
+      defaultConfig.DEV = process.env.DEVELOPMENT=="false"?false:true;
       defaultConfig.REST_CACHE_TIME = Number(process.env.REST_CACHE_TIME);
-      defaultConfig.SECURE = Boolean(process.env.SECURE);
+      defaultConfig.SECURE = process.env.SECURE=="false"?false:true;
       // Why do i need to do this? How thought this was a good idea? Fuck JS
       if (process.env.KEY) {
         defaultConfig.KEY = String(process.env.KEY);

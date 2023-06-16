@@ -186,6 +186,7 @@ class db {
                 // Create first initial state and save
                 let state = new State_1.State(State_1.StateType.CREATED, a);
                 state.order = order;
+                state.triggerer = a;
                 data_source_1.AppDataSource.getRepository(State_1.State).save(state);
                 // Save all ordered options to the order
                 if (options) {
@@ -236,14 +237,20 @@ class db {
         return new Promise(async (resolve, reject) => {
             let n;
             try {
+                console.log("new Status: " + status);
                 let old = await this.getOrderStatus(order);
+                console.log("old Status: " + old.statetype);
                 if (old.statetype == status) {
                     return reject("db/setOrderStatus: Order has already state " + status);
                 }
                 old.history = true;
                 n = new State_1.State(status, _trigger);
                 n.order = order;
+                console.log(old);
+                console.log(n);
+                console.log("saving updated old state");
                 await data_source_1.AppDataSource.getRepository(State_1.State).save(old);
+                console.log("saving new state");
                 await data_source_1.AppDataSource.getRepository(State_1.State).save(n);
             }
             catch (e) {

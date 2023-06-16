@@ -10,3 +10,4 @@ key.pem
 distofm_data.db
 ofm_data.db
 festivalmanager-linux-arm64
+.env

@@ -12,7 +12,7 @@ export class Station {
     })
     name: string
 
-    @ManyToOne(()=> Station, (station)=>station.responsible)
+    @ManyToOne(()=> Account, (account)=>account.responsiblefor)
     responsible: Account
 
     @OneToMany(() => Station, (product) => product.id)
@@ -20,6 +20,6 @@ export class Station {
 
     constructor(name: string) {
         this.name = name;
-      }
+    }
 
 }

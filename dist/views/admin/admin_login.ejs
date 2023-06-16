@@ -1,40 +1,57 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <title>Login Admin</title>
   <%- include('../header_common') %>
 </head>
+
 <body>
 
   <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/">Home</a>
+      <a class="navbar-brand" href="/">Home</a>
     </div>
-</nav>
-<br>
+  </nav>
+  <br>
 
-<div class="container">
-  <h2>Festl Order Managment Console</h2>
-  <h3>Administrator Login</h3>
-  <form action="#" method="POST">
-    <div class="form-group">
-      <label for="username">User:</label>
-      <input type="text" class="form-control" id="username" placeholder="Benutzer eingeben" name="username">
-      <label for="password">Password:</label>
-      <input type="password" class="form-control" id="password" placeholder="Password eingeben" name="password">
-    </div>
-    <br>
-    <% if(err){ %>
-      <div class="alert alert-danger" role="alert">
-        Wrong user or password!
+  <div class="container">
+    <h2>Festl Order Managment Console</h2>
+    <h3>Administrator Login</h3>
+    <form action="#" method="POST">
+
+
+      <% if(!err){ %>
+
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="username" placeholder="Benutzernamen eingeben" name="username">
+        <label for="username">Benutzername</label>
       </div>
-    <% } %>
-    
-    <div class="text-center d-grid gap-2">
+      <div class="form-floating">
+        <input type="password" class="form-control" id="password" placeholder="Passwort eingeben" name="password">
+        <label for="password">Passwort</label>
+      </div>
+
+      <% }else{ %>
+
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control is-invalid" id="username" placeholder="Name eingeben" name="username">
+        <label for="username">Benutzername</label>
+      </div>
+      <div class="form-floating">
+        <input type="text" class="form-control is-invalid" id="password" placeholder="Passwort eingeben" name="password">
+        <label for="password">Passwort</label>
+      </div>
+
+      <% } %>
+      <br>
+
+      <div class="text-center d-grid gap-2">
         <button type="submit" class="btn btn-primary btn-block">Login</button>
-    </div>
-  </form>
-</div>
+      </div>
+    </form>
+  </div>
 
 </body>
+
 </html>

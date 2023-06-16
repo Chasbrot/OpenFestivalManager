@@ -17,15 +17,17 @@
   <h2>Login Station</h2>
   <h3>Bitte anmelden.</h3>
   <form action="login" method="POST">
-    <div class="form-group">
-      <label for="username">Station:</label>
-      <input type="text" class="form-control" id="username" placeholder="Station eingeben" name="username">
+    <div class="form-floating mb-3">
+
+    <% if(err==""){ %>
+      <input type="text" class="form-control" id="username" placeholder="Stationsnamen eingeben" name="username">
+      <label for="username">Stationsname</label>
+      <% }else{ %>
+      <input type="text" class="form-control is-invalid" id="floatingInputInvalid" placeholder="Stationsnamen eingeben" name="username">
+      <label for="username"><%=err%></label>
+      <% } %>
     </div>
-    <% if(err != ""){ %>
-      <div class="alert alert-danger" role="alert">
-        <%=err%>
-      </div>
-    <% } %>
+      
     <br>
     <div class="text-center d-grid gap-2">
         <button type="submit" class="btn btn-primary btn-block">Login</button>

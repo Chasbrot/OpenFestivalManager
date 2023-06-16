@@ -48,7 +48,7 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <table class="table" v-if="products.length !== 0">
+                                    <table class="table table-hover" v-if="products.length !== 0">
                                         <thead>
                                             <tr>
                                                 <th scope="col">#</th>
@@ -91,7 +91,7 @@
                                         </thead>
                                         <tbody>
                                             <template v-for="p in products">
-                                                <tr>
+                                                <tr  @click="showProductDetails(p)">
                                                     <th scope="row">{{p.id}}</th>
                                                     <td>{{p.name}}</td>
                                                     <td>{{p.producer.name}}</td>
@@ -115,9 +115,7 @@
                                                     <td>{{p.variations.length}}</td>
                                                     <td>{{p.ingredients.length}}</td>
                                                     <td>
-                                                        <button class="btn btn-secondary btn-sm"
-                                                            @click="showProductDetails(p)">?</button>
-                                                        <button class="btn btn-danger btn-sm"
+                                                        <button class="btn btn-danger form-control"
                                                             @click="removeProduct(p.id)">X</button>
                                                     </td>
                                                 </tr>

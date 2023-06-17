@@ -183,7 +183,8 @@ function readCommandLineOptions() {
         KEY: "",
         CERT: "",
         DB_PATH: "",
-        VERSION: "2.0.1"
+        VERSION: "2.0.5",
+        NO_CACHE: false
     };
     // Read command line arguments
     let argv = require("minimist")(process.argv.slice(2));
@@ -201,9 +202,11 @@ function readCommandLineOptions() {
         try {
             defaultConfig.PORT = Number(process.env.PORT);
             /// WHY JS?? Are we in kindergarden or what?
-            defaultConfig.DEV = process.env.DEVELOPMENT == "false" ? false : true;
-            defaultConfig.REST_CACHE_TIME = Number(process.env.REST_CACHE_TIME);
-            defaultConfig.SECURE = process.env.SECURE == "false" ? false : true;
+            defaultConfig.DEV = process.env.DEVELOPMENT == "true" ? true : false;
+            if (Number.isNaN(Number(process.env.REST_CACHE_TIME))) {
+                defaultConfig.REST_CACHE_TIME = Number(process.env.REST_CACHE_TIME);
+            }
+            defaultConfig.SECURE = process.env.SECURE == "true" ? true : false;
             // Why do i need to do this? How thought this was a good idea? Fuck JS
             if (process.env.KEY) {
                 defaultConfig.KEY = String(process.env.KEY);

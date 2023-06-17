@@ -4,60 +4,72 @@
 <head>
     <title>Admin Konsole</title>
     <%- include('../../header_common') %>
+    <style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .card-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .card-body {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
 </head>
 
 <body>
 
     <%- include('../admin_navbar') %>
-        <br>
-        <div id="app">
-            <div class="row px-2 d-flex align-items-start">
-                <div class="col-2" style="max-width: 200px">
-                    <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist"
-                        aria-orientation="vertical">
-                        <button class="nav-link active" id="v-pills-tables-tab" data-bs-toggle="pill"
-                            data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
-                            aria-selected="true" >Tische</button>
-                        <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
-                            data-bs-target="#v-pills-organization" type="button" role="tab"
-                            aria-controls="v-pills-organization" aria-selected="true"
-                            >Organisation</button>
-                        <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
-                            data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
-                            aria-selected="true" >Produkte</button>
-                        <button class="nav-link" id="v-pills-users-tab" data-bs-toggle="pill"
-                            data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-users"
-                            aria-selected="true" >Benutzer</button>
-                    </div>
-                </div>
-                <div class="col-10">
-                    <div class="tab-content" id="v-pills-tabContent">
-                        <%- include('tab_tables') %>
-                        <%- include('tab_organisation') %>
-                        <%- include('tab_products') %>
-                        <%- include('tab_users') %>
-                    </div>
+    <br>
+    <div id="app">
+        <div class="row px-2 d-flex align-items-start">
+            <div class="col-2" style="max-width: 200px">
+                <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <button class="nav-link active" id="v-pills-tables-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-tables" type="button" role="tab" aria-controls="v-pills-tables"
+                        aria-selected="true">Tische</button>
+                    <button class="nav-link" id="v-pills-organization-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-organization" type="button" role="tab"
+                        aria-controls="v-pills-organization" aria-selected="true">Organisation</button>
+                    <button class="nav-link" id="v-pills-products-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-products" type="button" role="tab" aria-controls="v-pills-products"
+                        aria-selected="true">Produkte</button>
+                    <button class="nav-link" id="v-pills-users-tab" data-bs-toggle="pill"
+                        data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-users"
+                        aria-selected="true">Benutzer</button>
                 </div>
             </div>
-
-            <!-- Product Detail Modal -->
-            <%- include('modal_productdetail') %>
-
-
+            <div class="col-10">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <%- include('tab_tables') %>
+                    <%- include('tab_organisation') %>
+                    <%- include('tab_products') %>
+                    <%- include('tab_users') %>
+                </div>
+            </div>
         </div>
 
-        <!-- Error Modal -->
-        <%- include('../../errorModal') %>
+        <!-- Product Detail Modal -->
+        <%- include('modal_productdetail') %>
 
-            <script>
-                // Initialize all tooltips at load
-                $(document).ready(function () {
-                    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-                    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
-                        tooltipTriggerEl))
-                    $('[data-toggle="tooltip"]').tooltip();
-                });
-            </script>
+
+    </div>
+
+    <!-- Error Modal -->
+    <%- include('../../errorModal') %>
+
+    <script>
+        // Initialize all tooltips at load
+        $(document).ready(function () {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
+                tooltipTriggerEl))
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
 
 </body>
 
@@ -138,13 +150,14 @@
         },
 
         // Update data on changes
+        /*
         watch: {
             async selectedTableGroup(nTG, oTG) {
                 this.tables = await dm.loadTablesFromTableGroup(
                     this.selectedTableGroup
                 );
             },
-        },
+        },*/
 
         methods: {
             async loadData() {
@@ -157,7 +170,11 @@
                 dm.loadProducts().then(r=>this.products=r);
                 dm.loadAccounts().then(r=>this.accounts=r);
                 dm.loadRegActive().then(r=>this.registrationActive=r.registrationactive);
-                dm.loadDefaultPM().then(r=>this.defaultMethod=r.id);
+                dm.loadDefaultPM().then(r=>{
+                    if(r){
+                        this.defaultMethod=r.id
+                    }
+                });
             },
 
             async createTableGroup() {
@@ -179,11 +196,42 @@
                 if (!this.newTableNumber) {
                     return;
                 }
-                if(id!=-1){
-                    await dm.createTable(id, this.newTableNumber)
-                }else{
-                    await dm.createTable(this.selectedTableGroup.id, this.newTableNumber)
+                
+                // Check if Table number has valid format
+                const regex = new RegExp('^[A-Z][0-9]+$|^[A-Z][0-9]+\-[0-9]+$');
+                let tname = this.newTableNumber
+                if(!regex.test(tname)){
+                    // Regex failed set input false
+                    hlp.makeError("Invalid name format")
+                    return;
                 }
+                // Check if range is present
+                const rangepos = tname.search("-")
+                if(rangepos==-1){
+                    // no range specified -> create table
+                    if(id!=-1){
+                        await dm.createTable(id, this.newTableNumber)
+                    }else{
+                        await dm.createTable(this.selectedTableGroup.id, this.newTableNumber)
+                    }
+                }else{
+                    // range specified -> extract range and prefix
+                    const prefix = tname.substring(0,1)
+                    const start = parseInt(tname.substring(1,rangepos))
+                    const end = parseInt(tname.substring(rangepos+1))
+                    console.log(start)
+                    console.log(end)
+                    console.log(prefix)
+                    for(let i=start; i<=end; i++){
+                        if(id!=-1){
+                            await dm.createTable(id, prefix+i)
+                        }else{
+                            await dm.createTable(this.selectedTableGroup.id, prefix+i)
+                        }
+                    }
+
+                }
+
                 
                 this.tables = await dm.loadTablesFromTableGroup(this.selectedTableGroup);
                 this.newTableNumber = "";
@@ -193,6 +241,7 @@
             async removeTable(id) {
                 await dm.removeTable(id)
                 this.tables = await dm.loadTablesFromTableGroup(this.selectedTableGroup);
+                dm.loadTableGroups().then(r=>this.tableGroups=r);
             },
 
             async createStation() {

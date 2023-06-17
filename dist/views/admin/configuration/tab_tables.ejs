@@ -1,52 +1,14 @@
 <div class="tab-pane fade show active" id="v-pills-tables" role="tabpanel" aria-labelledby="v-pills-tables-tab">
   <div class="card">
     <div class="card-header">
-      Tischgruppen
-      <div class="float-end" v-if="tableGroups">
-        {{tableGroups.length}}
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="basic-addon1">Neue Tischgruppe:</span>
-        </div>
-        <input type="text" class="form-control" placeholder="Name der Gruppe" v-model="newTableGroupName" required>
-        <div class="input-group-append">
-          <button type="submit" class="btn btn-primary" @click="createTableGroup()">Anlegen</button>
-        </div>
-      </div>
-      <br>
-      <div class="list-group overflow-auto" style="max-height: 150px">
-        <template v-for="tg in tableGroups">
-          <div class="list-group-item">
-            {{tg.name}}
-            <div class="float-end">
-              <button class="btn btn-danger btn-sm" @click="this.removeTableGroup(tg.id)">
-                X
-              </button>
-            </div>
-        </template>
-        <div v-if="!tableGroups" class="list-group-item">
-          Keine Tisch Gruppen definiert
-        </div>
-      </div>
-    </div>
-  </div>
-  <br>
-  <div class="card">
-    <div class="card-header">
       Tische
-      <div class="float-end" v-if="tables">
-        {{tables.length}}
-      </div>
     </div>
     <div class="card-body">
       <div class="input-group">
         <div class="input-group-prepend">
           <span class="input-group-text" id="basic-addon1">Neuer Tisch:</span>
         </div>
-        <select class="form-control" required v-model="selectedTableGroup">
+        <select class="form-control" required v-model="selectedTableGroup" >
           <option v-for="tg in tableGroups" :value="tg">
             {{ tg.name }}
           </option>
@@ -59,56 +21,63 @@
           <button @click="createTable(-1)" class="btn btn-primary">Anlegen</button>
         </div>
       </div>
-      <br>
-      <div class="list-group overflow-auto" id="tables_tablegroup" style="max-height: 150px">
-        <template v-for="t in tables">
-          <div class="list-group-item">
-            {{t.name}}
-            <div class="float-end">
-              <button class="btn btn-danger btn-sm" @click="this.removeTable(t.id)">
-                X
-              </button>
-            </div>
-        </template>
-        <div v-if="tables && tables.length===0" class="list-group-item">
-          Keine Tische vorhanden
-        </div>
-      </div>
+      <div class="form-text">Beispiel: A1, G7, A1-7, G1-9</div>
     </div>
   </div>
 
-  <!--
+  
   <br>
-  <div class="row row-cols-1 row-cols-md-4 g-4">
+  <div class="row row-cols-1 row-cols-md-5 g-4">
     
     <template v-for="tg in tableGroups">
       <div class="col">
         <div class="card">
           <div class="card-header">
-            <h5 class="card-title text-center fw-semibold">{{tg.name}}</h5>
-          </div>
-          <div class="card-body">
+            <span class="card-title text-center fw-semibold">
+              {{tg.name}}
+            </span>
             
-            <div v-if="tg.tables.length" class="container text-center" >
-              <div class="row row-cols-auto">
-                <template v-for="t in tg.tables">
-                  <div class="col">
-                    <div class="card">
-                      <div class="card-body">
-                        {{t.name}}
-                      </div>
-                    </div>
-                  </div>
-                </template>
-              </div>
+            <button class="btn-close float-end" @click="this.removeTableGroup(tg.id)">
+            </button>
+            <div class="float-end pe-2" v-if="tg.tables && tg.tables.length">
+              {{tg.tables.length}}
             </div>
+          </div>
+          <div class="card-body px-0 py-1 overflow-auto" style="max-height:150px; ">
+            <ul v-if="tg.tables.length" class="list-group list-group-flush " >
+              <template v-for="t in tg.tables">
+                <li class="list-group-item">
+                  <span>{{t.name}}</span>
+                  <button class="btn-close float-end" @click="this.removeTable(t.id)">
+                  </button>
+                </li>
+              </template>
+            </ul>
             <div v-else>
-                <h6 class="text-center">Keine Tische</h6>
+                <h6 class="text-center py-2">Keine Tische</h6>
             </div>
           </div>
         </div>
       </div>
+      
     </template>
+    <!-- New table group card-->
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title text-center fw-semibold">
+            <input type="text" class="form-control" placeholder="Gruppenname" v-model="newTableGroupName" required>
+          </span>
+         
+        </div>
+        <div class="card-body">
+          
+            <button type="submit" class="btn btn-outline-secondary form-control" @click="createTableGroup()">
+              <img src="/gicons/add.svg" height="30" >
+            </button>
+        </div>
+      </div>
+    </div>
   </div>
--->
+
 </div>

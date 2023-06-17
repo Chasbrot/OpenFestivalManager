@@ -77,6 +77,12 @@ export default {
     */
     async makeError(message, request, error) {
         document.getElementById("errorMessage").innerHTML = message;
+        if(!request || !error){
+            // Hide detail info
+            document.getElementById("errorDebugInfo").style.visibility="hidden"
+        }else{
+            document.getElementById("errorDebugInfo").style.visibility="visible"
+        }
         document.getElementById("errorSource").innerHTML = request;
         document.getElementById("errorReason").innerHTML = error;
         var errorModal = new bootstrap.Modal(document.getElementById('errorModal'))

@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Table } from './Table';
 import { Account } from './Account';
 import { Product } from './Product';

@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { LockType } from "./../../entity/Product";
 import { db } from "./../../database";
 import { Product } from "../../entity/Product";

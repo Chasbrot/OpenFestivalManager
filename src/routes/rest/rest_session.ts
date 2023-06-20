@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { db } from "./../../database";
 import { Product } from "../../entity/Product";
 import { Ingredient } from "../../entity/Ingredient";

@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Account } from './Account';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm"
 import { Bill } from './Bill';

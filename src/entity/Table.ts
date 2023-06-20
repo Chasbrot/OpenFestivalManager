@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne } from "typeorm"
 import { Session } from "./Session";
 import { TableGroup } from './TableGroup';

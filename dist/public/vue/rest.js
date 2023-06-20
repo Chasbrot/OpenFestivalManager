@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import hlp from "/vue/helper.js";
 
 export default {

@@ -171,6 +171,7 @@ function printHelpText() {
     console.log("    --key             Key required for HTTPS");
     console.log("    --cert            Certificate required for HTTPS");
     console.log("    --dbpath          Path to the database");
+    console.log("    --nocache         Disables Caching");
     console.log("    ");
 }
 function readCommandLineOptions() {
@@ -258,6 +259,9 @@ function readCommandLineOptions() {
             else {
                 console.log("Path to Database required --dbpath");
                 return null;
+            }
+            if (argv.nocache) {
+                defaultConfig.NO_CACHE = argv.nocache == "true" ? true : false;
             }
         }
         catch (err) {

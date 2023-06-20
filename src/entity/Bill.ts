@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Session } from './Session';
 import { Account } from './Account';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne } from "typeorm"

@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { PaymentMethod } from './../../entity/PaymentMethod';
 import { ProductIngredient } from "../../entity/ProductIngredient";
 import { db } from "../../database";

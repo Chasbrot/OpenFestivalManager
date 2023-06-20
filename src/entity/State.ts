@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Request } from "express";
 import { Table } from "./Table";
 import { Account } from "./Account";

@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 // Imports
 // -- Data Model and Application Data
 import { Account } from "entity/Account";
@@ -20,6 +21,9 @@ var os = require("os");
 // -- Security Imports
 import helmet from "helmet";
 const https = require("https");
+
+console.log("Welcome to OpenFestivalManager!");
+console.log("Copyright Michael Selinger 2023");
 
 // Read Command Line and setup configuration
 let serverConfig = readCommandLineOptions();
@@ -222,6 +226,7 @@ function printHelpText() {
   console.log("    --key             Key required for HTTPS")
   console.log("    --cert            Certificate required for HTTPS")
   console.log("    --dbpath          Path to the database")
+  console.log("    --nocache         Disables Caching")
   console.log("    ")
 }
 
@@ -235,7 +240,8 @@ function readCommandLineOptions() {
     KEY: "",
     CERT: "",
     DB_PATH: "",
-    VERSION: "2.0.1"
+    VERSION: "2.0.5",
+    NO_CACHE: false
   };
   // Read command line arguments
   let argv = require("minimist")(process.argv.slice(2));
@@ -253,9 +259,11 @@ function readCommandLineOptions() {
     try {
       defaultConfig.PORT = Number(process.env.PORT);
       /// WHY JS?? Are we in kindergarden or what?
-      defaultConfig.DEV = process.env.DEVELOPMENT=="false"?false:true;
-      defaultConfig.REST_CACHE_TIME = Number(process.env.REST_CACHE_TIME);
-      defaultConfig.SECURE = process.env.SECURE=="false"?false:true;
+      defaultConfig.DEV = process.env.DEVELOPMENT=="true"?true:false;
+      if(Number.isNaN(Number(process.env.REST_CACHE_TIME))){
+        defaultConfig.REST_CACHE_TIME = Number(process.env.REST_CACHE_TIME);
+      }
+      defaultConfig.SECURE = process.env.SECURE=="true"?true:false;
       // Why do i need to do this? How thought this was a good idea? Fuck JS
       if (process.env.KEY) {
         defaultConfig.KEY = String(process.env.KEY);
@@ -303,6 +311,9 @@ function readCommandLineOptions() {
       } else {
         console.log("Path to Database required --dbpath")
         return null
+      }
+      if (argv.nocache) {
+        defaultConfig.NO_CACHE = argv.nocache=="true"?true:false;
       }
     } catch (err) {
       console.log("Invalid coniguration data");

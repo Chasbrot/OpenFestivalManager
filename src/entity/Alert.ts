@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { AlertType } from './AlertType';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, CreateDateColumn } from "typeorm"
 import { Station } from './Station';

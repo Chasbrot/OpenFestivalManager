@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, Double, ManyToMany, JoinTable } from "typeorm"
 import { Ingredient } from "./Ingredient";
 import { Product } from "./Product";

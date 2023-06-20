@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Session } from "./../entity/Session";
 import { Category } from "./../entity/Category";
 import { TableGroup } from "../entity/TableGroup";

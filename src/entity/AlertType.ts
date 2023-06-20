@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Alert } from "./Alert";
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 

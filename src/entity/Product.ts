@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import {
   Entity,
   Column,

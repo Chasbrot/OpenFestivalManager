@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, Double } from "typeorm"
 import { Category } from "./Category";
 import { Order } from "./Order";

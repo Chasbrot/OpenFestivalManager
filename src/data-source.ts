@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import "reflect-metadata";
 import { DatabaseType, DataSource, DataSourceOptions } from "typeorm";
 

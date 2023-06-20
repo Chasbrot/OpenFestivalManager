@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { stat } from "fs/promises";
 import { Ingredient } from "./../entity/Ingredient";
 import { Variation } from "./../entity/Variation";

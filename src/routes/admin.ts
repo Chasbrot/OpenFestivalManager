@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { PaymentMethod } from './../entity/PaymentMethod';
 import { Category } from './../entity/Category';
 import { TableGroup } from "../entity/TableGroup";

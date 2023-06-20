@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Variation } from "./entity/Variation";
 import { ProductIngredient } from "./entity/ProductIngredient";
 import { Category } from "./entity/Category";

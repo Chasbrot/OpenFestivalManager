@@ -1,3 +1,4 @@
+// Copyright Michael Selinger 2023
 import { Account } from './Account';
 import { Product } from './Product';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, Double, ManyToMany, JoinTable, UsingJoinColumnIsNotAllowedError } from "typeorm"

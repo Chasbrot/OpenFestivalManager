@@ -47,6 +47,9 @@ The webserver should start.
 Please refer to the wiki.<br>
 [Wiki Link](https://github.com/Chasbrot/OpenFestivalManager/wiki)
 
+## Licence
+Anyone can use the source code and packged executeable for their personal and non-profit use (a business can use it for their own but not sell it or sell it as a service) as intended. Any modifications or integrations into other projects/software are only allowed after explicit authorization. Copyright Michael Selinger 2023
+
 ## Authors 
 Michael Selinger<br>
 ~~Julian Springer~~<br>

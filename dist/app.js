@@ -18,6 +18,8 @@ var os = require("os");
 // -- Security Imports
 const helmet_1 = __importDefault(require("helmet"));
 const https = require("https");
+console.log("Welcome to OpenFestivalManager!");
+console.log("Copyright Michael Selinger 2023");
 // Read Command Line and setup configuration
 let serverConfig = readCommandLineOptions();
 if (!serverConfig) {
@@ -184,7 +186,7 @@ function readCommandLineOptions() {
         KEY: "",
         CERT: "",
         DB_PATH: "",
-        VERSION: "2.0.5",
+        VERSION: "2.0.7",
         NO_CACHE: false
     };
     // Read command line arguments

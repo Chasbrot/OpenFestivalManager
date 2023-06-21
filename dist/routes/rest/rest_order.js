@@ -49,13 +49,14 @@ router.get("/open", async (req, res) => {
                 states: true,
             },
             where: {
-                // Which are NOT finished
+                // Which are NOT finished, canceled or closed
                 states: {
                     history: false,
-                    statetype: (0, typeorm_1.Not)(State_1.StateType.CLOSED || State_1.StateType.CANCELED),
+                    statetype: (0, typeorm_1.Not)(State_1.StateType.CLOSED || State_1.StateType.CANCELED || State_1.StateType.FINISHED),
                 },
             },
         });
+        console.log(JSON.stringify(o));
         res.json(o);
     }
     catch (e) {

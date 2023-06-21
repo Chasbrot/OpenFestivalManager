@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Product = exports.LockType = void 0;
+// Copyright Michael Selinger 2023
 const typeorm_1 = require("typeorm");
 const Category_1 = require("./Category");
 const Station_1 = require("./Station");

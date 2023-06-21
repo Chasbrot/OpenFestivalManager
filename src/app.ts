@@ -240,7 +240,7 @@ function readCommandLineOptions() {
     KEY: "",
     CERT: "",
     DB_PATH: "",
-    VERSION: "2.0.6",
+    VERSION: "2.0.7",
     NO_CACHE: false
   };
   // Read command line arguments

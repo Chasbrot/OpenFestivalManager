@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// Copyright Michael Selinger 2023
 const Product_1 = require("./../../entity/Product");
 const database_1 = require("./../../database");
 const Product_2 = require("../../entity/Product");

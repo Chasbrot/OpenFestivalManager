@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var Alert_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Alert = void 0;
+// Copyright Michael Selinger 2023
 const AlertType_1 = require("./AlertType");
 const typeorm_1 = require("typeorm");
 const Station_1 = require("./Station");

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var Station_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Station = void 0;
+// Copyright Michael Selinger 2023
 const typeorm_1 = require("typeorm");
 const Account_1 = require("./Account");
 let Station = Station_1 = class Station {

@@ -60,13 +60,14 @@ router.get("/open", async (req: Request, res: Response) => {
         states: true,
       },
       where: {
-        // Which are NOT finished
+        // Which are NOT finished, canceled or closed
         states: {
           history: false,
-          statetype: Not(StateType.CLOSED || StateType.CANCELED),
+          statetype: Not(StateType.CLOSED || StateType.CANCELED || StateType.FINISHED),
         },
       },
     });
+    console.log(JSON.stringify(o))
     res.json(o);
   } catch (e) {
     console.log("rest/order/open GET: " + e);

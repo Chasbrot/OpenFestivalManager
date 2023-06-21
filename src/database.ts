@@ -194,11 +194,13 @@ export class db {
         order.orderedBy = a;
         order.product = p;
         order.session = s;
+        console.log(order)
         await AppDataSource.getRepository(Order).save(order);
         // Create first initial state and save
         let state = new State(StateType.CREATED, a);
         state.order = order;
         state.triggerer = a;
+        console.log(state)
         AppDataSource.getRepository(State).save(state);
         // Save all ordered options to the order
         if (options) {

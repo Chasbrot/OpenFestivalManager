@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var Account_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Account = exports.AccountType = void 0;
+// Copyright Michael Selinger 2023
 const typeorm_1 = require("typeorm");
 const State_1 = require("./State");
 const Bill_1 = require("./Bill");

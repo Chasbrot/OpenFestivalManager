@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// Copyright Michael Selinger 2023
 const ProductIngredient_1 = require("./../../entity/ProductIngredient");
 const Category_1 = require("./../../entity/Category");
 const Variation_1 = require("./../../entity/Variation");

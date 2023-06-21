@@ -241,6 +241,9 @@
           dm.closeSessionById(this.selectedSession.id).then(() => {
             this.fetchSessions()
             this.selectedSession = null
+            this.sortedOrders = []
+            this.finishedOrders = []
+            hlp.closeOffcanvas("oc_billing")
             hlp.openOffcanvas("oc_sessions")
           })
         },

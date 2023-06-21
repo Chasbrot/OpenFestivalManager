@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Variation = void 0;
+// Copyright Michael Selinger 2023
 const typeorm_1 = require("typeorm");
 const Order_1 = require("./Order");
 const Product_1 = require("./Product");

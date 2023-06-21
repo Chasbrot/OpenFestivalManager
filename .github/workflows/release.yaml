@@ -19,8 +19,11 @@ jobs:
       # Build .exe file and name it
       - name: Create package
         run: |
+           # install packages
            npm install
            npm install -g pkg
+           # enable vuejs production
+           cp dist/public/js/vue-prod-3.2.45.js dist/public/js/vue-3.2.45.js
            # s"--no-bytecode --public-packages "*" --public" workaround for https://github.com/vercel/pkg/issues/1663
            pkg package.json --no-bytecode --public-packages "*" --public
            mv festivalmanager-win-x64.exe festivalmanager-${{ github.ref_name }}.exe

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.db = void 0;
+// Copyright Michael Selinger 2023
 const Variation_1 = require("./entity/Variation");
 const ProductIngredient_1 = require("./entity/ProductIngredient");
 const Category_1 = require("./entity/Category");
@@ -182,11 +183,13 @@ class db {
                 order.orderedBy = a;
                 order.product = p;
                 order.session = s;
+                console.log(order);
                 await data_source_1.AppDataSource.getRepository(Order_1.Order).save(order);
                 // Create first initial state and save
                 let state = new State_1.State(State_1.StateType.CREATED, a);
                 state.order = order;
                 state.triggerer = a;
+                console.log(state);
                 data_source_1.AppDataSource.getRepository(State_1.State).save(state);
                 // Save all ordered options to the order
                 if (options) {

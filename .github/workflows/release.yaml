@@ -44,7 +44,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: festivalmanager-${{ github.ref_name }}.exe
           asset_name: festivalmanager-${{ github.ref_name }}.exe
-          tag: ${{ github.ref }}
+          tag: Release ${{ github.ref }}
           overwrite: true
           body: "This is the new release."
       # Upload linux file to github release
@@ -54,7 +54,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: festivalmanager-${{ github.ref_name }}
           asset_name: festivalmanager-${{ github.ref_name }}
-          tag: ${{ github.ref }}
+          tag: Release ${{ github.ref }}
           overwrite: true
           body: "This is the new release."
 

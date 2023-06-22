@@ -40,12 +40,12 @@
                     <div class="card-body" v-if="orderDates.length">
                         Datum:
                         <select class="form-control" v-model="selectedDayChart">
-                            <option value=""></option>
+                            <option value="" disabled></option>
                             <option v-for="d in orderDates" :value="d.day">
                                 {{ parseDate(d.day) }}
                             </option>
                         </select>
-                        <canvas id="lineChart"></canvas>
+                        <canvas v-if="selectedDayChart" id="lineChart"></canvas>
                     </div>
                     <div class="card-body" v-else>
                         <h5 class="text-center">Keine Daten</h5>
@@ -62,7 +62,7 @@
                                 <span class="input-group-text">Datum:</span>
                             </div>
                             <select class="form-select" v-model="selectedDaySold">
-                                <option value=""></option>
+                                <option value="" disabled></option>
                                 <option v-for="d in orderDates" :value="d.day">
                                     {{ parseDate(d.day) }}
                                 </option>
@@ -74,40 +74,55 @@
                                 <span class="input-group-text">Station:</span>
                             </div>
                             <select class="form-select" v-model="selectedStationSold">
-                                <option value=""></option>
+                                <option value="" disabled></option>
                                 <option v-for="s in stations" :value="s">
                                     {{ s.name }}
                                 </option>
                             </select>
                         </div>
-                        
+
                     </div>
-                    <br v-if="orderDates.length">
                     <div class="card-body" v-else>
                         <h5 class="text-center">Keine Daten</h5>
                     </div>
-                    
+
                     <div class="container" v-if="orderDates.length">
-                        <table class="table" v-if="soldProducts != null">
+                        <table class="table" v-if="soldProducts != null && soldProducts.size">
                             <thead>
                                 <tr>
                                     <th scope="col">Name</th>
                                     <th scope="col">Verkauft</th>
+                                    <th scope="col">Einzelpreis</th>
+                                    <th scope="col">Summe</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template v-for="[key, value] in soldProducts">
-                                    <tr>
-                                        <td>{{ key }}</td>
-                                        <td>{{ value }}</td>
+                                    <tr v-if="key.variation">
+                                        <td>{{ key.product.name}}, {{key.variation.attrname}} </td>
+                                        <td>{{ value.length }}</td>
+                                        <td>{{ key.variation.price }} €</td>
+                                        <td>{{ value.length * key.variation.price }} €</td>
+                                    </tr>
+                                    <tr v-else>
+                                        <td>{{ key.product.name}}</td>
+                                        <td>{{ value.length }}</td>
+                                        <td>{{ key.product.price }} €</td>
+                                        <td>{{ value.length * key.product.price }} €</td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
-                        <span v-else>Keine Daten gefunden!</span>
+                        <div v-if="soldProducts != null && soldProducts.size">
+                            <h5 class="float-end text-decoration-underline pe-4">Gesamtsumme: {{getSumSoldOrders()}} €</h5>
+                        </div>
+
+                        <div class="card-body" v-else>
+                            <h5 class="text-center">Keine Daten</h5>
+                        </div>
                     </div>
                 </div>
-                
+
                 <br>
 
             </div>
@@ -172,6 +187,7 @@
             async selectedStationSold(n, o) {
                 if (this.selectedStationSold && this.selectedDaySold) {
                     this.soldProducts = await this.loadSoldData()
+                    console.log(this.soldProducts)
                 } else {
                     this.soldProducts = null;
                 }
@@ -191,12 +207,30 @@
             },
 
             parseCartData(data) {
+                if(!data){
+                    return;
+                }
                 var t = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                 for (const d of data) {
                     let h = (new Date(d.currentState.created)).getHours();
                     t[h] = t[h] + 1;
                 }
                 return t;
+            },
+
+            getSumSoldOrders() {
+                if (!this.soldProducts) {
+                    return 0
+                }
+                let s = 0
+                for (let [k, v] of this.soldProducts) {
+                    if (k.variation) {
+                        s += k.variation.price * v.length
+                    } else {
+                        s += k.product.price * v.length
+                    }
+                }
+                return s.toFixed(2)
             },
 
             async loadData() {
@@ -267,17 +301,7 @@
 
             async loadSoldData() {
                 let raw = await hlp.loadDailyOrdersFromStation(this.selectedDaySold, this.selectedStationSold.id);
-                // Group by product
-                let ordered = new Map();
-                for (const r of raw) {
-                    let found = ordered.get(r.product.name);
-                    if (found) {
-                        ordered.set(r.product.name, found + 1);
-                    } else {
-                        ordered.set(r.product.name, 1);
-                    }
-                }
-                return ordered;
+                return await hlp.groupOrders(raw);
             }
 
 
@@ -288,7 +312,7 @@
     });
 
     app.config.errorHandler = (err, instance, info) => {
-        console.log("Error",err, info)
+        console.log("Error", err, info)
         hlp.makeError("The application has generated an error.", info, err);
     }
     app.mount("#app");

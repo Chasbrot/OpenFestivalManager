@@ -8,8 +8,8 @@ const data_source_1 = require("../../data-source");
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
 const router = express_1.default.Router();
-const process_1 = __importDefault(require("process"));
 const Order_1 = require("../../entity/Order");
+const State_1 = require("../../entity/State");
 const typeorm_1 = require("typeorm");
 /* Check session and accounttype*/
 router.use(function (req, res, next) {
@@ -51,11 +51,13 @@ router.post("/dailyordersfromstation", (0, express_validator_1.body)("date").isI
                         producer: true,
                     },
                     states: true,
+                    variation: true
                 },
                 where: {
                     // Was created on that date
                     states: {
                         history: false,
+                        statetype: State_1.StateType.FINISHED,
                         created: (0, typeorm_1.Between)(beginDateRange, endDateRange),
                     },
                 },
@@ -69,11 +71,13 @@ router.post("/dailyordersfromstation", (0, express_validator_1.body)("date").isI
                         producer: true,
                     },
                     states: true,
+                    variation: true,
                 },
                 where: {
                     // Was created on that date
                     states: {
                         history: false,
+                        statetype: State_1.StateType.FINISHED,
                         created: (0, typeorm_1.Between)(beginDateRange, endDateRange),
                     },
                     // Target station
@@ -86,7 +90,6 @@ router.post("/dailyordersfromstation", (0, express_validator_1.body)("date").isI
             });
         }
         result.forEach((e) => e.getCurrentState());
-        res.set("Cache-control", `max-age=${process_1.default.env.REST_CACHE_TIME}`);
         res.json(result);
     }
     catch (e) {

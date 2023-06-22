@@ -10,7 +10,7 @@ export default {
         var result = await fetch(url);
         if (result.status != 200) {
             hlp.makeError("Anfrage auf den Server fehlgeschlagen.", "GET " + url, result
-                .statusText);
+                );
             console.log(result)
             return null;
         }
@@ -28,7 +28,7 @@ export default {
         const response = await fetch(url,
             requestOptions);
         if (response.status != 200) {
-            hlp.makeError("Anfrage fehlerhaft.", "PUT " + url +" " + data, response.statusText);
+            hlp.makeError("Anfrage fehlerhaft.", "PUT " + url +" " + data, response);
             return false;
         }
         // Catch non json answer
@@ -50,7 +50,7 @@ export default {
         const response = await fetch(url,
             requestOptions);
         if (response.status != 200) {
-            hlp.makeError("Anfrage fehlerhaft.", "POST " + url + data, response.statusText);
+            hlp.makeError("Anfrage fehlerhaft.", "POST " + url + data, response);
             return false;
         }
         // Catch non json answer
@@ -72,7 +72,7 @@ export default {
         const response = await fetch(url,
             requestOptions);
         if (response.status != 200) {
-            hlp.makeError("Anfrage fehlerhaft.", "DELETE " + url + data, response.statusText);
+            hlp.makeError("Anfrage fehlerhaft.", "DELETE " + url + data, response);
             return false;
         }
         return true;

@@ -11,7 +11,6 @@ const router = express_1.default.Router();
 const process_1 = __importDefault(require("process"));
 const Order_1 = require("../../entity/Order");
 const State_1 = require("../../entity/State");
-const typeorm_1 = require("typeorm");
 /* Check session and accounttype*/
 // Every active session needs full access
 /* Check session and accounttype */
@@ -50,13 +49,22 @@ router.get("/open", async (req, res) => {
             },
             where: {
                 // Which are NOT finished, canceled or closed
-                states: {
-                    history: false,
-                    statetype: (0, typeorm_1.Not)(State_1.StateType.CLOSED || State_1.StateType.CANCELED || State_1.StateType.FINISHED),
-                },
+                states: [
+                    {
+                        history: false,
+                        statetype: State_1.StateType.CREATED,
+                    },
+                    {
+                        history: false,
+                        statetype: State_1.StateType.COOKING,
+                    },
+                    {
+                        history: false,
+                        statetype: State_1.StateType.DELIVERING,
+                    },
+                ],
             },
         });
-        console.log(JSON.stringify(o));
         res.json(o);
     }
     catch (e) {

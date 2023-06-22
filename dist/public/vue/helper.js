@@ -78,6 +78,11 @@ export default {
     */
     async makeError(message, request, error) {
         document.getElementById("errorMessage").innerHTML = message;
+        // Auth failed, probably session timeout
+        if(error && error.status == 403){
+            location.reload()
+        }
+        // 
         if(!request || !error){
             // Hide detail info
             document.getElementById("errorDebugInfo").style.visibility="hidden"
@@ -85,7 +90,7 @@ export default {
             document.getElementById("errorDebugInfo").style.visibility="visible"
         }
         document.getElementById("errorSource").innerHTML = request;
-        document.getElementById("errorReason").innerHTML = error;
+        document.getElementById("errorReason").innerHTML = error.statusText;
         var errorModal = new bootstrap.Modal(document.getElementById('errorModal'))
         errorModal.show()
     },
@@ -180,6 +185,8 @@ export default {
         
         return orderMap;
     }
+
+    
 
 
 

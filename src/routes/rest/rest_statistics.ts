@@ -68,11 +68,14 @@ router.post(
               producer: true,
             },
             states: true,
+            variation: true
           },
           where: {
             // Was created on that date
-            states: {
+            states: 
+            {
               history: false,
+              statetype: StateType.FINISHED,
               created: Between(beginDateRange, endDateRange),
             },
           },
@@ -85,11 +88,13 @@ router.post(
               producer: true,
             },
             states: true,
+            variation: true,
           },
           where: {
             // Was created on that date
             states: {
               history: false,
+              statetype: StateType.FINISHED,
               created: Between(beginDateRange, endDateRange),
             },
             // Target station
@@ -103,7 +108,6 @@ router.post(
       }
 
       result.forEach((e) => e.getCurrentState());
-      res.set("Cache-control", `max-age=${process.env.REST_CACHE_TIME}`);
       res.json(result);
     } catch (e) {
       console.log("rest/statistics/dailyordersfromstation GET/POST: " + e);

@@ -32,11 +32,15 @@ jobs:
       # Create a github release
       - name: Create Release
         id: create_release
-        uses: elgohr/Github-Release-Action@v4
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          title: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: New Release with improvements
+          draft: false
+          prerelease: true
       # Upload .exe file to github release
       - name: Upload windows x64 binaries to release
         uses: svenstaro/upload-release-action@v2
@@ -44,9 +48,9 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: festivalmanager-${{ github.ref_name }}.exe
           asset_name: festivalmanager-${{ github.ref_name }}.exe
-          tag: Release ${{ github.ref }}
+          tag: ${{ github.ref }}
           overwrite: true
-          body: "This is the new release."
+          body: "${{ github.event.head_commit.message }}"
       # Upload linux file to github release
       - name: Upload arm linux binaries to release
         uses: svenstaro/upload-release-action@v2
@@ -54,7 +58,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: festivalmanager-${{ github.ref_name }}
           asset_name: festivalmanager-${{ github.ref_name }}
-          tag: Release ${{ github.ref }}
+          tag: ${{ github.ref }}
           overwrite: true
-          body: "This is the new release."
+          body: "${{ github.event.head_commit.message }}"
 

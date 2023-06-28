@@ -10,6 +10,7 @@ export class Station {
 
     @Column({
         length: 100,
+        unique: true
     })
     name: string
 

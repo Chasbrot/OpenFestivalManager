@@ -26,6 +26,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({
         length: 100,
+        unique: true
     }),
     __metadata("design:type", String)
 ], Station.prototype, "name", void 0);

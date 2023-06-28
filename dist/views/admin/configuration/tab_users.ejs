@@ -23,7 +23,6 @@
                                         <select class="form-select" v-model="newAccount.accounttype">
                                             <option value="0">Admin</option>
                                             <option value="1">Normal</option>
-                                            <option value="2" disabled>Station</option>
                                         </select>
                                         <input type="text" class="form-control" v-model="newAccount.name"
                                             placeholder="Name">
@@ -52,7 +51,7 @@
                                         </thead>
                                         <tbody>
                                             <template v-for="a in accounts">
-                                                <tr>
+                                                <tr v-if="a.accounttype != 2">
                                                     <th scope="row">
                                                         <span>{{a.id}}</span>
                                                     </th>
@@ -67,10 +66,9 @@
                                                     </td>
                                                     <td>
                                                         <select class="form-select" v-model="a.accounttype"
-                                                            @change="updateAccount(a)" :disabled="a.accounttype==2">
+                                                            @change="updateAccount(a)">
                                                             <option value="0">Admin</option>
                                                             <option value="1">Normal</option>
-                                                            <option value="2" :disabled="true">Station</option>
                                                         </select>
                                                     </td>
                                                     <td>

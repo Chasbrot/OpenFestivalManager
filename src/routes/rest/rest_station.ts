@@ -145,11 +145,23 @@ router.put(
       console.log("create new station request");
       console.log(body); 
     }
-    // Create Table
+    // Create Station and Station user
     let tg;
     try {
       let station = new Station(body.name);
       await AppDataSource.getRepository(Station).save(station);
+      let sa = new Account();
+      sa.name = station.name
+      sa.accounttype = AccountType.STATION;
+      sa.responsiblefor=[]
+      sa.responsiblefor.push(station)
+      try {
+        await AppDataSource.getRepository(Account).insert(sa)
+      } catch (err) {
+        console.log("station/create " + err)
+        res.render("station/create", { err: "Error creating user" });
+        return;
+      }
     } catch (e) {
       console.log("rest/station/PUT new: Error" + e);
       res.sendStatus(500);
@@ -171,14 +183,29 @@ router.delete(
     if (global.dev) {
       console.log("delete station request " + req.params.sid)
     }
-    // Create Payment Method
+    // Delete Station user and station
     try {
-      let tmp = await AppDataSource.getRepository(Station).findOneOrFail({
+
+      
+      // Find station
+      let s = await AppDataSource.getRepository(Station).findOneOrFail({
         where: {
           id: Number(req.params.sid),
         },
       });
-      await AppDataSource.getRepository(Station).remove(tmp);
+
+      // Find station account
+      let sa = await AppDataSource.getRepository(Account).findOneBy({
+        name: s.name,
+        accounttype: AccountType.STATION
+      });
+      // Remove Station account
+      if(sa){
+        await AppDataSource.getRepository(Account).remove(sa);
+      }
+      // Remove Station
+      await AppDataSource.getRepository(Station).remove(s);
+      
     } catch (e) {
       console.log("rest/station/DELETE : Error" + e);
       res.sendStatus(500);

@@ -119,11 +119,24 @@ router.put("/", (0, express_validator_1.body)("name").isString(), async (req, re
         console.log("create new station request");
         console.log(body);
     }
-    // Create Table
+    // Create Station and Station user
     let tg;
     try {
         let station = new Station_1.Station(body.name);
         await data_source_1.AppDataSource.getRepository(Station_1.Station).save(station);
+        let sa = new Account_1.Account();
+        sa.name = station.name;
+        sa.accounttype = Account_1.AccountType.STATION;
+        sa.responsiblefor = [];
+        sa.responsiblefor.push(station);
+        try {
+            await data_source_1.AppDataSource.getRepository(Account_1.Account).insert(sa);
+        }
+        catch (err) {
+            console.log("station/create " + err);
+            res.render("station/create", { err: "Error creating user" });
+            return;
+        }
     }
     catch (e) {
         console.log("rest/station/PUT new: Error" + e);
@@ -141,14 +154,25 @@ router.delete("/:sid", (0, express_validator_1.param)("sid").isInt(), async (req
     if (global.dev) {
         console.log("delete station request " + req.params.sid);
     }
-    // Create Payment Method
+    // Delete Station user and station
     try {
-        let tmp = await data_source_1.AppDataSource.getRepository(Station_1.Station).findOneOrFail({
+        // Find station
+        let s = await data_source_1.AppDataSource.getRepository(Station_1.Station).findOneOrFail({
             where: {
                 id: Number(req.params.sid),
             },
         });
-        await data_source_1.AppDataSource.getRepository(Station_1.Station).remove(tmp);
+        // Find station account
+        let sa = await data_source_1.AppDataSource.getRepository(Account_1.Account).findOneBy({
+            name: s.name,
+            accounttype: Account_1.AccountType.STATION
+        });
+        // Remove Station account
+        if (sa) {
+            await data_source_1.AppDataSource.getRepository(Account_1.Account).remove(sa);
+        }
+        // Remove Station
+        await data_source_1.AppDataSource.getRepository(Station_1.Station).remove(s);
     }
     catch (e) {
         console.log("rest/station/DELETE : Error" + e);

@@ -1,6 +1,6 @@
 <!-- Copyright Michael Selinger 2023 -->
 <script type="module" type="text/javascript">
-    import dm from "/vue/datamodel.js";
+  import dm from "/vue/datamodel.js";
     import hlp from "/vue/helper.js";
 
     const {
@@ -89,6 +89,10 @@
           await this.fetchOrders()
           // Load Unpayed orders
           this.loadBillingData()
+          // Auto-Update orders
+          setInterval(this.fetchOrders,1000)
+          // Auto-Update billing data
+          setInterval(this.loadBillingData, 1000)
         },
 
         async fetchStationProducts(sid) {
@@ -100,6 +104,9 @@
 
 
         async loadBillingData() {
+          if(!this.selectedSession){
+            return;
+          }
           let r = await dm.isSessionCloseable(this.selectedSession.id)
           this.sessionCloseable = r.closeable
           console.log("session closeable: " + r.closeable)
@@ -136,13 +143,21 @@
             return;
           }
 
-          this.orders = await dm.loadOrdersFromSession(this.selectedSession.id)
-          if (!this.orders.length) {
+          let neworders = await dm.loadOrdersFromSession(this.selectedSession.id)
+          if (!neworders.length) {
             this.finishedOrders = [];
             this.sortedOrders = [];
             return;
           }
+          // Check if any updates where made to orders
+          if(JSON.stringify(neworders) != JSON.stringify(this.orders)){
+            this.orders = neworders
+            this.parseOrdersToLists()
+          }
 
+        },
+
+        async parseOrdersToLists(){
           // Generate sorted and grouped order lists
           this.finishedOrders = [];
           this.sortedOrders = [];
@@ -159,7 +174,6 @@
             return new Date(b.currentState.created).getTime() - new Date(a
               .currentState.created).getTime();
           });
-
         },
 
         getTimeFromOrder(order) {

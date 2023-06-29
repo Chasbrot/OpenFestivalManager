@@ -20,7 +20,7 @@
           <input type="number" class="form-control" placeholder="Preis" v-model="productDetailModal.price" min="0" step="0.1" required>
         </div>
         <div class="input-group">
-          <span class="input-group-text" id="basic-addon1">Erzeuger:</span>
+          <span class="input-group-text" id="basic-addon1">Station:</span>
           <select class="form-select" v-model="productDetailModal.producer">
             <option v-for="s in stations" :value="s">
               {{ s.name }}
@@ -29,55 +29,75 @@
         </div>
         <div class="form-text">Mengensymbole: ⅛ ¼ ½</div>
         <br>
-        <h5>Erweitert</h5>
-        <div class="input-group">
-          <span class="input-group-text">Status:</span>
-          <div class="btn-group" role="group">
-            <input type="radio" class="btn-check" id="btnradio0" value="0" autocomplete="off" checked v-model="productDetailModal.productLock">
-            <label class="btn btn-outline-success" for="btnradio0">
-              <span data-bs-toggle="tooltip" data-bs-placement="top" title="Produkt ist bestellbar">
-                <img src="/images/visible.png" width="20" height="20">
-              </span>
-
-            </label>
-
-            <input type="radio" class="btn-check" id="btnradio1" value="1" autocomplete="off" v-model="productDetailModal.productLock">
-            <label class="btn btn-outline-warning" for="btnradio1">
-                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Warnung wird angezeigt. Produkt sollte nicht mehr bestellt werden.">
-                    <img src="/images/production_warning.png" width="20" height="20">
-                </span>
-            </label>
-
-            <input type="radio" class="btn-check" id="btnradio2" value="2" autocomplete="off" v-model="productDetailModal.productLock">
-            <label class="btn btn-outline-danger" for="btnradio2">
-                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Warnung wird angezeigt. Produkt kann nicht mehr bestellt werden.">
-                    <img src="/images/lock.png" width="20" height="20">
-                </span>
-            </label>
-
-            <input type="radio" class="btn-check" id="btnradio3" value="3" autocomplete="off" v-model="productDetailModal.productLock">
-            <label class="btn btn-outline-secondary" for="btnradio3">
-                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Produkt nicht sicht-/bestellbar">
-                    <img src="/images/hidden.png" width="20" height="20">
-                </span>
-            </label>
+        <div class="accordion accordion-flush" id="accordionAdvancedDetails">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingOne">
+              <button class="accordion-button collapsed py-0 px-0" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                <h5>Erweitert</h5>
+              </button>
+            </h2>
+            <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionAdvancedDetails">
+              <div class="accordion-body pb-0 px-0">
+                <div class="input-group">
+                  <span class="input-group-text">Status:</span>
+                  <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" id="btnradio0" value="0" autocomplete="off" checked v-model="productDetailModal.productLock">
+                    <label class="btn btn-outline-success" for="btnradio0">
+                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="Produkt ist bestellbar">
+                        <img src="/images/visible.png" width="20" height="20">
+                      </span>
+        
+                    </label>
+        
+                    <input type="radio" class="btn-check" id="btnradio1" value="1" autocomplete="off" v-model="productDetailModal.productLock">
+                    <label class="btn btn-outline-warning" for="btnradio1">
+                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="Warnung wird angezeigt. Produkt sollte nicht mehr bestellt werden.">
+                            <img src="/images/production_warning.png" width="20" height="20">
+                        </span>
+                    </label>
+        
+                    <input type="radio" class="btn-check" id="btnradio2" value="2" autocomplete="off" v-model="productDetailModal.productLock">
+                    <label class="btn btn-outline-danger" for="btnradio2">
+                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="Warnung wird angezeigt. Produkt kann nicht mehr bestellt werden.">
+                            <img src="/images/lock.png" width="20" height="20">
+                        </span>
+                    </label>
+        
+                    <input type="radio" class="btn-check" id="btnradio3" value="3" autocomplete="off" v-model="productDetailModal.productLock">
+                    <label class="btn btn-outline-secondary" for="btnradio3">
+                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="Produkt nicht sicht-/bestellbar">
+                            <img src="/images/hidden.png" width="20" height="20">
+                        </span>
+                    </label>
+                  </div>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Produkte mit einer höheren Reihung werden als erstes in der Bestellliste angezeigt">
+                    <span class="input-group-text">Reihung:</span>
+                  </span>
+                  <input type="number" class="form-control" placeholder="Reihung" v-model="productDetailModal.list_priority" min="0">
+                  
+                </div>
+                <div class="input-group">
+                  <span class="input-group-text">Kategorie:</span>
+                  <select class="form-select" v-model="productDetailModal.category">
+                    <option value="">-</option>
+                    <option v-for="c in productCategories" :value="c">
+                      {{ c.name }}
+                    </option>
+                  </select>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Das Produkt wird von Helfern zu den Kunden gebracht, der Kellner muss es nicht holen">
+                    <span class="input-group-text">Zustellung:</span>
+                  </span>
+                  <div class="input-group-text">
+                    <input class="form-check-input mt-0" type="checkbox" checked v-model="productDetailModal.deliverable">
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <span class="input-group-text">Reihung:</span>
-          <input type="number" class="form-control" placeholder="Reihung" v-model="productDetailModal.list_priority" min="0">
         </div>
-        <div class="input-group">
-          <span class="input-group-text">Kategorie:</span>
-          <select class="form-select" v-model="productDetailModal.category">
-            <option value="">-</option>
-            <option v-for="c in productCategories" :value="c">
-              {{ c.name }}
-            </option>
-          </select>
-          <span class="input-group-text">Zustellung:</span>
-          <div class="input-group-text">
-            <input class="form-check-input mt-0" type="checkbox" checked v-model="productDetailModal.deliverable">
-          </div>
-        </div>
+        
+
+        
         <br>
         <div v-if="productDetailModal && productDetailModal.id && productDetailModal.variations.length === 0">
           <h5>Optionen/Zutaten</h5>
@@ -133,6 +153,7 @@
               <button class="btn btn-primary" @click="this.createVariation(productDetailModal)">+</button>
             </div>
           </div>
+          <div class="form-text">Mengensymbole: ⅛ ¼ ½</div>
           <table class="table" v-if="productDetailModal && productDetailModal.variations.length > 0">
             <thead>
               <tr>

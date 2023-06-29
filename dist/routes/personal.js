@@ -31,7 +31,7 @@ router.use(function (req, res, next) {
 router.get("/login", function (req, res) {
     if (req.session.account?.accounttype == Account_1.AccountType.USER) {
         // Redirect tp mainpage if user session exists
-        res.redirect("/personal/overview");
+        res.redirect("/webui");
     }
     else {
         res.render("personal/login_personal", { err: false });

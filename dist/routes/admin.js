@@ -28,10 +28,7 @@ router.use(function (req, res, next) {
 });
 /* GET main admin page */
 router.get("/", async (_req, res) => {
-    res.render("admin/admin", {
-        uptime: process.uptime() | 0,
-        db_a: data_source_1.AppDataSource.isInitialized,
-    });
+    res.render("admin/admin");
 });
 router.post("/", async (req, res, _next) => {
     // store all the user input data

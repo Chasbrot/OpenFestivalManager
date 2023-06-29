@@ -16,31 +16,109 @@
 
   <%- include('admin_navbar') %>
     <br>
-    <div class="container">
-      <div class="card">
-        <div class="card-header">
-          System
+    <div id="app">
+      <div class="container">
+        <div class="card">
+          <div class="card-header">
+            System
+          </div>
+          <div class="card-body">
+            Server Uptime: {{parseTimeHMS(server_uptime)}}
+          </div>
         </div>
-        <div class="card-body">
-          Server Uptime: <%= uptime%> s
+        <br>
+        <div class="card">
+          <div class="card-header">
+            Aktuelle Auslastung
+          </div>
+          <div class="card-body">
+            <span>Offene Bestellungen: </span>
+            <span v-if="openOrders">{{openOrders.length}}</span>
+            <span v-else>-</span>
             <br>
-            Database access:
-            <% if(db_a) { %>
-              <img src="images/check.png" style="width: 15px;">
-              <% }else{ %>
-                <img src="images/canceled.png" style="width: 15px;">
-                <% } %>
+            <span>Belegung: </span>
+            <span v-if="activeSessions && allTables">{{activeSessions.length}}/{{allTables.length}}</span>
+            <span v-else>-/-</span>
+            <br>
+            <span>Abgeschlossene Bestellungen heute: </span>
+            <span v-if="closedOrders">{{closedOrders.length}}</span>
+            <span v-else>-/-</span>
+          </div>
         </div>
-      </div>
-      <br>
-      <div class="card">
-        <div class="card-header">
-          Benachrichtigungen
-        </div>
-        <div class="card-body" id="alerts">
-        </div>
+        <br>
+        <!--<div class="card">
+          <div class="card-header">
+            Benachrichtigungen
+          </div>
+          <div class="card-body" id="alerts">
+          </div>
+        </div>-->
       </div>
     </div>
+
+
+
+    <!-- Vue Js -->
+    <script type="module" type="text/javascript">
+      import dm from "/vue/datamodel.js";
+      import hlp from "/vue/helper.js";
+
+      const { createApp } = Vue;
+
+      let app = createApp({
+        data: () => ({
+          // Data
+          openOrders: [],
+          activeSessions: [],
+          allTables: [],
+          closedOrders: [],
+          server_uptime: 0,
+        }),
+
+        // Execute at page load
+        mounted() {
+          this.loadLoadData();
+          setInterval(this.loadLoadData, 10000); // Auto-Refresh load data
+        },
+
+        // Helper functions
+        methods: {
+          parseTimeHMS(e) {
+            // God i hat js so much
+            e = parseInt(e)
+            let h = parseInt(e/3600)
+            let m = parseInt(e/60)
+            let s = e-h*3600-m*60
+            return String(h) + "h " + String(m)+ "m "+String(s) +"s";
+          },
+
+          parseDate(timestamp) {
+            const d = new Date(timestamp);
+            return d.getDate() + "." + d.getMonth() + "." + d.getFullYear();
+          },
+
+          async loadLoadData() {
+            this.openOrders = await hlp.loadOpenOrders();
+            this.activeSessions = await hlp.loadActiveSessions();
+            this.allTables = await dm.loadTables();
+            this.closedOrders = await hlp.loadDailyOrdersFromStation((new Date).toISOString(), -1)
+            this.server_uptime = await hlp.getServerUptime();
+          },
+
+        }
+
+      });
+
+      app.config.errorHandler = (err, instance, info) => {
+        console.log("Error", err, info)
+        hlp.makeError("The application has generated an error.", info, err);
+      }
+      app.mount("#app");
+
+
+
+    </script>
+
 </body>
 
 </html>

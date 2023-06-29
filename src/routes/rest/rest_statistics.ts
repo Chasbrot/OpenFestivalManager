@@ -53,8 +53,6 @@ router.post(
     let endDateRange = new Date(req.body.date);
     endDateRange.setHours(23);
     endDateRange.setMinutes(59);
-    console.log(beginDateRange);
-    console.log(endDateRange);
 
     let result;
     try {

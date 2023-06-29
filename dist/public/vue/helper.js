@@ -24,6 +24,10 @@ export default {
         return await rest.fetchData(`/rest/order/open`);
     },
 
+    async getServerUptime(){
+        return await rest.fetchData("/rest/uptime");
+    },
+
     async loadActiveSessions() {
         return await rest.fetchData(`/rest/session/active`);
     },

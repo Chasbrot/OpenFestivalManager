@@ -31,10 +31,7 @@ router.use(function (req, res, next) {
 
 /* GET main admin page */
 router.get("/", async (_req: Request, res: Response) => {
-  res.render("admin/admin", {
-    uptime: process.uptime() | 0,
-    db_a: AppDataSource.isInitialized,
-  });
+  res.render("admin/admin");
 });
 
 router.post("/", async (req, res, _next) => {

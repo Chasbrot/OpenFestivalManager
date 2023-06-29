@@ -16,25 +16,6 @@
         <div class="container">
             <div class="card">
                 <div class="card-header">
-                    Aktuelle Auslastung
-                </div>
-                <div class="card-body">
-                    <span>Offene Bestellungen: </span>
-                    <span v-if="openOrders">{{openOrders.length}}</span>
-                    <span v-else>-</span>
-                    <br>
-                    <span>Belegung: </span>
-                    <span v-if="activeSessions && allTables">{{activeSessions.length}}/{{allTables.length}}</span>
-                    <span v-else>-/-</span>
-                    <br>
-                    <span>Abgeschlossene Bestellungen heute: </span>
-                    <span v-if="closedOrders">{{closedOrders.length}}</span>
-                    <span v-else>-/-</span>
-                </div>
-            </div>
-            <br>
-            <div class="card">
-                <div class="card-header">
                     Auslastung Stationen
                 </div>
                 <div class="card-body" v-if="orderDates.length">
@@ -164,9 +145,6 @@
         data: () => ({
             // Data
             orderDates: [],
-            openOrders: [],
-            activeSessions: [],
-            allTables: [],
             stations: [],
             dailyOrders: "",
             // Chart

@@ -38,7 +38,7 @@
               {{tg.name}}
             </span>
             
-            <button class="btn-close float-end" @click="this.removeTableGroup(tg.id)">
+            <button v-if="!(tg.tables && tg.tables.length)" class="btn-close float-end"  @click="this.removeTableGroup(tg.id)">
             </button>
             <div class="float-end pe-2" v-if="tg.tables && tg.tables.length">
               {{tg.tables.length}}

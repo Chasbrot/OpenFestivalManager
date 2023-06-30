@@ -8,7 +8,7 @@
                 <div class="list-group-item py-0 ps-0">
                     <div class="row">
                         <div class="col-8 d-grid pe-0">
-                            <a class="btn btn-light text-start py-1 " :href="'/table/orderdetails/'+o.id"
+                            <a class="btn btn-light text-start py-1 " @click="this.showOrderDetails(o)"
                                 style="background-color:white">
                                 <!-- Status icons -->
                                 <img v-if="o.currentState.statetype == 0" src="/images/order.png" style="width:15px">
@@ -70,7 +70,7 @@
                                 <template v-for="o in finishedOrders">
                                     <div class="list-group-item p-0">
                                         <a class="btn btn-light text-start py-1 ps-4 w-100 "
-                                            :href="'/table/orderdetails/'+o.id" style="background-color:white">
+                                            @click="this.showOrderDetails(o)" style="background-color:white">
                                             <span class="pe-1">•</span>
                                             <!-- Status icons -->
                                             <img v-if="o.currentState.statetype == 0" src="/images/order.png"

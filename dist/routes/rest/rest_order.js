@@ -81,10 +81,16 @@ router.get("/:oid", (0, express_validator_1.param)("oid").isInt(), (req, res) =>
     data_source_1.AppDataSource.getRepository(Order_1.Order)
         .findOne({
         relations: {
-            states: true,
+            states: {
+                triggerer: true,
+            },
             variation: true,
-            bill: true,
+            bill: {
+                cashier: true,
+                method: true,
+            },
             product: true,
+            orderedBy: true,
         },
         where: {
             id: Number(req.params.oid),

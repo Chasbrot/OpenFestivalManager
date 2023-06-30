@@ -38,6 +38,8 @@ export class Order {
     })
     note: string
 
+    
+
     @ManyToMany(() => Ingredient)
     @JoinTable({name: "order_ingredients"})
     orderedIngredients: Ingredient[]

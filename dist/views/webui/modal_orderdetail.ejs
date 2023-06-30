@@ -1,0 +1,67 @@
+<!-- Copyright Michael Selinger 2023 -->
+<div class="modal" id="orderDetailModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" v-if="orderDetailModal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pdTitle">Bestellung</h5>
+        <div class="float-end">
+          <span class="text-secondary" v-if="!orderDetailModal.id">ID:-</span>
+          <span class="text-secondary" v-else>ID: {{orderDetailModal.id}}</span>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p>Bestellt durch: {{orderDetailModal.orderedBy.name}}</p>
+        <p v-if="orderDetailModal.note">Notiz: {{orderDetailModal.note}}</p>
+        <h5>Produkt</h5>
+        <template v-if="orderDetailModal.variation">
+          <p>{{orderDetailModal.product.name}}, {{orderDetailModal.variation.attrname}} <span class="float-end text-secondary">ID: {{orderDetailModal.product.id}}</span></p>
+          <p>Preis: {{orderDetailModal.variation.price}} €</p>
+        </template>
+        <template v-else>
+          <p>{{orderDetailModal.product.name}} <span class="float-end text-secondary">ID: {{orderDetailModal.product.id}}</span></p>
+          <p>Preis: {{orderDetailModal.product.price}} €</p>
+        </template>
+        
+        <div class="accordion accordion-flush" id="accordionFlushHistory">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingOne">
+              <button class="accordion-button collapsed px-0" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                <h5>Historie</h5>
+              </button>
+            </h2>
+            <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushHistory">
+              <div class="accordion-body px-0">
+                <ol class="list-group list-group-numbered">
+                  <template v-for="s in orderDetailModal.states">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div class="ms-2 me-auto">
+                        <div class="fw-bold" v-if="s.statetype==0">Erstellt</div>
+                        <div class="fw-bold" v-if="s.statetype==1">In Zubereitung</div>
+                        <div class="fw-bold" v-if="s.statetype==2">In Zustellung</div>
+                        <div class="fw-bold" v-if="s.statetype==3">Erledigt</div>
+                        <div class="fw-bold" v-if="s.statetype==4">Stoniert</div>
+                        Durch: {{s.triggerer.name}}
+                      </div>
+                      <span class="badge bg-primary rounded-pill">{{parseTime(s.created)}}</span>
+                    </li>
+                  </template>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <template v-if="orderDetailModal.bill">
+          <h5>Rechnung</h5>
+          <p>Gezahlt am: {{parseTime(orderDetailModal.bill.paymentTime)}}</p>
+          <p>Teil von Rechnung Nr.: {{orderDetailModal.bill.id}}</p>
+          <p>Durch: {{orderDetailModal.bill.cashier.name}}</p>
+        </template>
+        <h5></h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+</div>

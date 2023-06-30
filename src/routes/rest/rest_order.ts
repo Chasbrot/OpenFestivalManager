@@ -93,10 +93,16 @@ router.get("/:oid", param("oid").isInt(), (req: Request, res: Response) => {
   AppDataSource.getRepository(Order)
     .findOne({
       relations: {
-        states: true,
+        states: {
+          triggerer: true,
+        },
         variation: true,
-        bill: true,
+        bill: {
+          cashier: true,
+          method: true,
+        },
         product: true,
+        orderedBy: true,
       },
       where: {
         id: Number(req.params.oid),

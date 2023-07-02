@@ -102,7 +102,7 @@ router.post("/login", (0, express_validator_1.body)("username").isString().trim(
 });
 /* GET statistics page */
 router.get("/statistics", async (_req, res) => {
-    res.render("admin/admin_statistics_vue");
+    res.render("admin/admin_statistics");
 });
 /* GET configuration page */
 router.get("/configuration", async (req, res) => {
@@ -110,7 +110,7 @@ router.get("/configuration", async (req, res) => {
 });
 /* GET orderdata page */
 router.get("/orderdata", async function (_req, res) {
-    res.render("admin/admin_orderdata_vue");
+    res.render("admin/admin_orderdata");
 });
 /*
 router.get('/error', function (req, res) {

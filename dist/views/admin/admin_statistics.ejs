@@ -1,321 +1,295 @@
 <!-- Copyright Michael Selinger 2023 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
     <title>Admin Konsole</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <script src="/javascripts/jquery-3.1.1.min.js"></script>
-    <script src="/javascripts/mdb.js"></script>
-    <script src="/javascripts/bootstrap/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="/stylesheets/css/bootstrap.min.css">
+    <%- include('../header_common') %>
+    <script src="/js/mdb.js"></script>
 </head>
 
 <body>
-
-
-    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-        <!-- Brand/logo -->
-        <a class="navbar-brand" href="/">Home</a>
-
-        <!-- Links -->
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="/admin">System</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/admin/statistics">Statistik</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/admin/orderdata">Bestelldaten</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/admin/configuration">Stammdaten</a>
-            </li>
-        </ul>
-    </nav>
+    <%- include('admin_navbar') %>
     <br>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">
-                Aktuelle Auslastung
-            </div>
-            <div class="card-body">
-                Offene Bestellungen: <span id="openOrders"></span>
-                <br>
-                Belegung: <span id="activeSessions"></span>/<span id="allTables"></span>
-                <br>
-                Abgeschlossene Bestellungen heute: <span id="todayOrders"></span>
-                <br>
-                Abgeschlossene Sitzungen heute: <span id="todaySessions"></span>
-            </div>
-        </div>
-        <br>
-        <div class="card">
-            <div class="card-header">
-                Benachrichtigungen
-            </div>
-            <div class="card-body" id="alerts">
-            </div>
-        </div>
-        <br>
-        <div class="card">
-            <div class="card-header">
-                Auslastung Stationen
-            </div>
-            <div class="card-body">
-                Datum:
-                <select class="form-control" id="dates" onchange="loadChart()">
-                    <% if(dates.length){%>
-                    <option value="" selected>Choose ...</option>
-                    <% for(var i=0; i< dates.length; i++) {%>
-                    <option value="<%= dates[i].date_machine%>">
-                        <%= dates[i].date%>
-                    </option>
-                    <% } }else{ %>
-                    <option value="-1" selected>Keine Daten</option>
-                    <% } %>
-                </select>
-                <canvas id="lineChart"></canvas>
-            </div>
-        </div>
-        <br>
-        <div class="card">
-            <div class="card-header">
-                Verkaufszahlen
-            </div>
-            <div class="card-body">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Datum:</span>
-                    </div>
-                    <select class="custom-select" id="sold_date">
-                        <% if(dates.length){%>
-                        <option value="" selected>Choose ...</option>
-                        <% for(var i=0; i< dates.length; i++) {%>
-                        <option value="<%= dates[i].date_machine%>">
-                            <%= dates[i].date%>
-                        </option>
-                        <% } }else{ %>
-                        <option value="-1" selected>Keine Daten</option>
-                        <% } %>
-                    </select>
+
+    <div id="app">
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    Auslastung Stationen
                 </div>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Station:</span>
-                    </div>
-                    <select class="custom-select" id="sold_station" onchange="loadSellingData()">
+                <div class="card-body" v-if="orderDates.length">
+                    Datum:
+                    <select class="form-control" v-model="selectedDayChart">
+                        <option value="" disabled></option>
+                        <option v-for="d in orderDates" :value="d.day">
+                            {{ parseDate(d.day) }}
+                        </option>
                     </select>
+                    <canvas v-if="selectedDayChart" id="lineChart"></canvas>
+                </div>
+                <div class="card-body" v-else>
+                    <h5 class="text-center">Keine Daten</h5>
                 </div>
             </div>
             <br>
-            <div class="container">
-                <table class="table" style="min-height: 200px">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Verkauft</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sold_table">
-    
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <br>
+            <div class="card">
+                <div class="card-header">
+                    Verkaufszahlen
+                </div>
+                <div class="card-body" v-if="orderDates.length">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Datum:</span>
+                        </div>
+                        <select class="form-select" v-model="selectedDaySold">
+                            <option value="" disabled></option>
+                            <option v-for="d in orderDates" :value="d.day">
+                                {{ parseDate(d.day) }}
+                            </option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Station:</span>
+                        </div>
+                        <select class="form-select" v-model="selectedStationSold">
+                            <option value="" disabled></option>
+                            <option v-for="s in stations" :value="s">
+                                {{ s.name }}
+                            </option>
+                        </select>
+                    </div>
 
+                </div>
+                <div class="card-body" v-else>
+                    <h5 class="text-center">Keine Daten</h5>
+                </div>
+
+                <div class="container" v-if="orderDates.length">
+                    <table class="table table-hover" v-if="soldProducts != null && soldProducts.size">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Verkauft</th>
+                                <th scope="col">Einzelpreis</th>
+                                <th scope="col">Summe</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            <template v-for="[key, value] in soldProducts">
+                                <tr class="accordion-toggle collapsed" :id="'accordion_sold_'+key.id"
+                                    data-bs-toggle="collapse" :data-bs-target="'#collapse_sold_'+key.id"
+                                    :aria-controls="'collapse_sold_'+key.id">
+                                    <td>{{ key.name}}</td>
+                                    <template v-if="value instanceof Map"> 
+                                        <td>{{ getNumOfMapEntries(value) }}</td>
+                                        <td>-</td>
+                                        <td>{{ getSumOfVariations(value) }} €</td>
+                                    </template>
+                                    <template v-else>
+                                        <td>{{ value }}</td>
+                                        <td>{{ key.price }} €</td>
+                                        <td>{{ key.price * value }} €</td>
+                                    </template>
+                                </tr>
+                                <tr v-if="value instanceof Map">
+                                    <td colspan="4" class="p-0">
+                                        <div :id="'collapse_sold_'+key.id" class="collapse in p-0">
+                                            <template v-for="[v,num] in value">
+                                                <ul class="row m-1">
+                                                    <li class="col">{{v.attrname}}</li>
+                                                    <div class="col">{{num}}</div>
+                                                    <div class="col">{{v.price}} €</div>
+                                                    <div class="col">{{num*v.price}} €</div>
+                                                </ul>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                    <div v-if="soldProducts != null && soldProducts.size">
+                        <h5 class="float-end text-decoration-underline pe-4">Gesamtsumme: {{getSumSoldOrders()}} €</h5>
+                    </div>
+
+                    <div class="card-body" v-else>
+                        <h5 class="text-center">Keine Daten</h5>
+                    </div>
+                </div>
+
+                
+            </div>
+
+            <br>
+
+        </div>
+
+        <!-- Error Modal -->
+        <%- include('../errorModal') %>
     </div>
+
 
 </body>
 
-<script>
-    var chart = null;
+<!-- Vue Js -->
+<script type="module" type="text/javascript">
+    import dm from "/vue/datamodel.js";
+    import hlp from "/vue/helper.js";
 
-    $(document).ready(function () {
-        loadCurrentLoad();
-        setInterval(function () {
-            loadCurrentLoad()
-        }, 60000)
-        loadStations();
-    });
+    const { createApp } = Vue;
 
-    function loadStations() {
-        $.ajax({
-            type: "GET",
-            url: "/data/getAllStations",
-            success: (data) => {
-                var s = "";
-                if (!data.stations.length) {
-                    s = '<option value=""> Keine Stationen gefunden </option>';
+    let app = createApp({
+        data: () => ({
+            // Data
+            orderDates: [],
+            stations: [],
+            dailyOrders: "",
+            // Chart
+            selectedDayChart: "",
+            chart: null,
+            selectedStation: "",
+            closedOrders: [],
+            // Sold
+            selectedDaySold: "",
+            selectedStationSold: "",
+            soldProducts: [],
+        }),
+
+        // Execute at page load
+        mounted() {
+            this.loadData();
+        },
+
+        // Update data on changes
+        watch: {
+            async selectedDayChart(n, o) {
+                if (this.selectedDayChart) {
+                    await this.createChart()
                 } else {
-                    s = '<option value=""> Choose ... </option>';
-                    data.stations.forEach((element) => {
-                        s += '<option value="' + element.id + '">' + element.name + '</option>';
-                    })
+                    this.chart.destroy()
                 }
-                document.getElementById("sold_station").innerHTML=s;
-            }
-        });
-    }
-
-    function loadSellingData(){
-        var date = document.getElementById("sold_date").value;
-        var station = document.getElementById("sold_station").value;
-
-        if(date =="" || station==""){
-            return;
-        }
-
-        $.ajax({
-            type: "POST",
-            url: "/data/getSoldProducts",
-            data: {
-                date: date,
-                stationId: station
             },
-            success: (data) => {
-                var s ="";
-                if(data.data.length==0){
-                    s='<tr> Keine Daten gefunden </tr>';
-                } else{
-                    for(var i=0; i<data.data.length; i++){
-                        s+='<tr><th scope="row">'+(i+1)+'</th>'
-                        s+="<td>"+data.data[i].name+"</td>";
-                        s+="<td>"+data.data[i].amount+"</td></tr>";
-                    }
-                }
-                document.getElementById("sold_table").innerHTML=s;
-            }
-        });
-    }
-
-    function clearAlert(alert_id) {
-        $.ajax({
-            type: "POST",
-            url: "/data/alert",
-            data: {
-                clearAlert: alert_id
-            }
-        });
-    }
-
-    function loadCurrentLoad() {
-        $.ajax({
-            url: "/data/getActiveOrdersCount",
-            success: (result) => {
-                document.getElementById("openOrders").innerHTML = result.data
-            }
-        });
-        $.ajax({
-            url: "/data/getActiveSessionsCount",
-            success: (result) => {
-                document.getElementById("activeSessions").innerHTML = result.data
-            }
-        });
-        $.ajax({
-            url: "/data/getTablesCount",
-            success: (result) => {
-                document.getElementById("allTables").innerHTML = result.data
-            }
-        });
-        $.ajax({
-            url: "/data/getOrdersTodayCount",
-            success: (result) => {
-                document.getElementById("todayOrders").innerHTML = result.data
-            }
-        });
-        $.ajax({
-            url: "/data/getSessionsTodayCount",
-            success: (result) => {
-                document.getElementById("todaySessions").innerHTML = result.data
-            }
-        });
-
-        // Load alerts
-        $.ajax({
-            url: "/data/alerts",
-            success: (result) => {
-                document.getElementById("alerts").innerHTML = "";
-                if (result.data.length > 0) {
-                    result.data.forEach((element) => {
-                        document.getElementById("alerts").innerHTML +=
-                            '<div class="alert alert-warning alert-dismissible fade show" role="alert">' +
-                            '<img src="/images/alert.png" style="width: 20px; "> ' + element
-                            .triggered + ' <strong>' + element.stationname +
-                            '</strong> <span class="float-right">' +
-                            element.name +
-                            '</span><form action="#" method="POST"><button type="button" onclick="clearAlert(' +
-                            element.id +
-                            ')" class="close" data-dismiss="alert" aria-label="Close">' +
-                            '<span aria-hidden="true">&times;</span></button></form></div>'
-                    });
+            async selectedDaySold(n, o) {
+                if (this.selectedDaySold && this.selectedStationSold) {
+                    this.soldProducts = await this.loadSoldData()
                 } else {
-                    document.getElementById("alerts").innerHTML = "Keine Benachrichtigungen"
+                    this.soldProducts = null;
                 }
+            },
+            async selectedStationSold(n, o) {
+                if (this.selectedStationSold && this.selectedDaySold) {
+                    this.soldProducts = await this.loadSoldData()
+                    console.log(this.soldProducts)
+                } else {
+                    this.soldProducts = null;
+                }
+            },
+        },
 
+        // Helper functions
+        methods: {
+            parseTime(timestamp) {
+                const d = new Date(timestamp);
+                return d.getHours() + ":" + d.getMinutes();
+            },
 
-            }
-        });
-    }
+            parseDate(timestamp) {
+                const d = new Date(timestamp);
+                return d.getDate() + "." + d.getMonth() + "." + d.getFullYear();
+            },
 
-    function loadChart() {
-        var d = document.getElementById("dates").value;
-        if (d == -1 || d == "") {
-            chart.destroy();
-            return;
-        }
-        // Request all stations
-        $.ajax({
-            url: "/data/getAllStations",
-            type: "GET",
-            dataType: 'json',
-            success: function (result) {
-                var pdatasets = [];
-                var globalcolors=[]; // Prevent the same color twice
-                for (var i = 0; i < result.stations.length; i++) {
-                    var color, loop=0; // Generate random color
-                    do{
-                        color = getRandColor();
-                        globalcolors.push(color);
-                        loop++;
-                    }while(!globalcolors.includes(color) && loop < 10);
-                    if(loop == 10){
-                        console.log("Max tries at color generation")
-                    }
-                    console.log(globalcolors +" "+color);
-                    // Load data for station
-                    var station = result.stations[i];
-                    $.ajax({
-                        url: "/data/getDailyLoadForStation",
-                        type: "POST",
-                        async: false,
-                        data: {
-                            date: d,
-                            stationid: station.id
-                        },
-                        dataType: 'json',
-                        success: function (result) {
-                            pdatasets.push({
-                                label: station.name,
-                                data: parseLoad(result.load),
-                                borderColor: [
-                                    color,
-                                ],
-                            })
+            parseCartData(data) {
+                if(!data){
+                    return;
+                }
+                var t = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                for (const d of data) {
+                    let h = (new Date(d.currentState.created)).getHours();
+                    t[h] = t[h] + 1;
+                }
+                return t;
+            },
+
+            getSumSoldOrders() {
+                if (!this.soldProducts) {
+                    return 0
+                }
+                let s = 0
+                for (let [k, e] of this.soldProducts) {
+                    if (e instanceof Map) {
+                        for(let [variation,amount] of e) {
+                            s+= variation.price * amount
                         }
+                    } else {
+                        s += k.price * e
+                    }
+                }
+                return s.toFixed(2)
+            },
+
+            getSumOfVariations(map){
+                let s = 0
+                for(let [k,v] of map){
+                    s+=k.price * v
+                }
+                return s.toFixed(2)
+            },
+
+            getNumOfMapEntries(map){
+                let s =0;
+                for(let [k,v] of map){
+                    s+=v
+                }
+                return s;
+            },
+
+            async loadData() {
+                this.orderDates = await hlp.loadOrderDates();
+                this.openOrders = await hlp.loadOpenOrders();
+                this.activeSessions = await hlp.loadActiveSessions();
+                this.allTables = await dm.loadTables();
+                this.stations = await dm.loadStations();
+                this.closedOrders = await hlp.loadDailyOrdersFromStation((new Date).toISOString(), -1)
+            },
+
+            async createChart() {
+                // Datasets for the chart
+                var pdatasets = [];
+                // Generate colors for each station
+                var globalcolors = []; // Prevent the same color twice
+                // Load for each station the data
+                for (let s of this.stations) {
+                    // Generate individual color
+                    var max_loops = 10;
+                    var color;
+                    do {
+                        max_loops--;
+                        color = hlp.getRandColor();
+                        if (!globalcolors.includes(color)) {
+                            globalcolors.push(color);
+                            break;
+                        }
+                    } while (max_loops);
+                    // Add to dataset
+                    pdatasets.push({
+                        label: s.name,
+                        data: this.parseCartData(await hlp.loadDailyOrdersFromStation(this.selectedDayChart, s.id)),
+                        borderColor: [
+                            color,
+                        ],
                     });
                 }
-                // Make chart
-                if (chart != null) {
-                    chart.destroy();
+
+                // Clear old chart
+                if (this.chart != null) {
+                    this.chart.destroy();
                 }
+                // Create Chart
                 var ctxL = document.getElementById("lineChart").getContext('2d');
-                chart = new Chart(ctxL, {
+                this.chart = new Chart(ctxL, {
                     type: 'line',
                     data: {
                         labels: Array.from({
@@ -328,66 +302,98 @@
                         scales: {
                             yAxes: [{
                                 ticks: {
-                                    stepSize: 1
+                                    beginAtZero: true,
+                                    min: 0,
+                                    stepSize: 5
                                 }
                             }]
                         }
                     }
                 });
-            }
-        });
-    }
+            },
 
-    function parseLoad(load) {
-        var t = [];
-        for (var i = 0; i < 24; i++) {
-            var found = false;
-            load.forEach(element => {
-                if (element.hour == i) {
-                    t.push(element.anzahl)
-                    found = true;
+            async loadSoldData() {
+                /*
+                Creates a map with the following schema
+                Map{
+                    key: Product
+                    value: Map{
+                        key: variation
+                        value: amount
+                    } or
+                    value: amount (if no variation)
                 }
-            });
-            if (!found) {
-                t.push(0)
-            }
-        }
-        return t;
-    }
+                */
 
-    function getRandColor() {
-        var col=[0,0,0];
-        var ff = Math.floor(Math.random()*3);
-        var oo = Math.floor(Math.random()*3);
-        var color = Math.floor(Math.random() * 6)*51;
-        col[ff]=255;
-        if(ff==oo){
-            col[++oo%3]=0;
-            oo= ++oo%3;
-        }else{
-            col[oo]=0
-        }
-        var t = [0,1,2];
-        t.forEach((x)=>{
-            if(x!= oo && x!= ff){
-                col[x]=color;
+                let raw = await hlp.loadDailyOrdersFromStation(this.selectedDaySold, this.selectedStationSold.id);
+                let grouped = await hlp.groupOrders(raw);
+                console.log(grouped);
+                // Group to products with variations
+                let pMap = new Map();
+                for(let g of grouped){
+                    // Check if in map
+                    let found = false;
+                    for(let p of pMap.keys()){
+                        if(p.id == g[0].product.id){
+                            // Already in map -> add to existing
+                            let existing = pMap.get(p)
+                            // Check if variations present
+                            if(existing instanceof Map){
+                                // Check if variation is in subset
+                                let pvk_found=false;
+                                for(let [pvk,v] of existing){
+                                    // Increment amount in variation subset
+                                    if(pvk.id == g[0].variation.id){
+                                        existing.set(pvk,v+1)
+                                        pvk_found=true;
+                                        break;
+                                    }
+                                }
+                                if(!found){
+                                    // Add variation to subset
+                                    existing.set(g[0].variation,g[1].length)
+                                }
+                            }else{
+                                // No variations
+                                pMap.set(g[0].product,existing+1)
+                            }
+                            found=true;
+                            break;
+                        }
+                    }
+                    if(!found){
+                        // Insert to map
+                        if(g[0].variation){
+                            let varMap = new Map();
+                            varMap.set(g[0].variation,g[1].length)
+                            pMap.set(g[0].product, varMap)
+                        }else{
+                            // No variation only integer
+                            pMap.set(g[0].product,g[1].length)
+                        }
+                        
+                    }
+                }
+                console.log("New grouping")
+                console.log(pMap)
+                return pMap
             }
-        });
-        var hex = "#";
-        col.forEach((x)=>{
-            if(x==0){
-                hex+="00";
-            }else{
-                hex += x.toString(16);
-            }
-           
-        })
-        if(hex.length != 7){
-            console.log(ff + " "+ oo + " "+ color);
-            console.log(col);
+
+
         }
-        return hex;
+
+
+
+    });
+
+    app.config.errorHandler = (err, instance, info) => {
+        console.log("Error", err, info)
+        hlp.makeError("The application has generated an error.", info, err);
     }
+    app.mount("#app");
+
+
+
 </script>
 
 </html>

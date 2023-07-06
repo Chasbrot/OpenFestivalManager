@@ -29,7 +29,7 @@ Download newest .exe from releases and start. </br>
         --dbpath          Path to the database
     
 Access WebUI under localhost:3000 or IP-Address:3000 <br>
-You can save the login page to your home screen which enables a webapp like state with no address bar. This enhances the experiance. 
+You can save the login page to your home screen which enables a webapp like state with no address bar. This enhances the experiance. <br>
 [HowTo](https://android.gadgethacks.com/how-to/google-chrome-101-save-webpages-pwas-your-home-screen-for-instant-access-0184470/)
 
 ## Getting started on dev
@@ -52,10 +52,9 @@ Anyone can use the source code and packged executeable for their personal and no
 
 ## Authors 
 Michael Selinger<br>
-~~Julian Springer~~<br>
 ~~Saul Ptrondl~~
 ## Contributors
-Thanks Hannah and Jojo for their knowledge and expertise during development.
+Thanks Hannah and Jojo for their knowledge and expertise during development. Thanks Julian Springer for bug testing and some new ideas.
 
 ## Project status
 early development

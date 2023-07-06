@@ -26,8 +26,8 @@ jobs:
            cp dist/public/js/vue-prod-3.2.45.js dist/public/js/vue-3.2.45.js
            # s"--no-bytecode --public-packages "*" --public" workaround for https://github.com/vercel/pkg/issues/1663
            pkg package.json --no-bytecode --public-packages "*" --public
-           mv festivalmanager-win-x64.exe festivalmanager-${{ github.ref_name }}.exe
-           mv festivalmanager-linux-arm64 festivalmanager-${{ github.ref_name }}
+           mv festivalmanager-win-x64.exe festivalmanager-${{ github.ref_name }}-win-x64.exe
+           mv festivalmanager-linux-arm64 festivalmanager-${{ github.ref_name }}-linux-arm64
         shell: bash
       # Create a github release
       - name: Create Release
